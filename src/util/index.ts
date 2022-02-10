@@ -1,4 +1,4 @@
-export function hslToHexString(h: number, s: number, l: number) {
+export function hslToHexString(h: number, s: number, l: number): string {
   h /= 360
   s /= 100
   l /= 100
@@ -27,9 +27,9 @@ export function hslToHexString(h: number, s: number, l: number) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`
 }
 
-export function hexStringToHsl(hex: string) {
+export function hexStringToHsl(hex: string): [number, number, number] {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  if (!result) return null
+  if (!result) return [0, 0, 0]
   const r = parseInt(result[1], 16) / 255
   const g = parseInt(result[2], 16) / 255
   const b = parseInt(result[3], 16) / 255

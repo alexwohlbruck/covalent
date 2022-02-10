@@ -6,7 +6,7 @@
     //- Header/auth info
     .d-flex.align-center(v-if='user')
       img.mr-4(:src='user.photoURL' width='50' height='50')
-        
+
       v-list-item-content
         v-list-item-title
           span.text-subtitle-1.font-weight-bold {{user.displayName}}
@@ -16,9 +16,9 @@
 
       .d-flex.align-center
         v-btn.ml-2(v-if='isInGroup' @click='leaveGroup') Leave
-        
+
         form.d-flex.align-center(v-else @submit.prevent='joinGroup' )
-          v-text-field.ml-2(
+        v-text-field.ml-2(
             v-model='controls.groupId'
             outlined
             dense
@@ -26,7 +26,7 @@
             hide-details
           )
           v-btn.ml-2(type='submit' @click='joinGroup') Join
-        
+
         v-btn.ml-2(@click='logout') Log out
 
     //- Lamp info
@@ -39,7 +39,7 @@
           :states='states'
           :selectedColor='selectedColor'
         )
-          
+
         //- Color picker
         form(v-if='isInGroup' @submit.prevent='updateLamp')
           .d-flex.flex-column.align-center
@@ -52,7 +52,7 @@
                 :color='selectedColor'
                 :track-color='shiftedColor'
               )
-      
+
       //- Users list
       v-card(v-if='isInGroup')
         v-list
@@ -66,127 +66,155 @@
 
 </template>
 
-<script>
+<script lang="ts">
+import { Vue, Component, Watch } from 'vue-property-decorator'
 import { db, functions, auth } from '@/config/firebase'
 import Lamp from '@/components/Lamp.vue'
 import Login from '@/views/Login.vue'
 
 import { hslToHexString, hexStringToHsl } from '@/util'
 
-const defaultState = () => {
-  return {
-    user: null,
-    userMeta: null,
-    group: null,
-    groups: null,
-    users: null,
-    controls: {
-      hue: 0,
-    },
+type User = any
+
+type UserMeta = {
+  '.key': string
+  displayName: string
+  groupId: string
+  photoURL: string
+  uid: string
+}
+
+type Group = {
+  '.key': string
+  accessCode: string
+  createdAt: number
+  userStates: {
+    [uid: string]: {
+      color: string
+      timestamp: number
+      touching: boolean
+    }
   }
 }
 
-export default {
-  name: 'Home',
+@Component({
   components: {
     Login,
     Lamp,
   },
-  data: defaultState,
-  mounted() {
+  filters: {
+    kebabToTitle(value: string): string {
+      if (!value) return ''
+      return value.replace(/-/g, ' ')
+    },
+
+    capitalize(value: string): string {
+      return value.charAt(0).toUpperCase() + value.slice(1)
+    },
+  },
+})
+export default class Home extends Vue {
+  user: User | null = null
+  userMeta: UserMeta | null = null
+  group: Group | null = null
+  controls = {
+    groupId: '',
+    hue: 0,
+    lamp: null,
+  }
+
+  mounted(): void {
     // Get current firebase user
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged((user: User) => {
       if (user) {
         this.user = user
         this.updateProfile({ ...user._delegate })
       } else {
-        this.signOut()
+        this.logout()
       }
     })
-  },
+  }
 
-  filters: {
-    kebabToTitle(value) {
-      if (!value) return ''
-      return value.replace(/-/g, ' ')
-    },
-    capitalize(value) {
-      return value.charAt(0).toUpperCase() + value.slice(1)
-    },
-  },
-  watch: {
-    user: {
-      handler(user) {
-        if (user) {
-          const groupIdRef = db.ref(`users/${user.uid}`)
-          this.$rtdbBind('userMeta', groupIdRef)
-        }
-      },
-      immediate: true,
-    },
-    userMeta: {
-      async handler(userMeta) {
-        if (userMeta) {
-          const group = db.ref(`groups/${userMeta.groupId}`)
-          this.$rtdbBind('group', group)
-          this.$rtdbBind(
-            'users',
-            db.ref('users').orderByChild('groupId').equalTo(userMeta.groupId)
-          )
+  @Watch('user')
+  userChanged(user: User): void {
+    if (user) {
+      const groupIdRef = db.ref(`users/${user.uid}`)
+      this.$rtdbBind('userMeta', groupIdRef)
+    }
+  }
 
-          const snapshot = await group.once('value')
-          this.controls.lamp = snapshot.val().lamp
-        }
-      },
-      immediate: true,
-    },
-  },
-  computed: {
-    isInGroup() {
-      return this.userMeta && this.userMeta.groupId
-    },
-    selectedColor() {
-      return hslToHexString(this.controls.hue, 100, 50)
-    },
-    shiftedColor() {
-      const hsl = hexStringToHsl(this.selectedColor)
-      hsl[0] = hsl[0] + 40
-      return hslToHexString(...hsl)
-    },
-    states() {
-      console.log('state changed')
-      if (!this.group) return []
-      return Object.keys(this.group.userStates)
-        .map((key) => this.group.userStates[key])
-        .sort((a, b) => b.timestamp - a.timestamp)
-    },
-    groupRef() {
-      if (!this.group) return null
-      return db.ref(`groups/${this.group['.key']}`)
-    },
-  },
-  methods: {
-    async joinGroup() {
-      const joinGroup = functions.httpsCallable('joinGroup')
-      await joinGroup({
-        groupId: this.controls.groupId,
+  @Watch('userMeta')
+  async userMetaChanged(userMeta: UserMeta): Promise<void> {
+    if (userMeta) {
+      const group = db.ref(`groups/${userMeta.groupId}`)
+      this.$rtdbBind('group', group)
+      this.$rtdbBind(
+        'users',
+        db.ref('users').orderByChild('groupId').equalTo(userMeta.groupId)
+      )
+
+      const snapshot = await group.once('value')
+      this.controls.lamp = snapshot.val().lamp
+    }
+  }
+
+  get isInGroup(): boolean {
+    return !!this.userMeta && !!this.userMeta.groupId
+  }
+
+  get selectedColor(): string {
+    return hslToHexString(this.controls.hue, 100, 50)
+  }
+
+  get shiftedColor(): string {
+    const hsl = hexStringToHsl(this.selectedColor)
+    hsl[0] = hsl[0] + 40
+    return hslToHexString(...hsl)
+  }
+
+  get states(): any[] {
+    console.log('state changed')
+    if (!this.group) return []
+    return Object.keys(this.group.userStates)
+      .map((key) => this.group?.userStates[key])
+      .sort((a, b) => {
+        return a && b ? b.timestamp - a.timestamp : 0
       })
-    },
-    async leaveGroup() {
-      const leaveGroup = functions.httpsCallable('leaveGroup')
-      await leaveGroup()
-    },
-    async updateProfile(userInfo) {
-      const { uid, displayName, photoURL } = userInfo
-      await db.ref(`users/${uid}`).update({ uid, displayName, photoURL })
-    },
-    async logout() {
-      await auth.signOut()
-      const state = defaultState()
-      Object.keys(state).forEach((key) => {
-        this[key] = state[key]
-      })
-    },
-  },
+  }
+
+  get groupRef(): any {
+    if (!this.group) return null
+    return db.ref(`groups/${this.group['.key']}`)
+  }
+
+  async joinGroup(): Promise<void> {
+    const joinGroup = functions.httpsCallable('joinGroup')
+    await joinGroup({
+      groupId: this.controls.groupId,
+    })
+  }
+
+  async leaveGroup(): Promise<void> {
+    const leaveGroup = functions.httpsCallable('leaveGroup')
+    await leaveGroup()
+  }
+
+  async updateProfile(userInfo: UserMeta): Promise<void> {
+    const { uid, displayName, photoURL } = userInfo
+    await db.ref(`users/${uid}`).update({ uid, displayName, photoURL })
+  }
+
+  async logout(): Promise<void> {
+    await auth.signOut()
+
+    this.user = null
+    this.userMeta = null
+    this.group = null
+    this.controls = {
+      groupId: '',
+      hue: 0,
+      lamp: null,
+    }
+  }
 }
 </script>

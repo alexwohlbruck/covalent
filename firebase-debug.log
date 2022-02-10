@@ -1,0 +1,24 @@
+[debug] [2022-02-10T20:31:09.440Z] ----------------------------------------------------------------------
+[debug] [2022-02-10T20:31:09.441Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\owner\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2022-02-10T20:31:09.442Z] CLI Version:   10.1.5
+[debug] [2022-02-10T20:31:09.442Z] Platform:      win32
+[debug] [2022-02-10T20:31:09.442Z] Node Version:  v16.13.1
+[debug] [2022-02-10T20:31:09.442Z] Time:          Thu Feb 10 2022 15:31:09 GMT-0500 (Eastern Standard Time)
+[debug] [2022-02-10T20:31:09.443Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2022-02-10T20:31:09.505Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2022-02-10T20:31:09.506Z] > authorizing via signed-in user (alexwohlbruck@gmail.com)
+[debug] [2022-02-10T20:31:09.506Z] [iam] checking project friendship-lamp-1ea8a for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2022-02-10T20:31:09.508Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/friendship-lamp-1ea8a:testIamPermissions [none]
+[debug] [2022-02-10T20:31:09.508Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/friendship-lamp-1ea8a:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2022-02-10T20:31:09.713Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/friendship-lamp-1ea8a:testIamPermissions 200
+[debug] [2022-02-10T20:31:09.713Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/friendship-lamp-1ea8a:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2022-02-10T20:31:09.713Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/friendship-lamp-1ea8a/serviceAccounts/friendship-lamp-1ea8a@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2022-02-10T20:31:09.713Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/friendship-lamp-1ea8a/serviceAccounts/friendship-lamp-1ea8a@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2022-02-10T20:31:09.889Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/friendship-lamp-1ea8a/serviceAccounts/friendship-lamp-1ea8a@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2022-02-10T20:31:09.889Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/friendship-lamp-1ea8a/serviceAccounts/friendship-lamp-1ea8a@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'friendship-lamp-1ea8a'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: yarn build

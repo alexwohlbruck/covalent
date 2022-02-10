@@ -25,13 +25,15 @@ const getUid = async (req: any, res: any) => {
 }
 
 
-export const createGroup = functions.https.onRequest(async (req, res) => {
+export const createGroup = functions.https.onRequest(async (req: any, res: any) => {
+  
   cors(req, res, async () => {
-    
     const uid = await getUid(req, res)
-    if (!uid) return res.status(401).json({
-      message: 'You must be signed in.'
-    })
+    if (!uid) {
+      return res.status(401).json({
+        message: 'You must be signed in.',
+      })
+    }
 
     const { groupId } = req.body.data
 
@@ -72,14 +74,19 @@ export const createGroup = functions.https.onRequest(async (req, res) => {
   })
 })
 
-export const joinGroup = functions.https.onRequest(async (req, res) => {
+export const joinGroup = functions.https.onRequest(async (req: any, res: any) => {
+
   cors(req, res, async () => {
     const uid = await getUid(req, res)
-    let { groupId, accessCode } = req.body.data
+    let { groupId } = req.body.data
+    const { accessCode } = req.body.data
 
     // Convert group ID to kebab case
-    groupId = groupId.replaceAll(' ','-').replace(/[^a-zA-Z,-]/g,"").toLowerCase()
-    
+    groupId = groupId
+      .replaceAll(' ', '-')
+      .replace(/[^a-zA-Z,-]/g, '')
+      .toLowerCase()
+
     // Check if group exists
     const groupRef = db.ref(`groups/${groupId}`)
     const groupSnapshot = await groupRef.once('value')
@@ -91,7 +98,7 @@ export const joinGroup = functions.https.onRequest(async (req, res) => {
     // Check that access code is avlid
     const group = groupSnapshot.val()
     if (group.accessCode !== accessCode) {
-      res.status(401).json({message: 'Invalid access code.'})
+      res.status(401).json({ message: 'Invalid access code.' })
       return
     }
 
@@ -108,13 +115,15 @@ export const joinGroup = functions.https.onRequest(async (req, res) => {
   })
 })
 
-export const leaveGroup = functions.https.onRequest(async (req, res) => {
+export const leaveGroup = functions.https.onRequest(async (req: any, res: any) => {
+  
   cors(req, res, async () => {
     const uid = await getUid(req, res)
 
     // Get the user's group ID
     const groupIdRef = db.ref(`users/${uid}/groupId`)
     const groupIdSnapshot = await groupIdRef.once('value')
+
     if (!groupIdSnapshot.exists()) {
       return res.status(404).send('You are not in a group.')
     }
@@ -124,11 +133,16 @@ export const leaveGroup = functions.https.onRequest(async (req, res) => {
     await groupIdRef.remove()
 
     // Remove group if no users are left in it
-    const snapshot = await db.ref(`users`).orderByChild('groupId').equalTo(groupId).once('value')
+    const snapshot = await db
+      .ref('users')
+      .orderByChild('groupId')
+      .equalTo(groupId)
+      .once('value')
+
     if (!snapshot.exists()) {
       db.ref(`groups/${groupId}`).remove()
     }
-    
+
     return res.status(200).send('OK')
   })
 })
