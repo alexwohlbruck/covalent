@@ -1,18 +1,18 @@
+
 const cors = require('cors')({ origin: true })
 const admin = require('firebase-admin')
 const serviceAccount = require('../serviceAccountKey.json')
-
-import * as functions from 'firebase-functions'
+const functions = require("firebase-functions")
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://friendship-lamp-1ea8a-default-rtdb.firebaseio.com',
+  databaseURL: 'https://project-friendship-lamp-default-rtdb.firebaseio.com',
 })
 
 const db = admin.database()
 
 // Helper to get the authed user id from a request
-const getUid = async (req: any, res: any) => {
+const getUid = async (req, res) => {
   const authToken = req.get('Authorization')?.split('Bearer ')[1]
 
   if (!authToken) {
@@ -24,8 +24,7 @@ const getUid = async (req: any, res: any) => {
   return decodedToken.uid
 }
 
-
-export const createGroup = functions.https.onRequest(async (req: any, res: any) => {
+exports.createGroup = functions.https.onRequest(async (req, res) => {
   
   cors(req, res, async () => {
     const uid = await getUid(req, res)
@@ -74,7 +73,7 @@ export const createGroup = functions.https.onRequest(async (req: any, res: any) 
   })
 })
 
-export const joinGroup = functions.https.onRequest(async (req: any, res: any) => {
+exports.joinGroup = functions.https.onRequest(async (req, res) => {
 
   cors(req, res, async () => {
     const uid = await getUid(req, res)
@@ -115,7 +114,7 @@ export const joinGroup = functions.https.onRequest(async (req: any, res: any) =>
   })
 })
 
-export const leaveGroup = functions.https.onRequest(async (req: any, res: any) => {
+exports.leaveGroup = functions.https.onRequest(async (req, res) => {
   
   cors(req, res, async () => {
     const uid = await getUid(req, res)
