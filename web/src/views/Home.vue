@@ -18,11 +18,18 @@
         v-btn.ml-2(v-if='isInGroup' @click='leaveGroup') Leave
 
         form.d-flex.align-center(v-else @submit.prevent='joinGroup' )
-        v-text-field.ml-2(
-            v-model='controls.groupId'
+          v-text-field.ml-2(
+            v-model='form.groupId'
             outlined
             dense
             placeholder='Group ID'
+            hide-details
+          )
+          v-text-field.ml-2(
+            v-model='form.accessCode'
+            outlined
+            dense
+            placeholder='Access Code'
             hide-details
           )
           v-btn.ml-2(type='submit' @click='joinGroup') Join
@@ -117,8 +124,11 @@ export default class Home extends Vue {
   user: User | null = null
   userMeta: UserMeta | null = null
   group: Group | null = null
-  controls = {
-    groupId: '',
+  form: any = {
+    groupId: null,
+    accessCode: null,
+  }
+  controls: any = {
     hue: 0,
     lamp: null,
   }
@@ -145,9 +155,13 @@ export default class Home extends Vue {
 
   @Watch('userMeta')
   async userMetaChanged(userMeta: UserMeta): Promise<void> {
+    console.log('userMetaChanged', userMeta)
     if (userMeta) {
       const group = db.ref(`groups/${userMeta.groupId}`)
       this.$rtdbBind('group', group)
+      console.log('binding users')
+
+      // TODO: @firebase/database: FIREBASE WARNING: Using an unspecified index. Your data will be downloaded and filtered on the client. Consider adding ".indexOn": "groupId" at /users to your security rules for better performance.
       this.$rtdbBind(
         'users',
         db.ref('users').orderByChild('groupId').equalTo(userMeta.groupId)
@@ -190,7 +204,8 @@ export default class Home extends Vue {
   async joinGroup(): Promise<void> {
     const joinGroup = functions.httpsCallable('joinGroup')
     await joinGroup({
-      groupId: this.controls.groupId,
+      groupId: this.form.groupId,
+      accessCode: this.form.accessCode,
     })
   }
 
