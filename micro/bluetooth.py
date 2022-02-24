@@ -2,9 +2,11 @@ from machine import Pin
 from machine import Timer
 from time import sleep_ms
 import ubluetooth
+import json
+from wifi import connect_wifi
 
 class ESP32_BLE():
-    def __init__(self, name):
+    def __init__(self, name, callback):
         # Create internal objects for the onboard LED
         # blinking when no BLE device is connected
         # stable ON when connected
@@ -18,7 +20,7 @@ class ESP32_BLE():
         self.ble.irq(self.ble_irq)
         self.register()
         self.advertiser()
-        self.ble_msg = ""
+        self.callback = callback # When a message is received
 
     def connected(self):
         self.led.value(1)
@@ -40,7 +42,8 @@ class ESP32_BLE():
         elif event == 3: #_IRQ_GATTS_WRITE:
                          # A client has written to this characteristic or descriptor.          
             buffer = self.ble.gatts_read(self.rx)
-            self.ble_msg = buffer.decode('UTF-8').strip()
+            msg = buffer.decode('UTF-8')
+            self.callback(msg)
             
     def register(self):        
         # Nordic UART Service (NUS)
@@ -55,6 +58,7 @@ class ESP32_BLE():
         BLE_UART = (BLE_NUS, (BLE_TX, BLE_RX,))
         SERVICES = (BLE_UART, )
         ((self.tx, self.rx,), ) = self.ble.gatts_register_services(SERVICES)
+        self.ble.gatts_set_buffer(self.rx, 100)
 
     def send(self, data):
         self.ble.gatts_notify(0, self.tx, data + '\n')
@@ -63,25 +67,40 @@ class ESP32_BLE():
         name = bytes(self.name, 'UTF-8')
         adv_data = bytearray('\x02\x01\x02') + bytearray((len(name) + 1, 0x09)) + name
         self.ble.gap_advertise(100, adv_data)
-        print(adv_data)
-        print("\r\n")
 
 def run_ble():
+
+  def on_message(payload):
+    print(payload)
+    payload = json.loads(payload)
+    
+    name = payload['name']
+    data = payload['data']
+
+    if name == 'wifi':
+      ssid = data['ssid']
+      password = data['password']
+
+      if connect_wifi(ssid, password):
+        ble.send('wifi_connected')
+      else:
+        ble.send('wifi_failed')
+
   led = Pin(2, Pin.OUT)
   but = Pin(0, Pin.IN)
-  ble = ESP32_BLE("Friendship lamp")
+  ble = ESP32_BLE("Friendship lamp", on_message)
 
-  def buttons_irq(pin):
-    led.value(not led.value())
-    ble.send('LED state will be toggled.')
-    print('LED state will be toggled.')
+  # def buttons_irq(pin):
+  #   led.value(not led.value())
+  #   ble.send('LED state will be toggled.')
+  #   print('LED state will be toggled.')
 
-  but.irq(trigger=Pin.IRQ_FALLING, handler=buttons_irq)
+  # but.irq(trigger=Pin.IRQ_FALLING, handler=buttons_irq)
 
   while True:
-    if ble.ble_msg == 'read_LED':
-      print(ble.ble_msg)
-      ble.ble_msg = ""
-      print('LED is ON.' if led.value() else 'LED is OFF')
-      ble.send('LED is ON.' if led.value() else 'LED is OFF')
+    # if ble.ble_msg == 'read_LED':
+    #   print(ble.ble_msg)
+    #   ble.ble_msg = ""
+    #   print('LED is ON.' if led.value() else 'LED is OFF')
+    #   ble.send('LED is ON.' if led.value() else 'LED is OFF')
     sleep_ms(100)
