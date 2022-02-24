@@ -66,7 +66,9 @@ exports.createGroup = functions.https.onRequest(async (req, res) => {
         groupId,
       })
 
-      return res.status(200).send('OK')
+      return res.status(200).json({
+        'success': true,
+      })
     } catch (e) {
       return res.status(400).json(e)
     }
@@ -107,7 +109,9 @@ exports.joinGroup = functions.https.onRequest(async (req, res) => {
         groupId,
       })
 
-      return res.status(200).send('OK')
+      return res.status(200).json({
+        'success': true,
+      })
     } catch (e) {
       return res.status(400).json(e)
     }
@@ -142,6 +146,8 @@ exports.leaveGroup = functions.https.onRequest(async (req, res) => {
       db.ref(`groups/${groupId}`).remove()
     }
 
-    return res.status(200).send('OK')
+    return res.status(200).json({
+      'success': true,
+    })
   })
 })
