@@ -12,6 +12,7 @@ class ESP32_BLE():
         # stable ON when connected
         self.led = Pin(2, Pin.OUT)
         self.timer1 = Timer(0)
+        self.is_connected = False
         
         self.name = name
         self.ble = ubluetooth.BLE()
@@ -25,9 +26,11 @@ class ESP32_BLE():
     def connected(self):
         self.led.value(1)
         self.timer1.deinit()
+        self.is_connected = True
 
     def disconnected(self):        
         self.timer1.init(period=100, mode=Timer.PERIODIC, callback=lambda t: self.led.value(not self.led.value()))
+        self.is_connected = False
 
     def ble_irq(self, event, data):
         if event == 1: #_IRQ_CENTRAL_CONNECT:
@@ -42,14 +45,15 @@ class ESP32_BLE():
         elif event == 3: #_IRQ_GATTS_WRITE:
                          # A client has written to this characteristic or descriptor.          
             buffer = self.ble.gatts_read(self.rx)
-            msg = buffer.decode('UTF-8')
+            msg = buffer.decode('UTF-8').strip()
+            print('Received message: ' + msg)
             self.callback(msg)
             
     def register(self):        
         # Nordic UART Service (NUS)
-        NUS_UUID = '6E400001-B5A3-F393-E0A9-E50E24DCCA9E'
-        RX_UUID = '6E400002-B5A3-F393-E0A9-E50E24DCCA9E'
-        TX_UUID = '6E400003-B5A3-F393-E0A9-E50E24DCCA9E'
+        NUS_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e'
+        RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
+        TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
             
         BLE_NUS = ubluetooth.UUID(NUS_UUID)
         BLE_RX = (ubluetooth.UUID(RX_UUID), ubluetooth.FLAG_WRITE)
@@ -88,7 +92,7 @@ def run_ble():
 
   led = Pin(2, Pin.OUT)
   but = Pin(0, Pin.IN)
-  ble = ESP32_BLE("Friendship lamp", on_message)
+  ble = ESP32_BLE("mpy-uart", on_message)
 
   # def buttons_irq(pin):
   #   led.value(not led.value())
@@ -97,10 +101,15 @@ def run_ble():
 
   # but.irq(trigger=Pin.IRQ_FALLING, handler=buttons_irq)
 
+  count = 0
   while True:
     # if ble.ble_msg == 'read_LED':
     #   print(ble.ble_msg)
     #   ble.ble_msg = ""
     #   print('LED is ON.' if led.value() else 'LED is OFF')
     #   ble.send('LED is ON.' if led.value() else 'LED is OFF')
-    sleep_ms(100)
+    if (ble.is_connected):
+    #   ble.send('Test message ' + str(count))
+      count += 1
+
+    sleep_ms(1000)

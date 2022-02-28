@@ -1,0 +1,6 @@
+{
+	"appId": "com.wohlbruck.friendshiplamp",
+	"appName": "friendship-lamp",
+	"webDir": "dist",
+	"bundledWebRuntime": false
+}
