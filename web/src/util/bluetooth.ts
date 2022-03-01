@@ -4,20 +4,28 @@ import {
   dataViewToText,
 } from '@capacitor-community/bluetooth-le'
 import store from '@/store'
+import { Store } from 'vuex'
+import mitt from 'mitt'
 
 const NUS_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e' // Nordic UART Service
 const RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e' // Receiver characteristic
 const TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e' // Sender characteristic
 
-const REQUEST_NETWORKS = 'REQUEST_NETWORKS'
-const CONNECT_NETWORK = 'CONNECT_NETWORK'
+// RX Messages
+export const REQUEST_NETWORKS = 'REQUEST_NETWORKS'
+export const CONNECT_NETWORK = 'CONNECT_NETWORK'
 
-const AVAILABLE_NETWORKS = 'AVAILABLE_NETWORKS'
+// TX Messages
+export const AVAILABLE_NETWORKS = 'AVAILABLE_NETWORKS'
+export const CONNECTION_SUCCESS = 'CONNECTION_SUCCESS'
+export const CONNECTION_FAILURE = 'CONNECTION_FAILURE'
 
 interface Payload {
   name: string,
   data: any,
 }
+
+export const emitter = mitt()
 
 export async function requestDevice() {
   try {
@@ -50,7 +58,9 @@ export async function connect(device: any) {
       NUS_UUID, // Service
       TX_UUID, // Characteristic
       (buffer: DataView) => {
-        const payload = JSON.parse(dataViewToText(buffer))
+        const string = dataViewToText(buffer)
+        console.log('Received:', string)
+        const payload = JSON.parse(string)
         onMessage(payload)
       }
     )
@@ -74,12 +84,8 @@ export async function disconnected(deviceId: string) {
 // Message received payload
 export function onMessage(payload: Payload) {
   const { name, data } = payload
-
-  switch (name) {
-    case AVAILABLE_NETWORKS:
-      store.commit('SET_AVAILABLE_NETWORKS', data.networks)
-      break
-  }
+  console.log('Parsed:', name, data)
+  emitter.emit(name, data)
 }
 
 export async function sendMessage(payload: Payload) {
@@ -102,7 +108,7 @@ export async function requestNetworks() {
   })
 }
 
-export async function sendWifi(ssid: string, password: string) {
+export async function connectToNetwork(ssid: string, password: string) {
   await sendMessage({
     name: CONNECT_NETWORK,
     data: {

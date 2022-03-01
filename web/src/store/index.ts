@@ -7,6 +7,10 @@ import { firebaseAction, vuexfireMutations } from 'vuexfire'
 
 Vue.use(Vuex)
 
+export interface Network {
+  ssid: string
+}
+
 const initialState = () => {
   return {
     me: null,

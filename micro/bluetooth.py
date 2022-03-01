@@ -3,74 +3,83 @@ from machine import Timer
 from time import sleep_ms
 import ubluetooth
 import json
-from wifi import connect_wifi
+from wifi import connect_wifi, scan_wifi
+
+REQUEST_NETWORKS = 'REQUEST_NETWORKS'
+CONNECT_NETWORK = 'CONNECT_NETWORK'
+AVAILABLE_NETWORKS = 'AVAILABLE_NETWORKS'
+CONNECTION_SUCCESS = 'CONNECTION_SUCCESS'
+CONNECTION_FAILURE = 'CONNECTION_FAILURE'
 
 class ESP32_BLE():
-    def __init__(self, name, callback):
-        # Create internal objects for the onboard LED
-        # blinking when no BLE device is connected
-        # stable ON when connected
-        self.led = Pin(2, Pin.OUT)
-        self.timer1 = Timer(0)
-        self.is_connected = False
-        
-        self.name = name
-        self.ble = ubluetooth.BLE()
-        self.ble.active(True)
-        self.disconnected()
-        self.ble.irq(self.ble_irq)
-        self.register()
+  def __init__(self, name, callback):
+    # Create internal objects for the onboard LED
+    # blinking when no BLE device is connected
+    # stable ON when connected
+    self.led = Pin(2, Pin.OUT)
+    self.timer1 = Timer(0)
+    self.is_connected = False
+    
+    self.name = name
+    self.ble = ubluetooth.BLE()
+    self.ble.active(True)
+    self.ble.config(mtu=512) # Max is 527
+    self.disconnected()
+    self.ble.irq(self.ble_irq)
+    self.register()
+    self.advertiser()
+    self.callback = callback # When a message is received
+
+  def connected(self):
+    self.led.value(1)
+    self.timer1.deinit()
+    self.is_connected = True
+
+  def disconnected(self):        
+    self.timer1.init(period=100, mode=Timer.PERIODIC, callback=lambda t: self.led.value(not self.led.value()))
+    self.is_connected = False
+
+  def ble_irq(self, event, data):
+      if event == 1: #_IRQ_CENTRAL_CONNECT:
+                     # A central has connected to this peripheral
+        self.connected()
+
+      elif event == 2: #_IRQ_CENTRAL_DISCONNECT:
+                       # A central has disconnected from this peripheral.
         self.advertiser()
-        self.callback = callback # When a message is received
-
-    def connected(self):
-        self.led.value(1)
-        self.timer1.deinit()
-        self.is_connected = True
-
-    def disconnected(self):        
-        self.timer1.init(period=100, mode=Timer.PERIODIC, callback=lambda t: self.led.value(not self.led.value()))
-        self.is_connected = False
-
-    def ble_irq(self, event, data):
-        if event == 1: #_IRQ_CENTRAL_CONNECT:
-                       # A central has connected to this peripheral
-            self.connected()
-
-        elif event == 2: #_IRQ_CENTRAL_DISCONNECT:
-                         # A central has disconnected from this peripheral.
-            self.advertiser()
-            self.disconnected()
+        self.disconnected()
+    
+      elif event == 3: #_IRQ_GATTS_WRITE:
+                       # A client has written to this characteristic or descriptor.          
+        buffer = self.ble.gatts_read(self.rx)
+        msg = buffer.decode('UTF-8').strip()
+        print('Received message: ' + msg)
+        self.callback(msg)
+          
+  def register(self):        
+    # Nordic UART Service (NUS)
+    NUS_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e'
+    RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
+    TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
         
-        elif event == 3: #_IRQ_GATTS_WRITE:
-                         # A client has written to this characteristic or descriptor.          
-            buffer = self.ble.gatts_read(self.rx)
-            msg = buffer.decode('UTF-8').strip()
-            print('Received message: ' + msg)
-            self.callback(msg)
-            
-    def register(self):        
-        # Nordic UART Service (NUS)
-        NUS_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e'
-        RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'
-        TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'
-            
-        BLE_NUS = ubluetooth.UUID(NUS_UUID)
-        BLE_RX = (ubluetooth.UUID(RX_UUID), ubluetooth.FLAG_WRITE)
-        BLE_TX = (ubluetooth.UUID(TX_UUID), ubluetooth.FLAG_NOTIFY)
-            
-        BLE_UART = (BLE_NUS, (BLE_TX, BLE_RX,))
-        SERVICES = (BLE_UART, )
-        ((self.tx, self.rx,), ) = self.ble.gatts_register_services(SERVICES)
-        self.ble.gatts_set_buffer(self.rx, 100)
+    BLE_NUS = ubluetooth.UUID(NUS_UUID)
+    BLE_RX = (ubluetooth.UUID(RX_UUID), ubluetooth.FLAG_WRITE)
+    BLE_TX = (ubluetooth.UUID(TX_UUID), ubluetooth.FLAG_NOTIFY)
+        
+    BLE_UART = (BLE_NUS, (BLE_TX, BLE_RX,))
+    SERVICES = (BLE_UART, )
+    ((self.tx, self.rx,), ) = self.ble.gatts_register_services(SERVICES)
+    self.ble.gatts_set_buffer(self.rx, 1024, True)
 
-    def send(self, data):
-        self.ble.gatts_notify(0, self.tx, data + '\n')
+  def send(self, data):
+    data = json.dumps(data)
+    print('Sending message: ' + data)
+    self.ble.gatts_notify(0, self.tx, data + '\n')
 
-    def advertiser(self):
-        name = bytes(self.name, 'UTF-8')
-        adv_data = bytearray('\x02\x01\x02') + bytearray((len(name) + 1, 0x09)) + name
-        self.ble.gap_advertise(100, adv_data)
+  def advertiser(self):
+    name = bytes(self.name, 'UTF-8')
+    adv_data = bytearray('\x02\x01\x02') + bytearray((len(name) + 1, 0x09)) + name
+    self.ble.gap_advertise(100, adv_data)
 
 def run_ble():
 
@@ -81,14 +90,32 @@ def run_ble():
     name = payload['name']
     data = payload['data']
 
-    if name == 'wifi':
+    if name == REQUEST_NETWORKS:
+      networks = scan_wifi()
+      ble.send({
+        'name': AVAILABLE_NETWORKS,
+        'data': {
+          'networks': networks
+        }
+      })
+
+    if name == CONNECT_NETWORK:
       ssid = data['ssid']
       password = data['password']
 
       if connect_wifi(ssid, password):
-        ble.send('wifi_connected')
+        ble.send({
+          'name': CONNECTION_SUCCESS,
+          'data': {
+            'ssid': ssid,
+            # TODO: Get IP address and strength
+          },
+        })
       else:
-        ble.send('wifi_failed')
+        ble.send({
+          'name': CONNECTION_FAILURE,
+          'data': {},
+        })
 
   led = Pin(2, Pin.OUT)
   but = Pin(0, Pin.IN)

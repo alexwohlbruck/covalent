@@ -15,7 +15,7 @@ Payload:
 ```
 
 ##### `CONNECT_NETWORK`
-Connect to a Wifi network. Pass the SSID and password in the payload. If successfull, a response is sent via `CONNECTION_SUCCESS`. If unsuccessful, a response is sent via `CONNECTION_FAIL`.
+Connect to a Wifi network. Pass the SSID and password in the payload. If successfull, a response is sent via `CONNECTION_SUCCESS`. If unsuccessful, a response is sent via `CONNECTION_FAILURE`.
 
 Payload:
 ```json
@@ -42,7 +42,6 @@ Payload:
       "ssid": "My other wifi",
       "strength": 0.5
     }
-    ...
   ]
 }
 ```
@@ -59,7 +58,7 @@ Payload:
 }
 ```
 
-##### `CONNECTION_FAIL`
+##### `CONNECTION_FAILURE`
 The board failed to connect to Wifi.
 
 Payload:

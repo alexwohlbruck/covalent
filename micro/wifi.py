@@ -3,16 +3,17 @@ from time import sleep
 
 sta_if = network.WLAN(network.STA_IF); sta_if.active(True)
 
-def scan_wifi():
-  print('Scanning for Wifi networks...')
-  
+def scan_wifi() -> list[str]:
   wifis = sta_if.scan()
-  print('Found ' + str(len(wifis)) + ' networks:')
+  ssids = []
 
   for wifi in wifis:
-    print('- ' + wifi[0].decode('utf-8'))
+    ssid = wifi[0].decode('utf-8')
+    ssids.append({
+      'ssid': ssid,
+    })
   
-  print('\n')
+  return ssids
   
 def connect_wifi(ssid, password):
   print('Connecting to ' + ssid + '...')
