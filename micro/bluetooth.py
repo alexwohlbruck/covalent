@@ -92,7 +92,7 @@ def run_ble():
 
   led = Pin(2, Pin.OUT)
   but = Pin(0, Pin.IN)
-  ble = ESP32_BLE("mpy-uart", on_message)
+  ble = ESP32_BLE("Friendship Lamp", on_message)
 
   # def buttons_irq(pin):
   #   led.value(not led.value())
