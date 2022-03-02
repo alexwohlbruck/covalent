@@ -1,17 +1,21 @@
 import network
 from time import sleep
 
-sta_if = network.WLAN(network.STA_IF); sta_if.active(True)
+sta_if = network.WLAN(network.STA_IF)
+sta_if.active(True)
 
-def scan_wifi() -> list[str]:
+def scan_wifi():
   wifis = sta_if.scan()
   ssids = []
 
   for wifi in wifis:
     ssid = wifi[0].decode('utf-8')
-    ssids.append({
-      'ssid': ssid,
-    })
+
+    # Filter out hidden networks
+    if len(ssid.strip()) > 0:
+      ssids.append({
+        'ssid': ssid,
+      })
   
   return ssids
   

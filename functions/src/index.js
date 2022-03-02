@@ -1,5 +1,4 @@
 
-const cors = require('cors')({ origin: true })
 const admin = require('firebase-admin')
 const serviceAccount = require('../serviceAccountKey.json')
 const functions = require("firebase-functions")
@@ -24,111 +23,137 @@ const getUid = async (req, res) => {
   return decodedToken.uid
 }
 
-exports.createGroup = functions.https.onRequest(async (req, res) => {
+const toKebab = (str) => {
+  return str
+    .replaceAll(' ', '-')
+    .replace(/[^a-zA-Z,-]/g, '')
+    .toLowerCase()
+}
+
+exports.createLamp = functions.https.onCall(async (data, context) => {
   
-  cors(req, res, async () => {
-    const uid = await getUid(req, res)
-    if (!uid) {
-      return res.status(401).json({
-        message: 'You must be signed in.',
-      })
-    }
+    try {
+      const uid = context.auth.uid
 
-    const { groupId } = req.body.data
+      if (!uid) {
+        throw new functions.https.HttpsError(
+          'unauthenticated',
+          'You must be signed in.',
+        )
+      }
 
-    const groupRef = db.ref(`/groups/${groupId}`)
-    const groupSnapshot = await groupRef.once('value')
+      let { groupId } = data
+      const { accessCode, deviceData } = data
 
-    if (groupSnapshot.exists()) {
-      return res.status(400).json({
-        message: 'Group already exists.'
-      })
-    }
+      if (!groupId || !deviceData || !deviceData.deviceId) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          'Missing required fields.',
+        )
+      }
 
-    const group = {
-      createdAt: Date.now(),
-      accessCode: Math.floor(Math.random() * 1000000),
-      userStates: {
-        [uid]: {
+      let creatingGroup = false
+      if (!accessCode) {
+        creatingGroup = true
+      }
+    
+      // Convert group ID to kebab case
+      groupId = toKebab(groupId)
+    
+      // Check if the group exists
+      const groupRef = db.ref(`/groups/${groupId}`)
+      const groupSnapshot = await groupRef.once('value')
+    
+      const groupExists = groupSnapshot.exists()
+    
+      // Creating a group that already exists
+      if (creatingGroup && groupExists) {
+        throw new functions.https.HttpsError(
+          'already-exists',
+          'Group already exists.',
+        )
+      }
+    
+      // Joining a group that doesn't exist
+      if (!creatingGroup && !groupExists) {
+        throw new functions.https.HttpsError(
+          'not-found',
+          'Group does not exist.',
+        )
+      }
+    
+      let group
+    
+      if (groupExists) {
+        group = groupSnapshot.val()
+        
+        // Check access code is correct
+        if (group.accessCode !== accessCode) {
+          throw new functions.https.HttpsError(
+            'permission-denied',
+            'Invalid access code.',
+          )
+
+        }
+      }
+      else {
+        // Generate a random access code
+        const newAccessCode = Math.floor(Math.random() * 1000000).toString()
+      
+        // Create group object
+        group = {
+          createdAt: Date.now(),
+          accessCode: newAccessCode,
+        }
+        // Create group
+        await groupRef.set(group)
+      }
+    
+      // Create lamp object
+      const lamp = {
+        controls: {
           color: '#ff0000',
           timestamp: Date.now(),
           touching: false,
-        }
+        },
+        userId: uid,
+        groupId: groupId,
+      }
+    
+      // Create lamp
+      const lampRef = db.ref(`/lamps/${deviceData.deviceId}`)
+    
+      await lampRef.set(lamp)
+    
+      return {
+        message: 'Lamp created.',
       }
     }
-
-    // Create group
-    await groupRef.set(group)
-
-    // Add user to group
-    try {
-      await db.ref(`users/${uid}`).set({
-        groupId,
-      })
-
-      return res.status(200).json({
-        'success': true,
-      })
-    } catch (e) {
-      return res.status(400).json(e)
-    }
-  })
+    catch (error) {
+      functions.logger.error("Error creating lamp:", error)
+      throw new functions.https.HttpsError(
+        'internal',
+        'Error creating lamp.',
+        error
+      )
+    }  
 })
 
-exports.joinGroup = functions.https.onRequest(async (req, res) => {
 
-  cors(req, res, async () => {
-    const uid = await getUid(req, res)
-    let { groupId } = req.body.data
-    const { accessCode } = req.body.data
-
-    // Convert group ID to kebab case
-    groupId = groupId
-      .replaceAll(' ', '-')
-      .replace(/[^a-zA-Z,-]/g, '')
-      .toLowerCase()
-
-    // Check if group exists
-    const groupRef = db.ref(`groups/${groupId}`)
-    const groupSnapshot = await groupRef.once('value')
-    if (!groupSnapshot.exists()) {
-      res.status(404).send('That group does not exist.')
-      return
-    }
-
-    // Check that access code is avlid
-    const group = groupSnapshot.val()
-    if (group.accessCode !== accessCode) {
-      res.status(401).json({ message: 'Invalid access code.' })
-      return
-    }
-
-    // Add user to group
-    try {
-      await db.ref(`users/${uid}`).set({
-        groupId,
-      })
-
-      return res.status(200).json({
-        'success': true,
-      })
-    } catch (e) {
-      return res.status(400).json(e)
-    }
-  })
-})
-
-exports.leaveGroup = functions.https.onRequest(async (req, res) => {
+// TODO: Redo this with lamps collection
+exports.leaveGroup = functions.https.onCall(async (data, context) => {
   
-  cors(req, res, async () => {
-    const uid = await getUid(req, res)
+    const uid = context.auth.uid
 
     // Get the user's group ID
     const groupIdRef = db.ref(`users/${uid}/groupId`)
     const groupIdSnapshot = await groupIdRef.once('value')
 
     if (!groupIdSnapshot.exists()) {
-      return res.status(404).send('You are not in a group.')
+      throw new functions.https.HttpsError(
+        'not-found',
+        'You are not in a group.',
+      )
     }
     const groupId = groupIdSnapshot.val()
 
@@ -146,8 +171,7 @@ exports.leaveGroup = functions.https.onRequest(async (req, res) => {
       db.ref(`groups/${groupId}`).remove()
     }
 
-    return res.status(200).json({
+    return {
       'success': true,
-    })
-  })
+    }
 })

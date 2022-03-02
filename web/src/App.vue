@@ -1,5 +1,7 @@
 <template lang="pug">
 v-app
+  v-snackbar(v-model='error.show' :timeout='5000') {{ error.message }}
+
   toolbar
   v-main
     //- v-btn(@click='requestDevice') connect
@@ -13,6 +15,7 @@ v-app
 <script lang="ts">
 import Vue from 'vue'
 import Toolbar from '@/components/Toolbar.vue'
+import { mapState } from 'vuex'
 
 export default Vue.extend({
   name: 'App',
@@ -35,8 +38,10 @@ export default Vue.extend({
     async disconnect() {
       console.log('TODO')
     },
+  },
 
-    
+  computed: {
+    ...mapState(['error']),
   },
 })
 </script>

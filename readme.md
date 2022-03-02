@@ -7,7 +7,7 @@
 #### RX Messages (web app to board)
 
 ##### `REQUEST_NETWORKS`
-Request a list of available Wifi networks from the board. A response is sent via `AVAILABLE_NETWORKS`
+Request a list of available Wifi networks from the board. A response is sent via `AVAILABLE_NETWORKS`. In addition, `DEVICE_DATA` is sent for convenience.
 
 Payload:
 ```json
@@ -26,6 +26,16 @@ Payload:
 ```
 
 #### TX Messages (board to web app)
+
+##### `DEVICE_DATA`
+Sends info about the board.
+
+Payload:
+```json
+{
+  "deviceId": "abcd1234",
+}
+```
 
 ##### `AVAILABLE_NETWORKS`
 Sends a list of available Wifi networks.

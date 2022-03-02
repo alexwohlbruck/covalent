@@ -1,15 +1,22 @@
 from machine import Pin
 from machine import Timer
 from time import sleep_ms
+import network
 import ubluetooth
 import json
 from wifi import connect_wifi, scan_wifi
+import ubinascii
+import machine
 
+DEVICE_DATA = 'DEVICE_DATA'
 REQUEST_NETWORKS = 'REQUEST_NETWORKS'
 CONNECT_NETWORK = 'CONNECT_NETWORK'
 AVAILABLE_NETWORKS = 'AVAILABLE_NETWORKS'
 CONNECTION_SUCCESS = 'CONNECTION_SUCCESS'
 CONNECTION_FAILURE = 'CONNECTION_FAILURE'
+
+def get_device_id():
+  return ubinascii.hexlify(machine.unique_id()).decode('utf-8')
 
 class ESP32_BLE():
   def __init__(self, name, callback):
@@ -91,6 +98,12 @@ def run_ble():
     data = payload['data']
 
     if name == REQUEST_NETWORKS:
+      ble.send({
+        'name': DEVICE_DATA,
+        'data': {
+          'deviceId': get_device_id(),
+        }
+      })
       networks = scan_wifi()
       ble.send({
         'name': AVAILABLE_NETWORKS,
@@ -119,7 +132,9 @@ def run_ble():
 
   led = Pin(2, Pin.OUT)
   but = Pin(0, Pin.IN)
-  ble = ESP32_BLE("Friendship Lamp", on_message)
+
+  device_name = 'Friendship Lamp - ' + get_device_id()[-6:]
+  ble = ESP32_BLE(device_name, on_message)
 
   # def buttons_irq(pin):
   #   led.value(not led.value())

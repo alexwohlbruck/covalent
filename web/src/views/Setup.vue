@@ -54,9 +54,32 @@ v-container
     v-stepper-step(:complete='step > 3' step='3') Add your lamp to a group
     
     v-stepper-content(step='3')
-      v-card.mb-12(color='grey lighten-1' height='200px')
-      v-btn(color='primary') Continue
-      v-btn(text='') Cancel
+      v-form.d-flex.flex-column.gap-sm(ref='groupForm' @submit.prevent='createLamp')
+
+        v-radio-group(v-model='groupMethod')
+          v-radio(value='new' label='Create new group')
+          v-radio(value='existing' label='Add to existing group')
+
+        v-text-field(
+          v-model='groupId'
+          label='Group ID'
+          outlined
+          dense
+          hide-details
+          :placeholder='groupMethod == "new" ? "Make up a unique name for your group" : ""'
+        )
+        v-text-field(
+          v-if='groupMethod == "existing"'
+          v-model='accessCode'
+          label='Access code'
+          outlined
+          dense
+          hide-details
+        )
+
+      .mt-4
+        v-btn(color='primary' type='submit' @click='createLamp') Continue
+        v-btn(text) Cancel
 
 </template>
 
@@ -69,6 +92,7 @@ import {
   requestDevice,
   requestNetworks,
   connectToNetwork,
+  DEVICE_DATA,
   AVAILABLE_NETWORKS,
   CONNECTION_SUCCESS,
   CONNECTION_FAILURE,
@@ -77,6 +101,8 @@ import {
 @Component
 export default class Setup extends Vue {
   
+  deviceData: any = null
+
   step = 1
   password = ''
   selectedNetworkIndex = -1
@@ -85,10 +111,19 @@ export default class Setup extends Vue {
   connectingToNetwork = false
   connectedNetwork: Network | null = null
 
+  groupMethod = 'new'
+  groupId = ''
+  accessCode = ''
+
   mounted() {
+
+    emitter.on(DEVICE_DATA, (payload: any) => {
+      this.deviceData = payload
+    })
+
     emitter.on(AVAILABLE_NETWORKS, (payload: any) => {
-      this.availableNetworks = payload.networks
       this.loadingAvailableNetworks = false
+      this.availableNetworks = payload.networks
     })
 
     emitter.on(CONNECTION_SUCCESS, (payload: any) => {
@@ -100,6 +135,7 @@ export default class Setup extends Vue {
     emitter.on(CONNECTION_FAILURE, (payload: any) => {
       this.connectingToNetwork = false
       this.connectedNetwork = null
+      this.$store.dispatch('error', "Couldn't connect to wifi network.")
     })
   }
 
@@ -129,12 +165,6 @@ export default class Setup extends Vue {
     await requestNetworks()
   }
 
-  async connectToNetwork() {
-    if (!this.selectedNetwork) return
-    this.connectingToNetwork = true
-    await connectToNetwork(this.selectedNetwork.ssid, this.password)
-  }
-
   get selectedNetwork() {
     if (!this.networkSelected) return null
     return this.availableNetworks[this.selectedNetworkIndex]
@@ -143,5 +173,24 @@ export default class Setup extends Vue {
   get networkSelected() {
     return this.selectedNetworkIndex !== -1
   }
+
+  async connectToNetwork() {
+    if (!this.selectedNetwork) return
+    this.connectingToNetwork = true
+    await connectToNetwork(this.selectedNetwork.ssid, this.password)
+  }
+
+  async createLamp() {
+    const requestBody: any = {
+      groupId: this.groupId,
+      deviceData: this.deviceData 
+    }
+    if (this.groupMethod === 'existing') {
+      requestBody.accessCode = this.accessCode
+    }
+
+    await this.$store.dispatch('createLamp', requestBody)
+  }
+
 }
 </script>

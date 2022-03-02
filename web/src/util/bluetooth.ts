@@ -16,6 +16,7 @@ export const REQUEST_NETWORKS = 'REQUEST_NETWORKS'
 export const CONNECT_NETWORK = 'CONNECT_NETWORK'
 
 // TX Messages
+export const DEVICE_DATA = 'DEVICE_DATA'
 export const AVAILABLE_NETWORKS = 'AVAILABLE_NETWORKS'
 export const CONNECTION_SUCCESS = 'CONNECTION_SUCCESS'
 export const CONNECTION_FAILURE = 'CONNECTION_FAILURE'
@@ -34,7 +35,7 @@ export async function requestDevice() {
     const device = await BleClient.requestDevice({
       // services: [NUS_UUID],
       optionalServices: [NUS_UUID],
-      name: 'Friendship Lamp'
+      // name: 'Friendship Lamp'
     }) // TODO: Filter service to NUS
     
     return await connect(device)
