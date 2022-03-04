@@ -1,7 +1,9 @@
 """
     Server Side Events (SSE) client for Python.
     Provides a generator of SSE received through an existing HTTP response.
-    """
+
+    Based on https://github.com/mpetazzoni/sseclient/blob/master/sseclient/__init__.py
+"""
 
 # Copyright (C) 2016 SignalFx, Inc. All rights reserved.
 
@@ -46,49 +48,49 @@ class SSEClient(object):
             yield data
 
 
-def events(self):
-    for chunk in self._read():
-        event = Event()
-        for line in chunk.splitlines():
-            # Lines starting with a separator are comments and are to be
-            # ignored.
-            if not line.strip() or line.startswith(_FIELD_SEPARATOR):
-                continue
-        
-            data = line.split(_FIELD_SEPARATOR, 1)
-            field = data[0]
+    def events(self):
+        for chunk in self._read():
+            event = Event()
+            for line in chunk.splitlines():
+                # Lines starting with a separator are comments and are to be
+                # ignored.
+                if not line.strip() or line.startswith(_FIELD_SEPARATOR):
+                    continue
             
-            # Ignore unknown fields.
-            if field not in event.__dict__:
+                data = line.split(_FIELD_SEPARATOR, 1)
+                field = data[0]
+                
+                # Ignore unknown fields.
+                if field not in event.__dict__:
+                    continue
+
+                # Spaces may occur before the value; strip them. If no value is
+                # present after the separator, assume an empty value.
+                value = data[1].lstrip() if len(data) > 1 else ''
+            
+                # The data field may come over multiple lines and their values
+                # are concatenated with each other.
+                if field == 'data':
+                    event.__dict__[field] += value + '\n'
+                else:
+                    event.__dict__[field] = value
+
+
+            # Events with no data are not dispatched.
+            if not event.data:
                 continue
-
-            # Spaces may occur before the value; strip them. If no value is
-            # present after the separator, assume an empty value.
-            value = data[1].lstrip() if len(data) > 1 else ''
-        
-            # The data field may come over multiple lines and their values
-            # are concatenated with each other.
-            if field == 'data':
-                event.__dict__[field] += value + '\n'
-            else:
-                event.__dict__[field] = value
+            
+            # If the data field ends with a newline, remove it.
+            if event.data.endswith('\n'):
+                event.data = event.data[0:-1]
+            
+            # Dispatch the event
+            yield event
 
 
-        # Events with no data are not dispatched.
-        if not event.data:
-            continue
-        
-        # If the data field ends with a newline, remove it.
-        if event.data.endswith('\n'):
-            event.data = event.data[0:-1]
-        
-        # Dispatch the event
-        yield event
-
-
-def close(self):
-    """Manually close the event source stream."""
-    self._event_source.close()
+    def close(self):
+        """Manually close the event source stream."""
+        self._event_source.close()
 
 
 class Event(object):

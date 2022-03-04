@@ -140,3 +140,24 @@ def push(URL, msg):
     response.close()
     if response.status_code != 200:
         raise Exception(response.text)
+
+import uasyncio as asyncio
+import uaiohttpclient as aiohttp
+
+def print_stream(resp):
+    print((yield from resp.read()))
+    return
+    while True:
+        line = yield from reader.readline()
+        if not line:
+            break
+        print(line.rstrip())
+
+def run(url):
+    resp = yield from aiohttp.request("GET", url)
+    print(resp)
+    try:
+        yield from print_stream(resp)
+    finally:
+        yield from resp.aclose()
+
