@@ -45,30 +45,11 @@ class Response:
 
     def iter_content(self, chunk_size=ITER_CHUNK_SIZE):
         def generate():
-            if hasattr(self.raw, 'stream'):
-                print('hasattr(self.raw, \'stream\')')
-                try:
-                    for chunk in self.raw.stream(chunk_size, decode_content=True):
-                        print('chunk:', chunk)
-                        yield chunk
-                # except ProtocolError as e:
-                #     raise ChunkedEncodingError(e)
-                # except DecodeError as e:
-                #     raise ContentDecodingError(e)
-                # except ReadTimeoutError as e:
-                #     raise ConnectionError(e)
-                # except SSLError as e:
-                #     raise RequestsSSLError(e)
-                except Exception as e:
-                    print('Exception:', e)
-
-            else:
-                print('no stream')
-                while True:
-                    chunk = self.raw.read(chunk_size)
-                    if not chunk:
-                        break
-                    yield chunk
+            while True:
+                chunk = self.raw.read(chunk_size)
+                if not chunk:
+                    break
+                yield chunk
 
             self._content_consumed = True
 

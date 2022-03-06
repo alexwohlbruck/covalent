@@ -2,60 +2,76 @@ from time import sleep
 from wifi import prompt_wifi, disconnect_wifi, connect_wifi
 from bluetooth import run_ble
 import json
-# import firebase
+from machine import Pin
+import gc
+import _thread as thread
+
+builtin = Pin(2, Pin.OUT)
+led = Pin(32, Pin.OUT)
+button = Pin(27, Pin.IN, Pin.PULL_UP)
+
+import uwebsockets.client
+
+
+class WebSocket():
+    def __init__(self, uri, callback):
+        self.callback = callback
+        self.websocket = uwebsockets.client.connect(uri)
+        thread.start_new_thread(self.listen, ())
+    
+    def send(self, data):
+        message = json.dumps(data)
+        self.websocket.send(message)
+
+    def listen(self):
+        while (True):
+            message = self.websocket.recv()
+            print("< {}".format(message))
+            data = json.loads(message)
+            self.callback(data)
+    
+    def stop(self):
+        self.websocket.close()
 
 
 def main():
-    connect_wifi('Night Owl - Guest', 'brassbristlebrush')
+    connect_wifi('Night Owl', 'joeldrew swalonsky worst teacher batting average')
 
-    import urequests as requests
+    def callback(message):
+        name = message.get('name')
+        data = message.get('data')
+        if name == 'test':
+            if (data):
+                led.value(1)
+            else:
+                led.value(0)
 
-    url = 'https://project-friendship-lamp-default-rtdb.firebaseio.com/test.json'
-    headers = {'Accept': 'text/event-stream'}
+    ws = WebSocket('ws://192.168.86.31:3000', callback)
+
+    def button_pressed(pin):
+        ws.send({
+            'name': 'test',
+            'data': True
+        })
+        button.irq(trigger = Pin.IRQ_RISING, handler = button_released)
+    
+    def button_released(pin):
+        ws.send({
+            'name': 'test',
+            'data': False
+        })
+        button.irq(trigger = Pin.IRQ_FALLING, handler = button_pressed)
+
+    button.irq(trigger = Pin.IRQ_FALLING, handler = button_pressed)
         
-
-    with requests.get(url, stream=True, headers=headers) as response:
-        for chunk in response.iter_lines(1, b'\n\n'):
-            if (chunk):
-                """
-                Example stream:
-
-                event: put
-                data: {"path":"/","data":"hello world"}
-
-                event: keep-alive
-                data: null
-                """
-                message = chunk.decode(response.encoding)
-                
-                split = message.split('\n')
-
-                event = split[0].split(':')[1].strip()
-                data = json.loads(split[1].split(':', 1)[1].strip())
-
-                if (event == 'put'):
-                    print(data.get('data'))
-                
-                
-
-
-
-    # for line in response.iter_lines():
-    #     if line:
-    #         decoded_line = line.decode('utf-8')
-    #         print(json.loads(decoded_line))
-    # client = SSEClient(response)
-    # for event in client.events():
-    #     print(json.loads(event.data))
+    
 
     
     # run_ble()
-    # URL = 'project-friendship-lamp-default-rtdb/test'
-    # S = firebase.subscriber(URL, pprint)
-    # S.start()
+    # s.start()
 
     # prompt_wifi()
-    # sleep(1000)
     # disconnect_wifi()
 
+# 
 main()
