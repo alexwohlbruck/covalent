@@ -2,13 +2,15 @@ from time import sleep
 from wifi import prompt_wifi, disconnect_wifi, connect_wifi
 from bluetooth import run_ble
 import json
-from machine import Pin
+from machine import Pin, TouchPad
 import gc
 import _thread as thread
 
 builtin = Pin(2, Pin.OUT)
 led = Pin(32, Pin.OUT)
-button = Pin(27, Pin.IN, Pin.PULL_UP)
+# button = Pin(27, Pin.IN, Pin.PULL_UP)
+touchpad = TouchPad(Pin(27, Pin.IN, Pin.PULL_UP))
+touchpad.config(500)
 
 import uwebsockets.client
 
@@ -49,20 +51,35 @@ def main():
     ws = WebSocket('ws://192.168.86.31:3000', callback)
 
     def button_pressed(pin):
+        led.value(1)
         ws.send({
             'name': 'test',
             'data': True
         })
-        button.irq(trigger = Pin.IRQ_RISING, handler = button_released)
+        # button.irq(trigger = Pin.IRQ_RISING, handler = button_released)
     
     def button_released(pin):
+        led.value(0)
         ws.send({
             'name': 'test',
             'data': False
         })
-        button.irq(trigger = Pin.IRQ_FALLING, handler = button_pressed)
+        # button.irq(trigger = Pin.IRQ_FALLING, handler = button_pressed)
 
-    button.irq(trigger = Pin.IRQ_FALLING, handler = button_pressed)
+        
+    last_val = False
+    while (True):
+        val = touchpad.read() < 200
+        if val:
+            if not last_val:
+                button_pressed(None)
+        else:
+            if last_val:
+                button_released(None)
+        last_val = val
+        sleep(.1)
+        
+    # button.irq(trigger = Pin.IRQ_FALLING, handler = button_pressed)
         
     
 
