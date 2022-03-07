@@ -1,28 +1,19 @@
-import WebSocket, { WebSocketServer } from 'ws'
+import dotenv from 'dotenv'
+dotenv.config()
+import express from 'express'
+import expressWs from 'express-ws'
+
+import routes from './routes'
+import './db' // Connect to database
 
 const PORT = 3000
-const wss = new WebSocketServer({
-  port: PORT,
-})
 
-const clients: WebSocket[] = []
+const { app } = expressWs(express())
 
-const broadcast = (data: string) => {
-  clients.forEach((client) => {
-    client.send(data)
-  })
-}
+// Middleware
+app.use(express.json())
+app.use(routes)
 
-wss.on('connection', (ws: WebSocket) => {
-
-  clients.push(ws)
-
-  ws.on('message', (message: any) => {
-    const { name, data } = JSON.parse(message)
-
-    broadcast(JSON.stringify({
-      name,
-      data,
-    }))
-  })
+app.listen(PORT, () => {
+  console.log(`listening on port ${PORT}`)
 })

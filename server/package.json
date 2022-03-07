@@ -16,7 +16,11 @@
   "author": "Alex Wohlbruck",
   "license": "ISC",
   "dependencies": {
+    "@types/express-ws": "^3.0.1",
+    "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "express-ws": "^5.0.2",
+    "mongoose": "^6.2.4",
     "socket.io": "^3.1.2",
     "ws": "^8.5.0"
   },
