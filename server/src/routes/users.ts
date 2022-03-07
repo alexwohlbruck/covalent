@@ -1,10 +1,10 @@
 import express from 'express'
-import { User } from '../models'
+import { UserModel } from '../models/user'
 
 const router = express.Router()
 
 router.get('/', async (req, res) => {
-  const users = await User.find()
+  const users = await UserModel.find()
 
   try {
     res.send(users)

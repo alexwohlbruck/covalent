@@ -25,3 +25,5 @@ router.ws('/', (ws: WebSocket, req: express.Request) => {
     }))
   })
 })
+
+export default router
