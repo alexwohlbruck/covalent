@@ -7,3 +7,7 @@ export const db = {
     return `mongodb+srv://${this.username}:${this.password}@${this.cluster}.mongodb.net/${this.dbName}?retryWrites=true&w=majority`
   },
 }
+
+export const google = {
+  clientId: process.env.GOOGLE_CLIENT_ID,
+}

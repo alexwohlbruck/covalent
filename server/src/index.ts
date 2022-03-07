@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 import express from 'express'
 import expressWs from 'express-ws'
+import cors from 'cors'
 
 import './db' // Connect to database
 import './models' // Register models
@@ -14,6 +15,7 @@ import websockets from './websockets'
 
 // Middleware
 
+app.use(cors())
 app.use(express.json())
 app.use(routes)
 app.use(websockets)

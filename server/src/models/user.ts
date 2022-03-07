@@ -3,7 +3,7 @@ import { Schema, model } from 'mongoose'
 export interface User {
   name: string;
   email?: string;
-  photo?: string;
+  picture?: string;
 }
 
 const UserSchema = new Schema<User>({
@@ -15,7 +15,7 @@ const UserSchema = new Schema<User>({
     type: String,
     required: false,
   },
-  photo: {
+  picture: {
     type: String,
     required: false,
   },
