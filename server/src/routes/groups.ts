@@ -1,18 +1,14 @@
 import express from 'express'
-import { Lamp, LampModel } from '../models/lamp'
-import { Types } from 'mongoose'
 import { User } from '../models/user'
 import { isAuthenticated } from '../middleware'
+import { getGroup, listGroups } from '../services/groups'
 
 const router = express.Router()
 
 // Get a user's groups
 router.get('/', isAuthenticated, async (req, res) => {
   try {
-    const lamps = await LampModel.find({
-      user: new Types.ObjectId((req.user as User)._id)
-    })
-    const groups = lamps.map((lamp: Lamp) => lamp.group)
+    const groups = await listGroups((req.user as User)._id)
     return res.status(200).json(groups)
   }
   catch (err) {
@@ -24,15 +20,8 @@ router.get('/', isAuthenticated, async (req, res) => {
 // Get a group
 router.get('/:id', isAuthenticated, async (req, res) => {
   try {
-    const lamp = await LampModel.findOne({
-      user: new Types.ObjectId((req.user as User)._id),
-      group: new Types.ObjectId(req.params.id)
-    })
-
-    if (lamp) {
-      return res.status(200).json(lamp.group)
-    }
-    return res.status(404).json({ message: 'Group not found' })
+    const group = await getGroup((req.user as User)._id, req.params.id)
+    return res.status(200).json(group)
   }
   catch (err) {
     console.error(err)
