@@ -1,13 +1,12 @@
 import express from 'express'
-import { convertToDotNotation } from '../helpers'
-import { LampModel } from '../models/lamp'
 import { User } from '../models/user'
 import { getLamps, getLamp, createLamp, moveLampToGroup, sendCommand, deleteLamp } from '../services/lamps'
+import { isAuthenticated } from '../middleware'
 
 const router = express.Router()
 
 // Get the current user's lamps
-router.get('/', async (req, res) => {
+router.get('/', isAuthenticated, async (req, res) => {
   const lamps = await getLamps({
     userId: (req.user as User)._id,
   })
@@ -15,31 +14,39 @@ router.get('/', async (req, res) => {
 })
 
 // Get a lamp
-router.get('/:id', async (req, res) => {
+router.get('/:id', isAuthenticated, async (req, res) => {
   const lamp = await getLamp(req.params.id)
   return res.status(200).json(lamp)
 })
 
 // Create a lamp
-router.post('/', async (req, res) => {
-  const lamp = await createLamp(req.body)
+router.post('/', isAuthenticated, async (req, res) => {
+  const { groupId, deviceData, accessCode } = req.body
+
+  const lamp = await createLamp(
+    (req.user as User)._id,
+    groupId,
+    deviceData,
+    accessCode,
+  )
+
   return res.status(200).json(lamp)
 })
 
 // Move a lamp to another group
-router.put('/:id/group', async (req, res) => {
+router.put('/:id/group', isAuthenticated, async (req, res) => {
   const lamp = moveLampToGroup(req.params.id, req.body.groupId)
   return res.status(200).json(lamp)
 })
 
 // Send a command to lamp
-router.patch('/:id/state', async (req, res) => {
+router.patch('/:id/state', isAuthenticated, async (req, res) => {
   const lamp = sendCommand(req.params.id, req.body)
   return res.status(200).json(lamp)
 })
 
 // Delete a lamp
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', isAuthenticated, async (req, res) => {
   await deleteLamp(req.params.id)
   return res.status(200).send()
 })

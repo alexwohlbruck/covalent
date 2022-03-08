@@ -9,3 +9,10 @@ export const convertToDotNotation = (obj: any, newObj: any={}, prefix='') => {
   }
   return newObj
 }
+
+export const toKebab = (str: string) => {
+  return str
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z,-]/g, '')
+    .toLowerCase()
+}

@@ -2,12 +2,12 @@ import { Schema, model } from 'mongoose'
 
 export interface Group {
   _id: string;
-  name: string;
+  groupId: string;
   accessCode: string;
 }
 
 const GroupSchema = new Schema<Group>({
-  name: {
+  groupId: {
     type: String,
     required: true,
   },

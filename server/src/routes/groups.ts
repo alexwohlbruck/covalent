@@ -2,11 +2,12 @@ import express from 'express'
 import { Lamp, LampModel } from '../models/lamp'
 import { Types } from 'mongoose'
 import { User } from '../models/user'
+import { isAuthenticated } from '../middleware'
 
 const router = express.Router()
 
 // Get a user's groups
-router.get('/', async (req, res) => {
+router.get('/', isAuthenticated, async (req, res) => {
   try {
     const lamps = await LampModel.find({
       user: new Types.ObjectId((req.user as User)._id)
@@ -21,7 +22,7 @@ router.get('/', async (req, res) => {
 })
 
 // Get a group
-router.get('/:id', async (req, res) => {
+router.get('/:id', isAuthenticated, async (req, res) => {
   try {
     const lamp = await LampModel.findOne({
       user: new Types.ObjectId((req.user as User)._id),
