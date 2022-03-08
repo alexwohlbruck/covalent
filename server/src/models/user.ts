@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose'
 import findOrCreate from 'mongoose-findorcreate'
 
 export interface User {
-  _id: string | Schema.Types.ObjectId,
+  _id: string,
   googleId: string;
   name: string;
   familyName: string;

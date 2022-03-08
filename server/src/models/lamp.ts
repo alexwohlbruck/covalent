@@ -10,9 +10,10 @@ export interface LampState {
 }
 
 export interface Lamp {
-  state: LampState,
-  group: PopulatedDoc<Group>; // string | ObjectID | Group
-  user: PopulatedDoc<User>; // string | ObjectID | User
+  _id: string;
+  state: LampState;
+  group: Group;
+  user: User;
 }
 
 const LampSchema = new Schema<Lamp>({

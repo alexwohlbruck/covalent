@@ -1,33 +1,42 @@
+import { Types } from 'mongoose'
+import { RequestException } from '../routes'
 import { convertToDotNotation } from '../helpers'
 import { Lamp, LampModel, LampState } from '../models/lamp'
 
-export const getMyLamps = async () => {
+export const getLamps = async (options: {
+  userId?: string;
+}) => {
+  const query: any = {}
 
-  // TODO: Return only the authed users lamps
+  if (options) {
+    if (options.userId) query.user = new Types.ObjectId(options.userId)
+  }
 
-  return LampModel.find()
+  return await LampModel.find(query)
 }
 
 export const getLamp = async (id: string) => {
-  return LampModel.findById(id)
+  const lamp = await LampModel.findById(id)
+  if (!lamp) throw new RequestException(404, `Lamp with id ${id} not found`)
+  return lamp
 }
 
 export const createLamp = async (lamp: Lamp) => {
 
   // TODO: Require group ID and access code and add the lamp to the group
 
-  return LampModel.create(lamp)
+  return await LampModel.create(lamp)
 }
 
-export const changeGroup = async (id: string, groupId: string) => {
+export const moveLampToGroup = async (id: string, groupId: string) => {
 
   // TODO: Require group ID and access code and add the lamp to the group
 
-  return LampModel.findByIdAndUpdate(id, { group: groupId }, { new: true })
+  return await LampModel.findByIdAndUpdate(id, { group: groupId }, { new: true })
 }
 
 export const sendCommand = async (id: string, state: LampState) => {
-  return LampModel.findByIdAndUpdate(id, {
+  return await LampModel.findByIdAndUpdate(id, {
     $set: convertToDotNotation({
       state,
     }),
@@ -40,5 +49,5 @@ export const deleteLamp = async (id: string) => {
 
   // TODO: Check if group is empty after removing, if so delete group
 
-  return LampModel.findByIdAndRemove(id)
+  return await LampModel.findByIdAndRemove(id)
 }
