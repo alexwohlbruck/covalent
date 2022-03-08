@@ -25,9 +25,13 @@ passport.use(new GoogleTokenStrategy(
   },
   async (parsedToken: any, googleId: string, done: any) => {
     try {
+      const u = parsedToken.payload
+
       const { doc: user } = await (UserModel as any).findOrCreate({
         googleId,
-        ...parsedToken.payload
+        ...u,
+        givenName: u.given_name,
+        familyName: u.family_name,
       })
       return done(null, user)
     }

@@ -96,7 +96,7 @@ import {
   AVAILABLE_NETWORKS,
   CONNECTION_SUCCESS,
   CONNECTION_FAILURE,
- } from "@/util/bluetooth"
+ } from "@/services/bluetooth"
 
 @Component
 export default class Setup extends Vue {

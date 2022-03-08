@@ -10,8 +10,7 @@ div
   )
 </template>
 
-<script>
-import { db } from '@/config/firebase'
+<script lang="js">
 import { hslToHexString, hexStringToHsl } from '@/util'
 
 let timeout
@@ -39,7 +38,8 @@ export default {
   computed: {
     myStateRef() {
       if (!this.group) return null
-      return db.ref(`groups/${this.group['.key']}/userStates/${this.user.uid}`)
+      return null
+      // return db.ref(`groups/${this.group['.key']}/userStates/${this.user.uid}`)
     },
     incomingMessage() {
       const userStates = this.group.userStates

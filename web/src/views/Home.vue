@@ -75,7 +75,6 @@
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
-import { db, functions, auth } from '@/config/firebase'
 import Lamp from '@/components/Lamp.vue'
 import Login from '@/views/Login.vue'
 
@@ -133,45 +132,6 @@ export default class Home extends Vue {
     lamp: null,
   }
 
-  mounted(): void {
-    // Get current firebase user
-    auth.onAuthStateChanged((user: User) => {
-      if (user) {
-        this.user = user
-        this.updateProfile({ ...user._delegate })
-      } else {
-        this.logout()
-      }
-    })
-  }
-
-  @Watch('user')
-  userChanged(user: User): void {
-    if (user) {
-      const groupIdRef = db.ref(`users/${user.uid}`)
-      this.$rtdbBind('userMeta', groupIdRef)
-    }
-  }
-
-  @Watch('userMeta')
-  async userMetaChanged(userMeta: UserMeta): Promise<void> {
-    console.log('userMetaChanged', userMeta)
-    if (userMeta) {
-      const group = db.ref(`groups/${userMeta.groupId}`)
-      this.$rtdbBind('group', group)
-      console.log('binding users')
-
-      // TODO: @firebase/database: FIREBASE WARNING: Using an unspecified index. Your data will be downloaded and filtered on the client. Consider adding ".indexOn": "groupId" at /users to your security rules for better performance.
-      this.$rtdbBind(
-        'users',
-        db.ref('users').orderByChild('groupId').equalTo(userMeta.groupId)
-      )
-
-      const snapshot = await group.once('value')
-      this.controls.lamp = snapshot.val().lamp
-    }
-  }
-
   get isInGroup(): boolean {
     return !!this.userMeta && !!this.userMeta.groupId
   }
@@ -187,7 +147,6 @@ export default class Home extends Vue {
   }
 
   get states(): any[] {
-    console.log('state changed')
     if (!this.group) return []
     return Object.keys(this.group.userStates)
       .map((key) => this.group?.userStates[key])
@@ -196,40 +155,26 @@ export default class Home extends Vue {
       })
   }
 
-  get groupRef(): any {
-    if (!this.group) return null
-    return db.ref(`groups/${this.group['.key']}`)
-  }
-
   async joinGroup(): Promise<void> {
-    const joinGroup = functions.httpsCallable('joinGroup')
-    await joinGroup({
-      groupId: this.form.groupId,
-      accessCode: this.form.accessCode,
-    })
+    // await joinGroup({
+    //   groupId: this.form.groupId,
+    //   accessCode: this.form.accessCode,
+    // })
   }
 
   async leaveGroup(): Promise<void> {
-    const leaveGroup = functions.httpsCallable('leaveGroup')
-    await leaveGroup()
-  }
-
-  async updateProfile(userInfo: UserMeta): Promise<void> {
-    const { uid, displayName, photoURL } = userInfo
-    await db.ref(`users/${uid}`).update({ uid, displayName, photoURL })
+    // await leaveGroup()
   }
 
   async logout(): Promise<void> {
-    await auth.signOut()
-
-    this.user = null
-    this.userMeta = null
-    this.group = null
-    this.controls = {
-      groupId: '',
-      hue: 0,
-      lamp: null,
-    }
+    // this.user = null
+    // this.userMeta = null
+    // this.group = null
+    // this.controls = {
+    //   groupId: '',
+    //   hue: 0,
+    //   lamp: null,
+    // }
   }
 }
 </script>

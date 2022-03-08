@@ -19,15 +19,22 @@ v-app-bar(app)
   ) Pair lamp
 
   div(v-if='me')
-    span.text-body-2.mr-4.font-weight-bold {{ me.displayName }}
+    v-btn(
+      text
+      @click='signOut'
+      color='red darken-1'
+    ) Sign out
+
+    span.text-body-2.mr-4.font-weight-bold {{ me.name }}
     v-avatar(size='40px')
-      v-img(:src='me.photoURL')
+      v-img(:src='me.picture')
     
 
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { signOut } from '@/services/auth'
 
 @Component
 export default class Toolbar extends Vue {
@@ -37,6 +44,10 @@ export default class Toolbar extends Vue {
 
   get btDevice() {
     return this.$store.state.btDevice
+  }
+
+  async signOut() {
+    await signOut()
   }
 }
 </script>

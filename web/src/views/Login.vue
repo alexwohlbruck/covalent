@@ -2,26 +2,29 @@
 
 v-container
   h1 Friendship lamp
-  v-btn.black--text(color='white' @click='logIn') Sign in with Google
-
+  google-sign-in-button
 </template>
 
 <script lang="ts">
 /*eslint no-undef: "off"*/
-import firebase from 'firebase/compat/app'
-import 'firebaseui/dist/firebaseui.css'
-import * as firebaseui from 'firebaseui'
+import { Vue, Component } from 'vue-property-decorator'
 import { mapState } from 'vuex'
+import { getMe } from '@/services/auth'
+import GoogleSignInButton from '@/components/GoogleSignInButton.vue'
 
-export default {
-  name: 'Login',
-  methods: {
-    logIn() {
-      (this as any).$store.dispatch('logIn')
-    }
+@Component({
+  components: {
+    GoogleSignInButton,
   },
-  computed: {
-    ...mapState(['me']),
-  },
+})
+export default class Login extends Vue {
+
+  get me() {
+    return this.$store.state.me
+  }
+
+  loadMe() {
+    getMe()
+  }
 }
 </script>

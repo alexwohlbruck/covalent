@@ -6,7 +6,8 @@ dist
 /tests/e2e/screenshots/
 
 
-# local env files
+# env files
+.env
 .env.local
 .env.*.local
 

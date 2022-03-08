@@ -4,11 +4,6 @@ v-app
 
   toolbar
   v-main
-    //- v-btn(@click='requestDevice') connect
-    //- v-btn(@click='disconnect') disconnect
-    //- v-btn(@click='sendWifi') send wifi
-    //- v-text-field(v-model='ssid') ssid
-    //- v-text-field(v-model='password') password
     router-view
 </template>
 
@@ -24,21 +19,11 @@ export default Vue.extend({
     Toolbar,
   },
 
-  mounted() {
-    this.$store.dispatch('bindData')
-  },
-
   data: (): any => ({
     device: null,
     ssid: '',
     password :'',
   }),
-
-  methods: {
-    async disconnect() {
-      console.log('TODO')
-    },
-  },
 
   computed: {
     ...mapState(['error']),

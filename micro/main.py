@@ -1,4 +1,4 @@
-from time import sleep
+from time import sleep, sleep_ms
 from wifi import prompt_wifi, disconnect_wifi, connect_wifi
 from bluetooth import run_ble
 import json
@@ -69,20 +69,20 @@ def main():
         
     last_val = False
     while (True):
-        val = touchpad.read() < 200
+        print("{}".format(touchpad.read()))
+        val = touchpad.read() < 250
         if val:
             if not last_val:
                 button_pressed(None)
+                sleep_ms(300)
         else:
             if last_val:
                 button_released(None)
+                sleep_ms(300)
         last_val = val
-        sleep(.1)
+        sleep_ms(10)
         
     # button.irq(trigger = Pin.IRQ_FALLING, handler = button_pressed)
-        
-    
-
     
     # run_ble()
     # s.start()
