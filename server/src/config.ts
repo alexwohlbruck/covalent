@@ -11,3 +11,7 @@ export const db = {
 export const google = {
   clientId: process.env.GOOGLE_CLIENT_ID,
 }
+
+export const sessionSecret = process.env.SESSION_SECRET
+
+export const clientUrl = process.env.NODE_ENV === 'production' ? 'https://lamp-client.herokuapp.com' : 'http://localhost:8080'
