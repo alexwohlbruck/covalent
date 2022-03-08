@@ -4,12 +4,10 @@ import { google } from './config'
 import { User, UserModel } from './models/user'
 
 passport.serializeUser((user: User, done: any) => {
-  console.log('serialize', user._id.toString())
   done(null, user._id)
 })
 
 passport.deserializeUser(async (id: string, done: any) => {
-  console.log('deserialize', id)
   try {
     const user = await UserModel.findById(id)
     done(null, user)

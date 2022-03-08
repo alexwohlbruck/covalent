@@ -83,11 +83,26 @@ export const createLamp = async (
   return LampModel.findById(lamp._id)
 }
 
-export const moveLampToGroup = async (id: string, groupId: string) => {
+export const moveLampToGroup = async (id: string, groupId: string, accessCode: string) => {
 
-  // TODO: Require group ID and access code and add the lamp to the group
+  if (!id) throw new RequestException(400, 'Lamp ID is required.')
+  if (!groupId) throw new RequestException(400, 'Group ID is required.')
+  if (!accessCode) throw new RequestException(400, 'Access code is required.')
 
-  return await LampModel.findByIdAndUpdate(id, { group: groupId }, { new: true })
+  const lamp: any = await LampModel.findById(id)
+  if (!lamp) throw new RequestException(404, `Lamp id: ${id} not found.`)
+
+  const group = await GroupModel.findOne({
+    groupId,
+  })
+  if (!group) throw new RequestException(404, `Group id: ${groupId} not found.`)
+
+  // Check new group access code
+  if (accessCode !== group.accessCode) {
+    throw new RequestException(400, 'Access code is incorrect.')
+  }
+
+  return await LampModel.findByIdAndUpdate(id, { group: group._id }, { new: true })
 }
 
 export const sendCommand = async (id: string, state: LampState) => {
@@ -102,7 +117,19 @@ export const sendCommand = async (id: string, state: LampState) => {
 
 export const deleteLamp = async (id: string) => {
 
-  // TODO: Check if group is empty after removing, if so delete group
+  const lamp = await LampModel.findById(id)
+
+  if (!lamp) throw new RequestException(404, `Lamp id: ${id} not found.`)
+
+  // Get lamps that are in the same group
+  const lamps = await LampModel.find({
+    group: new Types.ObjectId(lamp.group._id),
+  })
+
+  // If there are no other lamps in the group, delete the group
+  if (lamps.length === 1) {
+    await GroupModel.findByIdAndDelete(lamp.group._id)
+  }
 
   return await LampModel.findByIdAndRemove(id)
 }

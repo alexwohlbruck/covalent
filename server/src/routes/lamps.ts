@@ -35,19 +35,26 @@ router.post('/', isAuthenticated, async (req, res) => {
 
 // Move a lamp to another group
 router.put('/:id/group', isAuthenticated, async (req, res) => {
-  const lamp = moveLampToGroup(req.params.id, req.body.groupId)
+  const { groupId, accessCode } = req.body
+
+  const lamp = await moveLampToGroup(
+    req.params.id,
+    groupId,
+    accessCode,
+  )
+
   return res.status(200).json(lamp)
 })
 
 // Send a command to lamp
 router.patch('/:id/state', isAuthenticated, async (req, res) => {
-  const lamp = sendCommand(req.params.id, req.body)
+  const lamp = await sendCommand(req.params.id, req.body)
   return res.status(200).json(lamp)
 })
 
 // Delete a lamp
 router.delete('/:id', isAuthenticated, async (req, res) => {
-  await deleteLamp(req.params.id)
+  await await deleteLamp(req.params.id)
   return res.status(200).send()
 })
 
