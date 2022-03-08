@@ -1,25 +1,26 @@
 import express from 'express'
-import { google } from '../config'
-import { OAuth2Client } from 'google-auth-library'
+import passport from 'passport'
 
 const router = express.Router()
-const client = new OAuth2Client(google.clientId)
 
-router.post('/login', async (req, res) => {
-  try {
-    const ticket = await client.verifyIdToken({
-      idToken: req.body.idToken,
-      audience: google.clientId,
-    })
-    const payload = ticket.getPayload()
-    const userid = payload.sub
-
-    res.status(200).json(payload)
-  }
-  catch (error) {
-    console.error(error)
-    res.status(500).json({ message: error.message, error })
-  }
+router.get('/me', (req, res) => {
+  console.log(req.user)
+  return res.status(req.user ? 200 : 401).json(req.user)
 })
+
+router.post('/login',
+  passport.authenticate('google-id-token'),
+  (req, res) => {
+    return res.status(req.user ? 200 : 401).json(req.user)
+  }
+)
+
+router.post('/logout', (req, res, next) => {
+  req.logout()
+  req.session.destroy(() => {
+    res.status(200)
+  })
+})
+
 
 export default router
