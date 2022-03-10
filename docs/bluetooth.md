@@ -1,8 +1,8 @@
-## Bluetooth Protocol
+# Bluetooth Protocol
 
-### RX Messages (web app to board)
+## RX Messages (web app to board)
 
-#### `REQUEST_NETWORKS`
+### `REQUEST_NETWORKS`
 Request a list of available Wifi networks from the board. A response is sent via `AVAILABLE_NETWORKS`. In addition, `DEVICE_DATA` is sent for convenience.
 
 Payload:
@@ -10,7 +10,7 @@ Payload:
 {}
 ```
 
-#### `CONNECT_NETWORK`
+### `CONNECT_NETWORK`
 Connect to a Wifi network. Pass the SSID and password in the payload. If successfull, a response is sent via `CONNECTION_SUCCESS`. If unsuccessful, a response is sent via `CONNECTION_FAILURE`.
 
 Payload:
@@ -21,9 +21,9 @@ Payload:
 }
 ```
 
-### TX Messages (board to web app)
+## TX Messages (board to web app)
 
-#### `DEVICE_DATA`
+### `DEVICE_DATA`
 Sends info about the board.
 
 Payload:
@@ -33,7 +33,7 @@ Payload:
 }
 ```
 
-#### `AVAILABLE_NETWORKS`
+### `AVAILABLE_NETWORKS`
 Sends a list of available Wifi networks.
 
 Payload:
@@ -52,7 +52,7 @@ Payload:
 }
 ```
 
-#### `CONNECTION_SUCCESS`
+### `CONNECTION_SUCCESS`
 The board has successfully connected to Wifi.
 
 Payload:
@@ -64,7 +64,7 @@ Payload:
 }
 ```
 
-#### `CONNECTION_FAILURE`
+### `CONNECTION_FAILURE`
 The board failed to connect to Wifi.
 
 Payload:
