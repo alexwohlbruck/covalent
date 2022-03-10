@@ -1,22 +1,32 @@
+import Store from '@/store'
+import router from '@/router'
+import axios from '@/axios'
+import { Lamp } from '@/types/Lamp'
 
-export createLamp = async   ({ dispatch }, {
+export const getMyLamps = async() => {
+  const { data } = await axios.get('/lamps/me')
+  data.forEach((lamp: Lamp) => Store.commit('ADD_LAMP', lamp))
+  return data
+}
+
+export const createLamp = async ({
   groupId, accessCode, deviceData
 }: {
   groupId: string,
   accessCode: string,
   deviceData: any
-}) {
+}) => {
   try {
-    // TODO
-    // const result = await createLamp({
-    //   groupId,
-    //   accessCode,
-    //   deviceData,
-    // })
-    // router.push({name: 'lamps'})
-    // return result
+    const { data }: { data: Lamp } = await axios.post('/lamps', {
+      groupId,
+      deviceData,
+      accessCode,
+    })
+    Store.commit('ADD_LAMP', data)
+    router.push({name: 'lamps'})
+    return data
   }
   catch (error: any) {
-    dispatch('error', error?.details?.message)
+    Store.dispatch('error', error?.details?.message)
   }
 }

@@ -90,7 +90,7 @@ export function onMessage(payload: Payload) {
 }
 
 export async function sendMessage(payload: Payload) {
-  const device = store.state.btDevice
+  const device = store.state.app.btDevice
 
   if (!device) return
 

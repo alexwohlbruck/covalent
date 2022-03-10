@@ -1,5 +1,6 @@
 import { Lamp } from '@/types/Lamp'
 import Vue from 'vue'
+import { RootState } from '.'
 
 export interface LampsState {
   all: string[]
@@ -12,6 +13,22 @@ export const initialState = (): LampsState => ({
   all: [],
   byId: {},
 })
+
+const getters = {
+  lamp: (state: LampsState) => (id: number) => {
+    return state.byId[id]
+  },
+
+  lamps: (_state: LampsState, getters: any) => (ids: string[]) => {
+    return ids.map((id: string) => getters.lamp(id))
+  },
+
+  myLamps: (state: LampsState, getters: any, _rootState: RootState, rootGetters: any) => {
+    return getters
+      .lamps(state.all)
+      .filter((lamp: Lamp) => lamp.user._id === rootGetters.me?._id)
+  }
+}
 
 const mutations = {
   ADD_LAMP(state: LampsState, lamp: Lamp) {
@@ -29,4 +46,5 @@ const mutations = {
 export default {
   state: initialState(),
   mutations,
+  getters,
 }

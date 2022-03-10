@@ -39,7 +39,22 @@ const mutations = {
   },
 }
 
+const getters = {
+  user: (state: UsersState) => (id: string) => {
+    return state.byId[id]
+  },
+
+  users: (_state: UsersState, getters: any) => (ids: string[]) => {
+    return ids.map((id: string) => getters.user(id))
+  },
+
+  me: (state: UsersState, getters: any) => {
+    return getters.user(state.me)
+  }
+}
+
 export default {
   state: initialState(),
   mutations,
+  getters,
 }

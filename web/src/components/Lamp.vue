@@ -10,81 +10,81 @@ div
   )
 </template>
 
-<script lang="js">
+<script lang="ts">
+import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import { hslToHexString, hexStringToHsl } from '@/util'
+import { Lamp } from '@/types/Lamp'
 
-let timeout
+let timeout: any
 
-export default {
-  name: 'lamp',
-  props: {
-    group: Object,
-    user: Object,
-    states: Array,
-    selectedColor: String,
-  },
-  data: () => ({
-    active: false,
-  }),
-  watch: {
-    states() {
-      this.active = true
-      clearTimeout(timeout)
-      timeout = setTimeout(() => {
-        this.active = false
-      }, 10000)
-    },
-  },
-  computed: {
-    myStateRef() {
-      if (!this.group) return null
-      return null
-      // return db.ref(`groups/${this.group['.key']}/userStates/${this.user.uid}`)
-    },
-    incomingMessage() {
-      const userStates = this.group.userStates
-      const colors = Object.keys(userStates)
-        .filter((uid) => uid !== this.user.uid)
-        .map((key) => userStates[key])
-        .filter((state) => state.touching)
-        .sort((a, b) => a.timestamp - b.timestamp)
-        .map((state) => state.color)
+@Component
+export default class LampVisualizer extends Vue {
 
-      return colors.length != 0
-    },
-    visualizerStyle() {
-      let colors = this.states
-        .filter((state) => state.touching)
-        .map((state) => state.color)
+  @Prop(Object) lamp!: Lamp
+  @Prop(String) selectedColor!: string
 
-      if (colors.length === 0) colors = [this.states[0]?.color || '#000000']
+  active = false
 
-      const firstColor = colors[0]
+  @Watch('states')
+  onStateChanged() {
+    this.active = true
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      this.active = false
+    }, 10000)
+  }
 
-      if (colors.length == 1) {
-        // Add a second color that is slightly shifted
-        const hsl = hexStringToHsl(firstColor)
-        hsl[0] = hsl[0] + 40
-        const shiftedColor = hslToHexString(...hsl)
-        colors.push(shiftedColor)
-      }
+  get myStateRef() {
+    return null
+    // return db.ref(`groups/${this.group['.key']}/userStates/${this.user.uid}`)
+  }
 
-      return {
-        'box-shadow': `0px 0px 50px 30px ${firstColor}`,
-        background: `black linear-gradient(135deg, ${colors.join(',')})`,
-      }
-    },
-  },
-  methods: {
-    async updateLamp(touching) {
-      const color = this.selectedColor
-      await this.myStateRef.update({
-        touching,
-        color,
-        timestamp: Date.now(),
-      })
-    },
-  },
+  get incomingMessage() {
+    // TODO
+    return false
+    // const userStates = this.group.userStates
+    // const colors = Object.keys(userStates)
+    //   .filter((uid) => uid !== this.user?._id)
+    //   .map((key) => userStates[key])
+    //   .filter((state) => state.touching)
+    //   .sort((a, b) => a.timestamp - b.timestamp)
+    //   .map((state) => state.color)
+
+    // return colors.length != 0
+  }
+
+  get visualizerStyle() {
+    let colors = [this.lamp.state]
+      .filter((state) => state.touching)
+      .map((state) => state.color)
+
+    if (colors.length === 0) colors = [this.lamp.state.color || '#000000']
+
+    const firstColor = colors[0]
+
+    if (colors.length == 1) {
+      // Add a second color that is slightly shifted
+      const hsl = hexStringToHsl(firstColor)
+      hsl[0] = hsl[0] + 40
+      const shiftedColor = hslToHexString(...hsl)
+      colors.push(shiftedColor)
+    }
+
+    return {
+      'box-shadow': `0px 0px 50px 30px ${firstColor}`,
+      background: `black linear-gradient(135deg, ${colors.join(',')})`,
+    }
+  }
+
+  async updateLamp(touching: boolean) {
+    const color = this.selectedColor
+    // TODO
+    // await this.myStateRef.update({
+    //   touching,
+    //   color,
+    //   timestamp: Date.now(),
+    // })
+  }
 }
 </script>
 

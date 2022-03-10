@@ -40,7 +40,8 @@ export const signIn = async (idToken: string) => {
 
 export const signOut = async () => {
   await axios.post('/auth/logout')
-  store.commit('SET_ME', null)
+  store.commit('RESET_STATE')
+  router.push({ name: 'home' })
 }
 
 export const getMe = async () => {

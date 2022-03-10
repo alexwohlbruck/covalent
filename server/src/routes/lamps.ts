@@ -6,7 +6,7 @@ import { isAuthenticated } from '../middleware'
 const router = express.Router()
 
 // Get the current user's lamps
-router.get('/', isAuthenticated, async (req, res) => {
+router.get('/me', isAuthenticated, async (req, res) => {
   const lamps = await getLamps({
     userId: (req.user as User)._id,
   })

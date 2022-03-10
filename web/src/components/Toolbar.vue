@@ -34,8 +34,6 @@ v-app-bar(app)
     span.text-body-2.mr-4.font-weight-bold {{ me.name }}
     v-avatar(size='40px')
       v-img(:src='me.picture')
-  
-    
 
 </template>
 
@@ -46,7 +44,7 @@ import { signOut } from '@/services/auth'
 @Component
 export default class Toolbar extends Vue {
   get me() {
-    return this.$store.state.me
+    return this.$store.getters.me
   }
 
   get btDevice() {

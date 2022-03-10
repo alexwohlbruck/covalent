@@ -1,6 +1,6 @@
 
 export interface AppState {
-  btDevice: null // TODO: Move to Bluetooth module
+  btDevice: null | any // TODO: Move to Bluetooth module
   error: {
     show: boolean
     message: string

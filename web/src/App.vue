@@ -8,27 +8,24 @@ v-app
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { Vue, Component } from 'vue-property-decorator'
 import Toolbar from '@/components/Toolbar.vue'
-import { mapState } from 'vuex'
 
-export default Vue.extend({
-  name: 'App',
-
+@Component({
   components: {
     Toolbar,
   },
-
-  data: (): any => ({
-    device: null,
-    ssid: '',
-    password :'',
-  }),
-
-  computed: {
-    ...mapState(['error']),
-  },
 })
+export default class App extends Vue {
+
+  device = null
+  ssid = ''
+  password = ''
+
+  get error() {
+    return this.$store.state.app.error
+  }
+}
 </script>
 
 <style>
