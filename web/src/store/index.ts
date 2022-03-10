@@ -20,38 +20,19 @@ export interface Network {
 
 const storeConfig: StoreOptions<RootState> = {
   mutations: {
-    SET_ME(state: any, me: any | null) {
-      state.me = me || null
-    },
-    SET_BT_DEVICE(state: any, device: any) {
-      state.btDevice = device
-    },
-    SET_ERROR(state: any, error: string) {
-      if (error) {
-        state.error = {
-          show: true,
-          message: error,
-        }
-      }
-      else {
-        state.error = {
-          show: false,
-          message: '',
-        }
-      }
-    }
-  },
-  actions: {
-    error: ({ commit }, error: string) => {
-      console.error(error)
-      commit('SET_ERROR', error)
-      setTimeout(() => {
-        commit('SET_ERROR', null)
-      }, 5000)
+    RESET_STATE(state) {
+      Object.assign(state.app, app.initialState())
+      Object.assign(state.lamps, lamps.initialState())
+      Object.assign(state.groups, groups.initialState())
+      Object.assign(state.users, users.initialState())
     },
   },
-  getters: {},
-  modules: {},
+  modules: {
+    app: app.default,
+    lamps: lamps.default,
+    groups: groups.default,
+    users: users.default,
+  },
 }
 
 export default new Vuex.Store(storeConfig)

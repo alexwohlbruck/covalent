@@ -23,7 +23,7 @@ const mutations = {
     state.btDevice = device
   },
 
-  SET_ERROR(state: AppState, error: string) {
+  SET_ERROR(state: AppState, error: string | null) {
     if (error) {
       state.error = {
         show: true,
