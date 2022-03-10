@@ -16,9 +16,7 @@ export const listGroups = async (userId: string) => {
 export const getGroup = async (userId: string, groupId: string) => {
 
   const myGroups = await listGroups(userId)
-  console.log(myGroups)
   const group = myGroups.find((g: any) => g._id.toString() === groupId)
-  console.log(group)
 
   if (!group) throw new RequestException(404, `Group id: ${groupId} not found.`)
 

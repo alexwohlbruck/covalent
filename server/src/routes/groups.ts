@@ -5,7 +5,7 @@ import { getGroup, listGroups } from '../services/groups'
 
 const router = express.Router()
 
-// Get a user's groups
+// Get current user's groups
 router.get('/', isAuthenticated, async (req, res) => {
   try {
     const groups = await listGroups((req.user as User)._id)

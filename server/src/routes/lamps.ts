@@ -15,6 +15,9 @@ router.get('/', isAuthenticated, async (req, res) => {
 
 // Get a lamp
 router.get('/:id', isAuthenticated, async (req, res) => {
+
+  // TODO: Ensure the user owns the lamp
+
   const lamp = await getLamp(req.params.id)
   return res.status(200).json(lamp)
 })
