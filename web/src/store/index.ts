@@ -1,28 +1,24 @@
 import Vue from 'vue'
-import Vuex from 'vuex'
+import Vuex, { StoreOptions } from 'vuex'
+
+import * as app from './app'
+import * as lamps from './lamps'
+import * as groups from './groups'
+import * as users from './users'
 
 Vue.use(Vuex)
 
-
+export interface RootState {
+  app: app.AppState
+  lamps: lamps.LampsState
+  groups: groups.GroupsState
+  users: users.UsersState
+}
 export interface Network {
   ssid: string
 }
 
-const initialState = () => {
-  return {
-    me: null,
-    lamps: [],
-    groups: [],
-    btDevice: null,
-    error: {
-      show: false,
-      message: '',
-    },
-  }
-}
-
-export default new Vuex.Store({
-  state: initialState(),
+const storeConfig: StoreOptions<RootState> = {
   mutations: {
     SET_ME(state: any, me: any | null) {
       state.me = me || null
@@ -46,29 +42,6 @@ export default new Vuex.Store({
     }
   },
   actions: {
-
-    async createLamp({ dispatch }, {
-      groupId, accessCode, deviceData
-    }: {
-      groupId: string,
-      accessCode: string,
-      deviceData: any
-    }) {
-      try {
-        // TODO
-        // const result = await createLamp({
-        //   groupId,
-        //   accessCode,
-        //   deviceData,
-        // })
-        // router.push({name: 'lamps'})
-        // return result
-      }
-      catch (error: any) {
-        dispatch('error', error?.details?.message)
-      }
-    },
-
     error: ({ commit }, error: string) => {
       console.error(error)
       commit('SET_ERROR', error)
@@ -79,4 +52,6 @@ export default new Vuex.Store({
   },
   getters: {},
   modules: {},
-})
+}
+
+export default new Vuex.Store(storeConfig)

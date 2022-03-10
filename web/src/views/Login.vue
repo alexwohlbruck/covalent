@@ -1,7 +1,6 @@
 <template lang="pug">
 
 v-container
-  h1 Friendship lamp
   google-sign-in-button
 </template>
 

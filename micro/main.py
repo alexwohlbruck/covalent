@@ -37,7 +37,7 @@ class WebSocket():
 
 
 def main():
-    connect_wifi('Night Owl', 'joeldrew swalonsky worst teacher batting average')
+    connect_wifi('Taylor', '1a2b3c4d5e')
 
     def callback(message):
         name = message.get('name')
@@ -48,7 +48,7 @@ def main():
             else:
                 led.value(0)
 
-    ws = WebSocket('ws://192.168.86.31:3000', callback)
+    ws = WebSocket('ws://192.168.86.30:3000', callback)
 
     def button_pressed(pin):
         led.value(1)
