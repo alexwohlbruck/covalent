@@ -5,16 +5,16 @@ import { Group } from './group'
 import { User } from './user'
 
 export interface LampState {
-  color: string;
-  touching: boolean;
+  color: string
+  touching: boolean
 }
 
 export interface Lamp {
-  _id: string;
-  state: LampState;
-  group: Group;
-  user: User;
-  deviceData: any;
+  _id: string
+  state: LampState
+  group: Group
+  user: User
+  deviceData: any
 }
 
 const LampSchema = new Schema<Lamp>({

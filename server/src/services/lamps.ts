@@ -1,19 +1,22 @@
 import { Types } from 'mongoose'
 import { RequestException } from '../routes'
 import { convertToDotNotation, toKebab } from '../helpers'
-import { Lamp, LampModel, LampState } from '../models/lamp'
+import { LampModel, LampState } from '../models/lamp'
 import { GroupModel } from '../models/group'
+import { updateGroupState } from './groups'
 
 export const getLamps = async (options: {
   userId?: string;
+  groupId?: string;
 }) => {
   const query: any = {}
 
   if (options) {
     if (options.userId) query.user = new Types.ObjectId(options.userId)
+    if (options.groupId) query.group = new Types.ObjectId(options.groupId)
   }
 
-  return await LampModel.find(query)
+  return await LampModel.find(query).sort({ createdAt: -1 })
 }
 
 export const getLamp = async (id: string) => {
@@ -105,14 +108,82 @@ export const moveLampToGroup = async (id: string, groupId: string, accessCode: s
   return await LampModel.findByIdAndUpdate(id, { group: group._id }, { new: true })
 }
 
-export const sendCommand = async (id: string, state: LampState) => {
-  return await LampModel.findByIdAndUpdate(id, {
+interface GroupState {
+  lampId: string
+  color: string
+  touching: boolean
+}
+
+// Store states for each group in memory for fast access
+const statesCache: {
+  [key: string]: GroupState[]
+} = {}
+
+// Update the state of a group in cache
+const updateGroupStateCache = (groupId: string, lampId: string, state: LampState) => {
+  const group = statesCache[groupId] || []
+  const newState = {
+    lampId,
+    ...state,
+  }
+
+  statesCache[groupId] = group.filter((s: GroupState) => {
+    return s.lampId !== lampId
+  }).concat(newState)
+}
+
+// Compute the colors and active state of a group
+const groupState = (groupId: string) => {
+
+  let active = false
+  const group = statesCache[groupId]
+
+  if (!group) return { active, colors: [] }
+
+  let colors = group
+    .filter((state: GroupState) => {
+      return state.touching
+    })
+    .map((state: GroupState) => {
+      return state.color
+    })
+
+  if (colors.length === 0) {
+    // If no colors are active, use the last color
+    colors = [group[0].color] || ['#ff0000']
+  }
+  else {
+    active = true
+  }
+
+  return {
+    colors,
+    active,
+  }
+}
+
+export const sendCommand = async (lampId: string, state: LampState) => {
+
+  const lamp = await LampModel.findByIdAndUpdate(lampId, {
     $set: convertToDotNotation({
       state,
     }),
   }, {
     new: true,
   })
+
+  if (!lamp) throw new RequestException(404, `Lamp id: ${lampId} not found.`)
+
+  const groupId = lamp.group._id
+
+  updateGroupStateCache(groupId, lampId, state)
+  updateGroupState(groupId) // Save new group state in DB in the background
+
+  // Broadcast this
+  return {
+    groupId,
+    state: groupState(groupId),
+  }
 }
 
 export const deleteLamp = async (id: string) => {
