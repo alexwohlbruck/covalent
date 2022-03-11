@@ -4,6 +4,7 @@ import { convertToDotNotation, toKebab } from '../helpers'
 import { LampModel, LampState } from '../models/lamp'
 import { GroupModel } from '../models/group'
 import { updateGroupState } from './groups'
+import { broadcast } from '../websockets'
 
 export const getLamps = async (options: {
   userId?: string;
@@ -179,11 +180,17 @@ export const sendCommand = async (lampId: string, state: LampState) => {
   updateGroupStateCache(groupId, lampId, state)
   updateGroupState(groupId) // Save new group state in DB in the background
 
-  // Broadcast this
-  return {
+  const response = {
     groupId,
     state: groupState(groupId),
   }
+
+  broadcast({
+    name: 'GROUP_STATE_CHANGED',
+    data: response
+  })
+
+  return response
 }
 
 export const deleteLamp = async (id: string) => {

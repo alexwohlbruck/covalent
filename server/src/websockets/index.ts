@@ -4,9 +4,9 @@ import WebSocket, { WebSocketServer } from 'ws'
 const router = express.Router()
 const clients: WebSocket[] = []
 
-const broadcast = (data: string) => {
+export const broadcast = (data: { name: string, data: object }) => {
   clients.forEach((client) => {
-    client.send(data)
+    client.send(JSON.stringify(data))
   })
 }
 
@@ -17,12 +17,10 @@ router.ws('/', (ws: WebSocket, req: express.Request) => {
   ws.on('message', (message: any) => {
     const { name, data } = JSON.parse(message)
 
-    console.log(data)
-
-    broadcast(JSON.stringify({
+    broadcast({
       name,
       data,
-    }))
+    })
   })
 })
 
