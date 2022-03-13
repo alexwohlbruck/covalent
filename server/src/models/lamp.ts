@@ -14,7 +14,9 @@ export interface Lamp {
   state: LampState
   group: Group
   user: User
-  deviceData: any
+  deviceData: {
+    deviceId: string
+  }
 }
 
 const LampSchema = new Schema<Lamp>({
@@ -41,7 +43,10 @@ const LampSchema = new Schema<Lamp>({
     autopopulate: true,
   },
   deviceData: {
-    type: Object,
+    deviceId: {
+      type: String,
+      required: true,
+    },
   },
 }, {
   timestamps: true,

@@ -2,11 +2,12 @@ import Store from '@/store'
 import router from '@/router'
 import axios from '@/axios'
 import { Lamp } from '@/types/Lamp'
+import { AVAILABLE_NETWORKS } from './bluetooth'
 
 export const getMyLamps = async() => {
-  const { data } = await axios.get('/lamps/me')
-  data.forEach((lamp: Lamp) => Store.commit('ADD_LAMP', lamp))
-  return data
+  const { data: lamps } = await axios.get<Lamp[]>('/lamps/me')
+  lamps.forEach(lamp => Store.commit('ADD_LAMP', lamp))
+  return lamps
 }
 
 export const createLamp = async ({
@@ -17,7 +18,7 @@ export const createLamp = async ({
   deviceData: any
 }) => {
   try {
-    const { data }: { data: Lamp } = await axios.post('/lamps', {
+    const { data } = await axios.post<Lamp>('/lamps', {
       groupId,
       deviceData,
       accessCode,
@@ -27,6 +28,27 @@ export const createLamp = async ({
     return data
   }
   catch (error: any) {
-    Store.dispatch('error', error?.details?.message)
+    Store.dispatch('error', error.message)
+  }
+}
+
+export const sendCommand = async ({
+  lampId, color, touching
+}: {
+  lampId: string,
+  color: string
+  touching?: boolean
+}) => {
+  try {
+    const { data } = await axios.patch<Lamp>(`/lamps/${lampId}/state`, {
+      color,
+      touching,
+    })
+    console.log(data)
+    Store.commit('GROUP_STATE_CHANGED', data)
+    return data
+  }
+  catch (error: any) {
+    Store.dispatch('error', error.message)
   }
 }

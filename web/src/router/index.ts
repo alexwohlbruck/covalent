@@ -21,6 +21,11 @@ const routes: Array<RouteConfig> = [
     component: () => import('../views/Lamps.vue'),
   },
   {
+    path: '/group/:id',
+    name: 'group',
+    component: () => import('../views/Group.vue'),
+  },
+  {
     path: '/setup',
     name: 'setup',
     component: () => import('../views/Setup.vue'),

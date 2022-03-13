@@ -75,7 +75,7 @@
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
-import Lamp from '@/components/Lamp.vue'
+import Lamp from '@/components/LampVisualizer.vue'
 import Login from '@/views/Login.vue'
 
 import { hslToHexString, hexStringToHsl } from '@/util'

@@ -2,63 +2,72 @@
 div
   span.flex-shrink-1.lamp(
     :style='visualizerStyle'
-    :class='{pulsing: incomingMessage, active}'
+    :class='{pulse: incomingMessage, active: state.active}'
     @mousedown='updateLamp(true)'
     @touchstart='updateLamp(true)'
     @mouseup='updateLamp(false)'
     @touchend='updateLamp(false)'
+  )
+  pre {{ state }}
+  
+  //- Color picker
+  //- .d-flex.flex-column.align-center
+  //-   .d-flex
+  v-slider(
+    style='width: 150px'
+    v-model='hue'
+    min='0'
+    max='360'
+    :color='selectedColor'
+    :track-color='shiftedColor'
   )
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import { hslToHexString, hexStringToHsl } from '@/util'
-import { Lamp } from '@/types/Lamp'
+import { LampState } from '@/types/Lamp'
+import { GroupState } from '@/types/Group'
+import { sendCommand } from '@/services/lamp'
 
 let timeout: any
+
+type State = GroupState
 
 @Component
 export default class LampVisualizer extends Vue {
 
-  @Prop(Object) lamp!: Lamp
-  @Prop(String) selectedColor!: string
+  @Prop(Object) state!: State
+  @Prop(String) lampId!: string
+  @Prop(Boolean) active!: boolean
 
-  active = false
-
-  @Watch('states')
-  onStateChanged() {
-    this.active = true
-    clearTimeout(timeout)
-    timeout = setTimeout(() => {
-      this.active = false
-    }, 10000)
-  }
-
-  get myStateRef() {
-    return null
-    // return db.ref(`groups/${this.group['.key']}/userStates/${this.user.uid}`)
-  }
+  hue = 0
+  cooldown = false
+  touching = false
 
   get incomingMessage() {
-    // TODO
-    return false
-    // const userStates = this.group.userStates
-    // const colors = Object.keys(userStates)
-    //   .filter((uid) => uid !== this.user?._id)
-    //   .map((key) => userStates[key])
-    //   .filter((state) => state.touching)
-    //   .sort((a, b) => a.timestamp - b.timestamp)
-    //   .map((state) => state.color)
+    return this.state.active && !this.touching
+  }
 
-    // return colors.length != 0
+  @Watch('state')
+  onStateChanged() {
+    this.cooldown = (this.state as any).active
+    // this.cooldown = true
+    // clearTimeout(timeout)
+    // timeout = setTimeout(() => {
+    //   this.cooldown = false
+    // }, 10000)
   }
 
   get visualizerStyle() {
-    let colors = [this.lamp.state]
-      .filter((state) => state.touching)
-      .map((state) => state.color)
 
-    if (colors.length === 0) colors = [this.lamp.state.color || '#000000']
+    if (!this.state) {
+      return {}
+    }
+
+    let colors = this.state.colors
+
+    colors = [...colors]
 
     const firstColor = colors[0]
 
@@ -75,15 +84,25 @@ export default class LampVisualizer extends Vue {
       background: `black linear-gradient(135deg, ${colors.join(',')})`,
     }
   }
+  
+  get selectedColor(): string {
+    return hslToHexString(this.hue, 100, 50)
+  }
+
+  get shiftedColor(): string {
+    const hsl = hexStringToHsl(this.selectedColor)
+    hsl[0] = hsl[0] + 40
+    return hslToHexString(...hsl)
+  }
 
   async updateLamp(touching: boolean) {
-    const color = this.selectedColor
-    // TODO
-    // await this.myStateRef.update({
-    //   touching,
-    //   color,
-    //   timestamp: Date.now(),
-    // })
+    this.touching = touching
+
+    await sendCommand({
+      lampId: this.lampId,
+      touching,
+      color: this.selectedColor,
+    })
   }
 }
 </script>
@@ -119,7 +138,7 @@ $size: 200px;
     opacity: 1;
   }
 
-  &.pulsing {
+  &.pulse {
     animation: pulse 1s ease-in-out infinite;
   }
 }

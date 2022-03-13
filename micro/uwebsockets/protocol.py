@@ -8,6 +8,7 @@ import urandom as random
 import usocket as socket
 from ucollections import namedtuple
 
+
 # Opcodes
 OP_CONT = const(0x0)
 OP_TEXT = const(0x1)
@@ -39,6 +40,7 @@ class ConnectionClosed(Exception):
 def urlparse(uri):
     """Parse ws:// URLs"""
     match = URL_RE.match(uri)
+
     if match:
         protocol = match.group(1)
         host = match.group(2)
@@ -238,6 +240,6 @@ class Websocket:
         self._close()
 
     def _close(self):
-        if __debug__: print("Connection closed")
+        if __debug__: LOGGER.debug("Connection closed")
         self.open = False
         self.sock.close()

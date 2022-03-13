@@ -1,6 +1,6 @@
 from time import sleep, sleep_ms
 from wifi import prompt_wifi, disconnect_wifi, connect_wifi
-from bluetooth import run_ble
+from bluetooth import run_ble, get_device_id
 import json
 from machine import Pin, TouchPad
 import gc
@@ -37,6 +37,7 @@ class WebSocket():
 
 
 def main():
+
     connect_wifi('Taylor', '1a2b3c4d5e')
 
     def callback(message):
@@ -47,29 +48,51 @@ def main():
                 led.value(1)
             else:
                 led.value(0)
+    
+        if name == 'GROUP_STATE_CHANGED':
+            state = data.get('state')
+            active = state.get('active')
+            if active:
+                led.value(1)
+            else:
+                led.value(0)
 
-    ws = WebSocket('ws://192.168.86.30:3000', callback)
+    device_id = get_device_id()
+    lamp_id = '6226fd0e8667493a669ba747'
+    uri = 'ws://192.168.86.30:3000/?deviceId=' + device_id
+    ws = WebSocket(uri, callback)
 
     def button_pressed(pin):
         led.value(1)
         ws.send({
-            'name': 'test',
-            'data': True
+            'name': 'SEND_LAMP_COMMAND',
+            'data': {
+                'lampId': lamp_id,
+                'state': {
+                    'color': '#00ff00',
+                    'touching': True,
+                }
+            }
         })
         # button.irq(trigger = Pin.IRQ_RISING, handler = button_released)
     
     def button_released(pin):
         led.value(0)
         ws.send({
-            'name': 'test',
-            'data': False
+            'name': 'SEND_LAMP_COMMAND',
+            'data': {
+                'lampId': lamp_id,
+                'state': {
+                    'color': '#00ff00',
+                    'touching': False,
+                }
+            }
         })
         # button.irq(trigger = Pin.IRQ_FALLING, handler = button_pressed)
 
         
     last_val = False
     while (True):
-        print("{}".format(touchpad.read()))
         val = touchpad.read() < 250
         if val:
             if not last_val:

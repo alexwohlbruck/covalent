@@ -9,7 +9,9 @@ export interface LampState {
 export interface Lamp {
   _id: string;
   state: LampState;
-  group: Group;
-  user: User;
+  group?: Group;
+  groupId?: string;
+  user?: User;
+  userId?: string;
   deviceData: any;
 }

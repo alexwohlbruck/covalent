@@ -3,20 +3,21 @@ v-container
   h1.text-h4 My lamps
   v-card(v-for='(lamp, i) in myLamps' :key='i').d-flex
     lamp-visualizer.px-15(
-      :lamp='lamp'
+      :state='lamp.group.state'
+      :lampId='lamp._id'
       selectedColor='#000000'
     )
     v-card-text.d-flex.flex-column
       pre {{ lamp.state }}
-      span {{ lamp.group.groupId }}
+      span Group: {{ lamp.group.groupId }}
       span Access code: {{ lamp.group.accessCode }}
-      span Owned by: {{ lamp.user.name }}
+      v-btn(:to="{ name: 'group', params: { id: lamp.group._id } }") Open group
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { getMyLamps } from '@/services/lamp'
-import LampVisualizer from '@/components/Lamp.vue'
+import LampVisualizer from '@/components/LampVisualizer.vue'
 
 @Component({
   components: {

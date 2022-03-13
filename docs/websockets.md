@@ -8,6 +8,7 @@ Update a lamp's state. This does the same as `PATCH /lamps/:id/state` but is dup
 Payload:
 ```json
 {
+  "lampId": "xxxxxxxxxxxxxxxxxxxxxxxx",
   "color": "#ff00ff",
   "touching": true
 }
@@ -18,32 +19,18 @@ Payload:
 
 All these events correspond to mutations in the Vuex store.
 
-### `LAMP_STATE_CHANGED`
+### `GROUP_STATE_CHANGED`
 Fired when a user in your group starts or stops touching their lamp. 
-Returns a list of lamps that are active and their states. Not all lamp data is published, only `_id`, `state`, and `userId`, which is the owner of the lamp.
+Returns a new group state with the computed colors and active flag.
 
 Payload:
 ```json
 {
-  "lamps": [
-    {
-      "_id": "xxxxxxxxxxxxxxxxxxxxxxxx",
-      "state": {
-        "touching": true,
-        "color": "#ff0000"
-      },
-      "userId": "xxxxxxxxxxxxxxxxxxxxxxxx"
-    },
-    {
-      "_id": "xxxxxxxxxxxxxxxxxxxxxxxx",
-      "state": {
-        "touching": true,
-        "color": "#ff0000"
-      },
-      "userId": "xxxxxxxxxxxxxxxxxxxxxxxx"
-    }
-  ]
-}
+  "groupId": "xxxxxxxxxxxxxxxxxxxxxxxx",
+  "state": {
+    "colors": ["#ff00ff", "#00ff00", "#0000fff"],
+    "active": true
+  }
 ```
 
 

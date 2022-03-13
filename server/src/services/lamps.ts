@@ -4,7 +4,7 @@ import { convertToDotNotation, toKebab } from '../helpers'
 import { LampModel, LampState } from '../models/lamp'
 import { GroupModel } from '../models/group'
 import { updateGroupState } from './groups'
-import { broadcast } from '../websockets'
+import { broadcast, broadcastToUsers } from '../websockets'
 
 export const getLamps = async (options: {
   userId?: string;
@@ -84,7 +84,12 @@ export const createLamp = async (
   await lamp.save()
 
   // Get populated lamp
-  return LampModel.findById(lamp._id)
+  const res = LampModel.findById(lamp._id)
+  broadcastToUsers([userId], {
+    name: 'ADD_LAMP',
+    data: res,
+  })
+  return res
 }
 
 export const moveLampToGroup = async (id: string, groupId: string, accessCode: string) => {
@@ -106,7 +111,14 @@ export const moveLampToGroup = async (id: string, groupId: string, accessCode: s
     throw new RequestException(400, 'Access code is incorrect.')
   }
 
-  return await LampModel.findByIdAndUpdate(id, { group: group._id }, { new: true })
+  const res = await LampModel.findByIdAndUpdate(id, { group: group._id }, { new: true })
+
+  // TODO: Notify other users in group
+  broadcastToUsers([lamp.user._id], {
+    name: 'ADD_LAMP',
+    data: res,
+  })
+  return res
 }
 
 interface GroupState {

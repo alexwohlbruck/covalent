@@ -1,12 +1,16 @@
 import { Lamp } from '@/types/Lamp'
 import Vue from 'vue'
 import { RootState } from '.'
+import UsersStore from './users'
+import GroupsStore from './groups'
+const { mutations: usersMutations, state: usersState } = UsersStore
+const { mutations: groupsMutations, state: groupsState } = GroupsStore
 
 export interface LampsState {
   all: string[]
   byId: {
     [id: string]: Lamp
-  }
+  },
 }
 
 export const initialState = (): LampsState => ({
@@ -15,8 +19,21 @@ export const initialState = (): LampsState => ({
 })
 
 const getters = {
-  lamp: (state: LampsState) => (id: number) => {
-    return state.byId[id]
+  lamp: (state: LampsState, getters: any) => (id: number) => {
+    const lamp = {...state.byId[id]}
+
+    // Denormalize data
+    if (lamp.groupId) {
+      lamp.group = getters.group(lamp.groupId)
+      delete lamp.groupId
+    }
+
+    if (lamp.userId) {
+      lamp.user = getters.user(lamp.userId)
+      delete lamp.userId
+    }
+
+    return lamp
   },
 
   lamps: (_state: LampsState, getters: any) => (ids: string[]) => {
@@ -26,13 +43,27 @@ const getters = {
   myLamps: (state: LampsState, getters: any, _rootState: RootState, rootGetters: any) => {
     return getters
       .lamps(state.all)
-      .filter((lamp: Lamp) => lamp.user._id === rootGetters.me?._id)
+      // .filter((lamp: Lamp) => lamp.user?._id === rootGetters.me?._id)
   }
 }
 
 const mutations = {
   ADD_LAMP(state: LampsState, lamp: Lamp) {
-    Vue.set(state.byId, lamp._id, lamp)
+    if (lamp.user) {
+      UsersStore.mutations.ADD_USER(UsersStore.state, lamp.user)
+      lamp.userId = lamp.user._id
+      delete lamp.user
+    }
+    if (lamp.group) {
+      GroupsStore.mutations.ADD_GROUP(GroupsStore.state, lamp.group)
+      lamp.groupId = lamp.group._id
+      delete lamp.group
+    }
+
+    Vue.set(state.byId, lamp._id, {
+      ...state.byId[lamp._id],
+      ...lamp,
+    })
     if (!state.all.includes(lamp._id)) state.all.push(lamp._id)
   },
 
