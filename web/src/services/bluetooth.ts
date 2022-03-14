@@ -35,7 +35,7 @@ export async function requestDevice() {
     const device = await BleClient.requestDevice({
       // services: [NUS_UUID],
       optionalServices: [NUS_UUID],
-      // name: 'Friendship Lamp'
+      name: 'Friendship Lamp'
     }) // TODO: Filter service to NUS
     
     return await connect(device)

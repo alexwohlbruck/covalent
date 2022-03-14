@@ -83,7 +83,6 @@ class ESP32_BLE():
 
     def send(self, data):
         data = json.dumps(data)
-        print('Sending message (' + data.length + '): ' + data)
         self.ble.gatts_notify(0, self.tx, data + '\n')
 
     def advertiser(self):
@@ -103,6 +102,7 @@ def run_ble():
 
         # TODO: Move these checks out of the function in a dict
         if name == REQUEST_NETWORKS:
+            print('Request networks')
             ble.send({
                 'name': DEVICE_DATA,
                 'data': {
@@ -110,14 +110,18 @@ def run_ble():
                 }
             })
             networks = scan_wifi()
+
+            # TODO: I only send the first 5 networks because of the packet size limit.
+            # TODO: Make a recursive function to send all networks in chunks of 5.
             ble.send({
                 'name': AVAILABLE_NETWORKS,
                 'data': {
-                    'networks': networks
+                    'networks': networks[0:5]
                 }
             })
 
         if name == CONNECT_NETWORK:
+            print('connect network')
             ssid = data['ssid']
             password = data['password']
 
@@ -138,7 +142,7 @@ def run_ble():
     led = Pin(2, Pin.OUT)
     but = Pin(0, Pin.IN)
 
-    device_name = 'Friendship Lamp - ' + get_device_id()[-6:]
+    device_name = 'Friendship Lamp' # - ' + get_device_id()[-6:]
     ble = ESP32_BLE(device_name, on_message)
 
     # def buttons_irq(pin):
