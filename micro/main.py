@@ -1,6 +1,7 @@
 from time import sleep, sleep_ms
 from wifi import prompt_wifi, disconnect_wifi, connect_wifi
-from bluetooth import run_ble, get_device_id
+from bluetooth import run_ble
+from config import get_device_id
 import json
 from machine import Pin, TouchPad
 import gc
@@ -38,7 +39,11 @@ class WebSocket():
 
 def main():
 
-    connect_wifi('Taylor', '1a2b3c4d5e')
+    # connect_wifi('Taylor', '1a2b3c4d5e')
+
+    while(True):
+        print('Waiting')
+        sleep(1)
 
     def callback(message):
         name = message.get('name')
@@ -113,5 +118,5 @@ def main():
     # prompt_wifi()
     # disconnect_wifi()
 
-# 
-main()
+if __name__ == "__main__":
+    main()
