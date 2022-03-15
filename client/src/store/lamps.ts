@@ -18,7 +18,7 @@ export const initialState = (): LampsState => ({
   byId: {},
 })
 
-const getters = {
+const lampsGetters = {
   lamp: (state: LampsState, getters: any) => (id: number) => {
     const lamp = {...state.byId[id]}
 
@@ -77,5 +77,5 @@ const mutations = {
 export default {
   state: initialState(),
   mutations,
-  getters,
+  getters: lampsGetters,
 }

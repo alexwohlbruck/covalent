@@ -40,7 +40,7 @@ export async function requestDevice() {
       optionalServices: [NUS_UUID],
       name: 'Friendship Lamp'
     }) // TODO: Filter service to NUS
-    
+
     return await connect(device)
 
   }
@@ -62,9 +62,9 @@ export async function connect(device: any) {
       NUS_UUID, // Service
       TX_UUID, // Characteristic
       (buffer: DataView) => {
-        const string = dataViewToText(buffer)
-        console.log('Received:', string)
-        const payload = JSON.parse(string)
+        const str = dataViewToText(buffer)
+        console.log('Received:', str)
+        const payload = JSON.parse(str)
         onMessage(payload)
       }
     )
@@ -122,8 +122,8 @@ export async function connectToNetwork(ssid: string, password: string) {
   await sendMessage({
     name: CONNECT_NETWORK,
     data: {
-      ssid: ssid,
-      password: password,
+      ssid,
+      password,
     },
   })
 }
@@ -132,7 +132,7 @@ export async function setLampId(lampId: string) {
   await sendMessage({
     name: SET_LAMP_ID,
     data: {
-      lampId: lampId,
+      lampId,
     },
   })
 }

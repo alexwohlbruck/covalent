@@ -1,9 +1,8 @@
-import { Lamp, LampModel, LampState } from '../models/lamp'
+import { Lamp, LampModel } from '../models/lamp'
 import { Types } from 'mongoose'
 import { RequestException } from '../routes'
 import { getLamps } from './lamps'
-import { GroupModel, GroupState } from '../models/group'
-import { convertToDotNotation } from '../helpers'
+import { GroupModel } from '../models/group'
 
 // List a user's groups
 export const listGroups = async (userId: string) => {

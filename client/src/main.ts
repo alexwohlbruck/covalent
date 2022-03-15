@@ -10,7 +10,7 @@ import vuetify from './plugins/vuetify'
 Vue.config.productionTip = false
 
 Vue.use(VueNativeSock, 'ws://localhost:3000', {
-  store: store, reconnection: true,
+  store, reconnection: true,
   reconnectionAttempts: 5,
   reconnectionDelay: 3000,
   passToStoreHandler: (eventName: string, event: any) => {

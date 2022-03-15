@@ -29,7 +29,7 @@ const mutations = {
     if (me && me._id) {
       addUser(state, me)
     }
-    state.me = me?._id || null 
+    state.me = me?._id || null
   },
 
   ADD_USER(state: UsersState, user: User) {
@@ -42,7 +42,7 @@ const mutations = {
   },
 }
 
-const getters = {
+const usersGetters = {
   user: (state: UsersState) => (id: string) => {
     return state.byId[id]
   },
@@ -59,5 +59,5 @@ const getters = {
 export default {
   state: initialState(),
   mutations,
-  getters,
+  getters: usersGetters,
 }

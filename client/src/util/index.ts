@@ -2,7 +2,9 @@ export function hslToHexString(h: number, s: number, l: number): string {
   h /= 360
   s /= 100
   l /= 100
-  let r, g, b
+  let r
+  let g
+  let b
   if (s === 0) {
     r = g = b = l // achromatic
   } else {
