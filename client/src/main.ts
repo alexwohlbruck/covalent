@@ -6,9 +6,10 @@ import './services/auth'
 import VueNativeSock from 'vue-native-websocket'
 
 import vuetify from './plugins/vuetify'
-import { wsUrl } from './config'
 
 Vue.config.productionTip = false
+
+const wsUrl = window.origin.toString().replace('http', 'ws')
 
 Vue.use(VueNativeSock, wsUrl, {
   store, reconnection: true,
