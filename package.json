@@ -4,15 +4,16 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf dist/server/* dist/index.js dist/index.js.map",
+    "clean": "rimraf dist/*",
     "lint": "tslint -c tslint.json -p tsconfig.json --fix",
     "tsc": "tsc ",
-    "build": "npm-run-all clean lint tsc",
-    "dev:start": "npm-run-all build start",
+    "build-server": "npm-run-all lint tsc",
+    "build-client": "cd client && yarn build && cd ..",
+    "build": "npm-run-all clean build-server build-client",
+    "dev:start": "npm-run-all build-server start",
     "dev": "nodemon --watch 'server,index.ts' -e ts --exec npm run dev:start",
     "start": "node .",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "cd .. && git subtree push --prefix server heroku master"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alex Wohlbruck",
   "license": "ISC",
