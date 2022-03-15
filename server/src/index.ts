@@ -12,7 +12,7 @@ import * as config from './config'
 import './db' // Connect to database
 import './models' // Register models
 
-const PORT = 3000
+const PORT = process.env.PORT || 8080
 const { app } = expressWs(express())
 
 import routes from './routes'
