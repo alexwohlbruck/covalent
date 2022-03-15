@@ -1,1 +1,1 @@
-release: chmod u+x client/build.sh
+web: chmod u+x client/build.sh
