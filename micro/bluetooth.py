@@ -145,22 +145,5 @@ def run_ble():
     device_name = 'Friendship Lamp' # - ' + get_device_id()[-6:]
     ble = ESP32_BLE(device_name, on_message)
 
-    # def buttons_irq(pin):
-    #   led.value(not led.value())
-    #   ble.send('LED state will be toggled.')
-    #   print('LED state will be toggled.')
-
-    # but.irq(trigger=Pin.IRQ_FALLING, handler=buttons_irq)
-
-    count = 0
     while True:
-        # if ble.ble_msg == 'read_LED':
-        #   print(ble.ble_msg)
-        #   ble.ble_msg = ""
-        #   print('LED is ON.' if led.value() else 'LED is OFF')
-        #   ble.send('LED is ON.' if led.value() else 'LED is OFF')
-        if (ble.is_connected):
-        #   ble.send('Test message ' + str(count))
-            count += 1
-
         sleep_ms(1000)

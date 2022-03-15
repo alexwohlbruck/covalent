@@ -16,6 +16,7 @@ export const initialState = (): UsersState => ({
 })
 
 const addUser = (state: UsersState, user: User) => {
+  if (!user) return
   Vue.set(state.byId, user._id, {
     ...state.byId[user._id],
     ...user,
@@ -24,9 +25,11 @@ const addUser = (state: UsersState, user: User) => {
 }
 
 const mutations = {
-  SET_ME(state: UsersState, me: any | null) {
-    addUser(state, me)
-    state.me = me._id 
+  SET_ME(state: UsersState, me: User | null) {
+    if (me && me._id) {
+      addUser(state, me)
+    }
+    state.me = me?._id || null 
   },
 
   ADD_USER(state: UsersState, user: User) {

@@ -13,7 +13,7 @@ window.onload = async () => {
 
 const initializeGoogleOneTap = () => {
   window.google.accounts.id.initialize({
-    client_id: '821633514868-hg4abju9ue86cfv536shb85h4v4r4jh9.apps.googleusercontent.com',
+    client_id: '1067362191574-44i4k8lk36kkub00gn77qiu8gff89c26.apps.googleusercontent.com',
     callback: handleCredentialResponse,
     auto_select: true,
   })

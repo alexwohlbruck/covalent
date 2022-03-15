@@ -29,7 +29,7 @@ class Server():
         device_id = get_device_id()
         lamp_id = '6226fd0e8667493a669ba747'
 
-        uri = 'ws://192.168.86.30:3000/?deviceId=' + device_id
+        uri = 'ws://192.168.86.34:3000/?deviceId=' + device_id
         self.ws = WebSocket(uri, self.on_message)
     
     def on_message(self, message):
