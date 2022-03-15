@@ -23,8 +23,7 @@ def connect(uri):
     uri = urlparse(uri)
     assert uri
 
-    if __debug__: print("open connection %s:%s",
-                                uri.hostname, uri.port)
+    if __debug__: print(f'Opening connection {uri.hostname}:{uri.port}')
 
     sock = socket.socket()
     addr = socket.getaddrinfo(uri.hostname, uri.port)

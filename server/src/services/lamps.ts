@@ -33,6 +33,10 @@ export const createLamp = async (
   accessCode?: string
 ) => {
 
+  // TODO: If a lamp with the existing device id exists, the user needs to relink the device
+  // TODO: Delete the existing lamp and the group if it is the last lamp in the group
+
+
   // TODO: Require group ID and access code and add the lamp to the group
   if (!groupId) throw new RequestException(400, 'Group ID is required.')
   if (!deviceData) throw new RequestException(400, 'Device data is required.')
@@ -77,6 +81,7 @@ export const createLamp = async (
       color: '#ff0000',
       touching: false,
     },
+    deviceData,
     group: new Types.ObjectId(group._id),
     user: new Types.ObjectId(userId),
   })
@@ -84,11 +89,12 @@ export const createLamp = async (
   await lamp.save()
 
   // Get populated lamp
-  const res = LampModel.findById(lamp._id)
+  const res = await LampModel.findById(lamp._id)
   broadcastToUsers([userId], {
     name: 'ADD_LAMP',
     data: res,
   })
+
   return res
 }
 

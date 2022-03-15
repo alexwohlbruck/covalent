@@ -5,7 +5,8 @@ import network
 import ubluetooth
 import json
 from wifi import connect_wifi, scan_wifi
-from config import get_device_id
+from config import get_device_id, add_config
+import _thread as thread
 
 DEVICE_DATA = 'DEVICE_DATA'
 REQUEST_NETWORKS = 'REQUEST_NETWORKS'
@@ -13,6 +14,8 @@ CONNECT_NETWORK = 'CONNECT_NETWORK'
 AVAILABLE_NETWORKS = 'AVAILABLE_NETWORKS'
 CONNECTION_SUCCESS = 'CONNECTION_SUCCESS'
 CONNECTION_FAILURE = 'CONNECTION_FAILURE'
+SET_LAMP_ID = 'SET_LAMP_ID'
+ERROR = 'ERROR'
 
 
 class ESP32_BLE():
@@ -91,7 +94,10 @@ class ESP32_BLE():
         adv_data = bytearray('\x02\x01\x02') + bytearray((len(name) + 1, 0x09)) + name
         self.ble.gap_advertise(100, adv_data)
 
-def run_ble():
+# TODO: Move this out of bluetooth into setup module
+def run_setup():
+
+    setup_finished = False
 
     def on_message(payload):
         print(payload)
@@ -110,6 +116,7 @@ def run_ble():
                 }
             })
             networks = scan_wifi()
+            print(networks)
 
             # TODO: I only send the first 5 networks because of the packet size limit.
             # TODO: Make a recursive function to send all networks in chunks of 5.
@@ -138,6 +145,22 @@ def run_ble():
                     'name': CONNECTION_FAILURE,
                     'data': {},
                 })
+        
+        if name == SET_LAMP_ID:
+            # Lamp created in DB, setup process finished, attempt to connect to server
+            
+            lamp_id = data.get('lampId', None)
+            if (lampId):
+                add_config('lampId', lamp_id)
+                setup_finished = True
+            else:
+                ble.send({
+                    'name': ERROR,
+                    'data': {
+                        'message': "Couldn't sync lamp ID to device."
+                    }
+                })
+            
 
     led = Pin(2, Pin.OUT)
     but = Pin(0, Pin.IN)
@@ -145,5 +168,5 @@ def run_ble():
     device_name = 'Friendship Lamp' # - ' + get_device_id()[-6:]
     ble = ESP32_BLE(device_name, on_message)
 
-    while True:
+    while not setup_finished:
         sleep_ms(1000)

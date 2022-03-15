@@ -55,6 +55,7 @@ def connect_wifi(ssid, password):
     
     if timeout == 0:
         print('Failed to connect to ' + ssid + '\n')
+        disconnect_wifi()
         return False
 
     else:

@@ -6,6 +6,7 @@ import {
 import store from '@/store'
 import { Store } from 'vuex'
 import mitt from 'mitt'
+import { error } from './app'
 
 const NUS_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e' // Nordic UART Service
 const RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e' // Receiver characteristic
@@ -14,12 +15,14 @@ const TX_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e' // Sender characteristic
 // RX Messages
 export const REQUEST_NETWORKS = 'REQUEST_NETWORKS'
 export const CONNECT_NETWORK = 'CONNECT_NETWORK'
+export const SET_LAMP_ID = 'SET_LAMP_ID'
 
 // TX Messages
 export const DEVICE_DATA = 'DEVICE_DATA'
 export const AVAILABLE_NETWORKS = 'AVAILABLE_NETWORKS'
 export const CONNECTION_SUCCESS = 'CONNECTION_SUCCESS'
 export const CONNECTION_FAILURE = 'CONNECTION_FAILURE'
+export const ERROR = 'ERROR'
 
 interface Payload {
   name: string,
@@ -85,8 +88,14 @@ export async function disconnected(deviceId: string) {
 // Message received payload
 export function onMessage(payload: Payload) {
   const { name, data } = payload
-  console.log('Parsed:', name, data)
+  console.log('Received BT message:', name, data)
   emitter.emit(name, data)
+
+  switch (name) {
+    case ERROR: {
+      error(data.message)
+    }
+  }
 }
 
 export async function sendMessage(payload: Payload) {
@@ -115,6 +124,15 @@ export async function connectToNetwork(ssid: string, password: string) {
     data: {
       ssid: ssid,
       password: password,
+    },
+  })
+}
+
+export async function setLampId(lampId: string) {
+  await sendMessage({
+    name: SET_LAMP_ID,
+    data: {
+      lampId: lampId,
     },
   })
 }

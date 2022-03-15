@@ -87,11 +87,14 @@ v-container
 
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { Network } from '@/store'
+import { error } from '@/services/app'
+import { createLamp } from '@/services/lamp'
 import {
   emitter,
   requestDevice,
   requestNetworks,
   connectToNetwork,
+  setLampId,
   DEVICE_DATA,
   AVAILABLE_NETWORKS,
   CONNECTION_SUCCESS,
@@ -135,7 +138,7 @@ export default class Setup extends Vue {
     emitter.on(CONNECTION_FAILURE, (payload: any) => {
       this.connectingToNetwork = false
       this.connectedNetwork = null
-      this.$store.dispatch('error', "Couldn't connect to wifi network.")
+      error("Couldn't connect to wifi network.")
     })
   }
 
@@ -183,13 +186,20 @@ export default class Setup extends Vue {
   async createLamp() {
     const requestBody: any = {
       groupId: this.groupId,
-      deviceData: this.deviceData 
+      // deviceData: this.deviceData,
+      deviceData: {
+        deviceId: '1234',
+      }
     }
     if (this.groupMethod === 'existing') {
       requestBody.accessCode = this.accessCode
     }
 
-    await this.$store.dispatch('createLamp', requestBody)
+    const lamp = await createLamp(requestBody)
+    console.log(lamp)
+
+    // TODO: Send lamp ID to board so it can connect to websocket
+    
   }
 
 }

@@ -40,3 +40,6 @@ def add_config(key, value):
   config[key] = value
   write_config(config)
 
+def get_config_item(key):
+  config = load_config()
+  return config[key]

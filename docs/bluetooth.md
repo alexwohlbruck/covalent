@@ -21,6 +21,17 @@ Payload:
 }
 ```
 
+### `SET_LAMP_ID`
+Set the `lampId` in the hardware configuration. The app will send this once the setup process is complete and the
+lamp has been added to the database. The `lampId` comes from the MongoDB _id field, it is **not** the same as the `deviceId`.
+
+Payload:
+```json
+{
+  "lampId": "xxxxxxxxxxxxxxxxxxxxxxxx"
+}
+```
+
 ## TX Messages (board to web app)
 
 ### `DEVICE_DATA`
@@ -71,3 +82,12 @@ Payload:
 ```json
 {}
 ```
+
+### `ERROR`
+A generic error handler to send an error message back to the app. These will be toasted to the user
+
+Payload:
+```json
+{
+  "message": "Something went wrong"
+}

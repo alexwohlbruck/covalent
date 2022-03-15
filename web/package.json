@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:e2e": "vue-cli-service test:e2e",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "yarn run build && firebase deploy --only hosting"
   },
   "dependencies": {
     "@capacitor-community/bluetooth-le": "^1.7.0",

@@ -1,10 +1,10 @@
-from wifi import connect_wifi, connect_wifi_from_config
-from bluetooth import run_ble
-from config import load_config
+from wifi import connect_wifi, disconnect_wifi, connect_wifi_from_config
+from bluetooth import run_setup
+from config import load_config, get_config_item
 from server import Server
 
 def start_setup_mode():
-    run_ble()
+    run_setup()
 
 from time import sleep, sleep_ms
 from machine import Pin, TouchPad
@@ -21,9 +21,16 @@ def run_startup():
         start_setup_mode()
     
     # Internet successfully connected
+    
+    try:
+        lamp_id = get_config_item('lampId')
+    except KeyError:
+        disconnect_wifi()
+        start_setup_mode()
+        return run_startup()
 
     # Connect to server
-    server = Server()
+    server = Server(lamp_id)
 
 
     # IO operations here
