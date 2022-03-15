@@ -8,7 +8,7 @@
     "lint": "tslint -c tslint.json -p tsconfig.json --fix",
     "tsc": "tsc ",
     "build-server": "npm-run-all lint tsc",
-    "build-client": "cd client && ./build.sh",
+    "build-client": "cd client && chmod u+x build.sh && ./build.sh",
     "build": "npm-run-all clean build-server build-client",
     "dev:start": "npm-run-all build-server start",
     "dev": "nodemon --watch 'server,index.ts' -e ts --exec npm run dev:start",
