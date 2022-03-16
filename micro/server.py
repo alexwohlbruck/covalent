@@ -2,6 +2,7 @@ import _thread as thread
 import uwebsockets.client
 from config import get_device_id
 import json
+from time import sleep_ms
 
 # TODO: Move IO operations to a separate file
 from machine import Pin, TouchPad
@@ -21,9 +22,16 @@ class WebSocket():
     def listen(self):
         while (True):
             message = self.websocket.recv()
-            print("< {}".format(message))
-            data = json.loads(message)
-            self.callback(data)
+            if message is None or len(message) == 0:
+                return
+
+            try:
+                data = json.loads(message)
+                print('Received data: {}'.format(data))
+                self.callback(data)
+            except ValueError:
+                print('Received invalid JSON: "{}"'.format(message))
+            sleep_ms(100)
     
     def stop(self):
         self.websocket.close()

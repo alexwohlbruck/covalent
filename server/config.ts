@@ -14,6 +14,6 @@ export const google = {
 
 export const sessionSecret = process.env.SESSION_SECRET
 
-// export const clientUrl = process.env.NODE_ENV === 'production'
-//   ? 'https://project-friendship-lamp.web.app'
-//   : 'http://localhost:8080'
+export const clientUrl = process.env.NODE_ENV === 'production'
+  ? 'https://project-covalent.herokuapp.com'
+  : 'http://localhost:8080'

@@ -1,5 +1,11 @@
 <template lang="pug">
-.group
+v-container.group
+  .d-flex
+    v-btn(icon :to="{ name: 'lamps' }")
+      v-icon mdi-arrow-left
+
+    h1.text-h5.font-weight-medium {{ group.groupId }}
+
   lamp-visualizer.px-15(
     v-if='myLamp'
     :state='group.state'
@@ -16,7 +22,6 @@
       v-list-item-content
         v-list-item-title {{ lamp.user.name }}
 
-  pre {{ group }}
 </template>
 
 <script lang="ts">

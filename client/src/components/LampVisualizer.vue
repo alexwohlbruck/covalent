@@ -1,5 +1,5 @@
 <template lang="pug">
-div
+.d-flex.flex-column.align-center
   span.flex-shrink-1.lamp(
     :style='visualizerStyle'
     :class='{pulse: incomingMessage, active: state.active}'
@@ -7,8 +7,8 @@ div
     @touchstart='updateLamp(true)'
     @mouseup='updateLamp(false)'
     @touchend='updateLamp(false)'
+    @contextmenu='() => {return false}'
   )
-  pre {{ state }}
   
   //- Color picker
   //- .d-flex.flex-column.align-center

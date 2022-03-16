@@ -1,39 +1,59 @@
 <template lang="pug">
 
-v-app-bar(app)
-  v-toolbar-title Covalent
-  v-spacer
+v-app-bar(app color='transparent' flat)
+  v-toolbar-title
+    router-link(:to="{ name: 'home' }") Covalent
 
-  v-btn(
-    v-if='btDevice'
-    text
-    color='blue darken-1'
-  )
-    v-icon(left) mdi-bluetooth-connect
-    | {{btDevice.name}}
-
-  v-btn(
-    v-else
+  v-btn.ml-4(
     text
     :to="{name: 'setup'}"
-  ) Pair lamp
+  ) Add lamp
+  
+  v-spacer
 
-  v-btn(
-    v-if='me'
-    text
-    @click='signOut'
-  ) Log out
+  div(v-if='me')
+    v-menu(
+      v-model='userMenu'
+      :close-on-content-click='false'
+      :nudge-width='200'
+    )
+      template(v-slot:activator='{ on, attrs }')
+        v-fade-transition
+          v-avatar(
+            v-show='!userMenu'
+            v-bind='attrs'
+            v-on='on'
+            size='35px'
+          )
+            v-img(:src='me.picture')
+      
+      v-card
+        v-list
+          v-list-item
+            v-list-item-avatar
+              v-img(:src='me.picture' :alt='me.name')
+
+            v-list-item-content
+              v-list-item-title {{ me.name }}
+              v-list-item-subtitle {{ me.email }}
+            
+            v-list-item-action(icon)
+              v-icon mdi-heart
+        
+        v-divider
+        
+        v-card-actions
+          v-spacer
+          v-btn(@click='signOut' color='primary' text) Sign out
+        
+          
 
   v-btn(
     v-else
     text
     :to="{ name: 'login' }"
-  ) Log in
+  ) Sign in
 
-  div(v-if='me')
-    span.text-body-2.mr-4.font-weight-bold {{ me.name }}
-    v-avatar(size='40px')
-      v-img(:src='me.picture')
 
 </template>
 
@@ -43,6 +63,9 @@ import { signOut } from '@/services/auth'
 
 @Component
 export default class Toolbar extends Vue {
+
+  userMenu = false
+
   get me() {
     return this.$store.getters.me
   }
@@ -52,6 +75,7 @@ export default class Toolbar extends Vue {
   }
 
   async signOut() {
+    this.userMenu = false
     await signOut()
   }
 }

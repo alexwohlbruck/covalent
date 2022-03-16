@@ -11,7 +11,7 @@
     "build-client": "cd client && yarn install && yarn build",
     "build": "npm-run-all clean build-server build-client",
     "dev:start": "npm-run-all build-server start",
-    "dev": "nodemon --watch 'server,index.ts' -e ts --exec npm run dev:start",
+    "dev": "nodemon --watch server --watch index.ts -e ts --exec npm run dev:start",
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

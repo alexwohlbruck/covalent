@@ -3,7 +3,7 @@ dotenv.config()
 import express from 'express'
 import expressWs from 'express-ws'
 import cookieParser from 'cookie-parser'
-// import cors from 'cors'
+import cors from 'cors'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import passport from 'passport'
@@ -22,10 +22,10 @@ import websockets from './server/websockets'
 
 // Middleware
 app.use(cookieParser())
-// app.use(cors({
-//   credentials: true,
-//   origin: config.clientUrl,
-// }))
+app.use(cors({
+  credentials: true,
+  origin: config.clientUrl,
+}))
 app.use(express.json())
 app.use(session({
   secret: config.sessionSecret,
