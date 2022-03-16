@@ -6,7 +6,7 @@ import ubluetooth
 import json
 from wifi import connect_wifi, scan_wifi
 from config import get_device_id, add_config
-import _thread as thread
+from machine import Pin
 
 DEVICE_DATA = 'DEVICE_DATA'
 REQUEST_NETWORKS = 'REQUEST_NETWORKS'
@@ -48,6 +48,10 @@ class ESP32_BLE():
         print('disconnected')
         self.timer1.init(period=100, mode=Timer.PERIODIC, callback=lambda t: self.led.value(not self.led.value()))
         self.is_connected = False
+
+    def disconnect(self):
+        self.ble.gap_disconnect(0)
+        self.disconnected()
 
     def ble_irq(self, event, data):
             print('BLE IRQ: ' + str(event))
@@ -94,13 +98,11 @@ class ESP32_BLE():
         adv_data = bytearray('\x02\x01\x02') + bytearray((len(name) + 1, 0x09)) + name
         self.ble.gap_advertise(100, adv_data)
 
-# TODO: Move this out of bluetooth into setup module
 def run_setup():
 
     setup_finished = False
 
     def on_message(payload):
-        print(payload)
         payload = json.loads(payload)
         
         name = payload['name']
@@ -150,8 +152,9 @@ def run_setup():
             # Lamp created in DB, setup process finished, attempt to connect to server
             
             lamp_id = data.get('lampId', None)
-            if (lampId):
+            if (lamp_id):
                 add_config('lampId', lamp_id)
+                nonlocal setup_finished
                 setup_finished = True
             else:
                 ble.send({
@@ -165,8 +168,12 @@ def run_setup():
     led = Pin(2, Pin.OUT)
     but = Pin(0, Pin.IN)
 
+    started = False
     device_name = 'Friendship Lamp' # - ' + get_device_id()[-6:]
     ble = ESP32_BLE(device_name, on_message)
 
     while not setup_finished:
         sleep_ms(1000)
+
+    ble.disconnect()
+    print('Setup finished')

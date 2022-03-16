@@ -1,6 +1,11 @@
 import _thread as thread
 import uwebsockets.client
 from config import get_device_id
+import json
+
+# TODO: Move IO operations to a separate file
+from machine import Pin, TouchPad
+led = Pin(32, Pin.OUT)
 
 class WebSocket():
     def __init__(self, uri, callback):
