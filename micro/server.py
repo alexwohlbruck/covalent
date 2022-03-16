@@ -26,11 +26,11 @@ class WebSocket():
 # Main server class to send and receive messages
 # TODO: Move event names to constants
 class Server():
-    def __init__(self, lamp_id):
+    def __init__(self, address, lamp_id):
         self.lamp_id = lamp_id
         self.device_id = get_device_id()
         
-        uri = 'ws://192.168.86.34:3000/?deviceId=' + self.device_id
+        uri = 'ws://' + address + '/?deviceId=' + self.device_id
         self.ws = WebSocket(uri, self.on_message)
     
     def on_message(self, message):

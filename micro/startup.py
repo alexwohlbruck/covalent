@@ -17,20 +17,24 @@ touchpad.config(500)
 
 def run_startup():
     wifi_success = connect_wifi_from_config()
+    print('Wifi success: {}'.format(wifi_success))
     if not wifi_success:
         start_setup_mode()
+
+    print ('getting lamp id')
     
     # Internet successfully connected
     
     try:
         lamp_id = get_config_item('lampId')
     except KeyError:
+        print('no lamp id configured')
         disconnect_wifi()
         start_setup_mode()
         return run_startup()
 
     # Connect to server
-    server = Server(lamp_id)
+    server = Server('project-covalent.herokuapp.com', lamp_id)
 
 
     # IO operations here

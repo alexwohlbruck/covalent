@@ -196,11 +196,8 @@ export default class Setup extends Vue {
     }
 
     const lamp = await createLamp(requestBody)
-    console.log(lamp)
 
-    // TODO: Send lamp ID to board so it can connect to websocket
-    
+    if (lamp) setLampId(lamp._id)
   }
-
 }
 </script>
