@@ -1,7 +1,7 @@
 import _thread as thread
 import json
 from time import sleep_ms
-import app.uwebsockets.client
+import app.uwebsockets.client as wsclient
 from app.config import get_device_id
 
 # TODO: Move IO operations to a separate file
@@ -12,7 +12,7 @@ class WebSocket():
     def __init__(self, uri, callback):
         print('Connecting to server')
         self.callback = callback
-        self.websocket = uwebsockets.client.connect(uri)
+        self.websocket = wsclient.connect(uri)
         thread.start_new_thread(self.listen, ())
     
     def send(self, data):
