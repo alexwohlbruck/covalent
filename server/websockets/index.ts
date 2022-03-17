@@ -22,12 +22,12 @@ interface WSPayload {
 export const broadcast = (data: WSPayload) => {
   const payload = JSON.stringify(data)
 
-  Object.keys(webClients).forEach((userId) => {
-    webClients.get(userId)?.send(payload)
+  webClients.forEach(ws => {
+    ws.send(payload)
   })
 
-  Object.keys(deviceClients).forEach((deviceId) => {
-    deviceClients.get(deviceId)?.send(payload)
+  deviceClients.forEach(ws => {
+    ws.send(payload)
   })
 }
 
