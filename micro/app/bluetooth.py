@@ -4,9 +4,9 @@ from time import sleep_ms
 import network
 import ubluetooth
 import json
-from wifi import connect_wifi, scan_wifi
-from config import get_device_id, add_config
 from machine import Pin
+from app.wifi import connect_wifi, scan_wifi
+from app.config import get_device_id, add_config
 
 DEVICE_DATA = 'DEVICE_DATA'
 REQUEST_NETWORKS = 'REQUEST_NETWORKS'

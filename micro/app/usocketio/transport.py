@@ -3,7 +3,7 @@
 import ujson as json
 import usocket as socket
 
-import uwebsockets.client
+import app.uwebsockets.client
 from .protocol import *
 
 class SocketIO:

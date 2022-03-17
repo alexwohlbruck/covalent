@@ -1,8 +1,8 @@
 import _thread as thread
-import uwebsockets.client
-from config import get_device_id
 import json
 from time import sleep_ms
+import app.uwebsockets.client
+from app.config import get_device_id
 
 # TODO: Move IO operations to a separate file
 from machine import Pin, TouchPad

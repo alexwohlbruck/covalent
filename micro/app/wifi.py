@@ -1,6 +1,6 @@
 import network
 from time import sleep
-from config import add_config, load_config
+from app.config import add_config, load_config
 
 sta_if = network.WLAN(network.STA_IF)
 sta_if.active(True)

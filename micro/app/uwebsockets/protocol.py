@@ -240,6 +240,6 @@ class Websocket:
         self._close()
 
     def _close(self):
-        if __debug__: LOGGER.debug("Connection closed")
+        if __debug__: print("Connection closed")
         self.open = False
         self.sock.close()

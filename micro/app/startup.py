@@ -1,10 +1,22 @@
-from wifi import connect_wifi, disconnect_wifi, connect_wifi_from_config
-from bluetooth import run_setup
-from config import load_config, get_config_item
-from server import Server
+import machine
+import gc
+from app.wifi import connect_wifi, disconnect_wifi, connect_wifi_from_config
+from app.bluetooth import run_setup
+from app.config import load_config, get_config_item
+from app.server import Server
+from app.ota.ota_updater import OTAUpdater
 
 def start_setup_mode():
     run_setup()
+
+def check_update_and_install():
+    otaUpdater = OTAUpdater('https://github.com/alexwohlbruck/covalent', github_src_dir='micro', main_dir='app')
+    hasUpdated = otaUpdater.install_update_if_available()
+    if hasUpdated:
+        machine.reset()
+    else:
+        del(otaUpdater)
+        gc.collect()
 
 from time import sleep, sleep_ms
 from machine import Pin, TouchPad
@@ -20,6 +32,9 @@ def run_startup():
     print('Wifi success: {}'.format(wifi_success))
     if not wifi_success:
         start_setup_mode()
+
+    # Install updates if available
+    check_update_and_install()
 
     print ('getting lamp id')
     
@@ -49,7 +64,8 @@ def run_startup():
 
     last_val = False
     while (True):
-        val = touchpad.read() < 250
+        sensor = touchpad.read()
+        val = sensor < 250
         if val:
             if not last_val:
                 button_pressed(None)

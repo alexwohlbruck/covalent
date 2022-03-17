@@ -1,4 +1,4 @@
-from startup import run_startup
+from app.startup import run_startup
 
 def main():
     run_startup()
