@@ -1,20 +1,17 @@
 import express from 'express'
 import { User, UserModel } from '../models/user'
 import WebSocket, { WebSocketServer } from 'ws'
-import { LampModel } from '../models/lamp'
 import { sendCommand } from '../services/lamps'
 
 const router = express.Router()
 
 // Store socket connections from web app
-const webClients: {
-  [userId: string]: WebSocket,
-} = {}
+// keyed by userId
+const webClients = new Map<string, WebSocket>()
 
 // Store socket connections from lamps
-const deviceClients: {
-  [deviceId: string]: WebSocket,
-} = {}
+// keyed by deviceId
+const deviceClients = new Map<string, WebSocket>()
 
 interface WSPayload {
   name: string
@@ -26,29 +23,25 @@ export const broadcast = (data: WSPayload) => {
   const payload = JSON.stringify(data)
 
   Object.keys(webClients).forEach((userId) => {
-    webClients[userId].send(payload)
+    webClients.get(userId)?.send(payload)
   })
 
   Object.keys(deviceClients).forEach((deviceId) => {
-    deviceClients[deviceId].send(payload)
+    deviceClients.get(deviceId)?.send(payload)
   })
 }
 
 // Send a message to a user on the web app
 export const broadcastToUsers = (userIds: string[], payload: WSPayload) => {
   userIds.forEach((userId) => {
-    if (webClients[userId]) {
-      webClients[userId].send(JSON.stringify(payload))
-    }
+    webClients.get(userId)?.send(JSON.stringify(payload))
   })
 }
 
 // Send a message to a device
 export const broadcastToDevices = (deviceIds: string[], payload: WSPayload) => {
   deviceIds.forEach((deviceId) => {
-    if (deviceClients[deviceId]) {
-      deviceClients[deviceId].send(JSON.stringify(payload))
-    }
+    deviceClients.get(deviceId)?.send(JSON.stringify(payload))
   })
 }
 
@@ -61,6 +54,12 @@ const events = {
       await sendCommand(lampId, state)
   },
 }
+
+// Ping clients on an interval
+setInterval(() => {
+  webClients.forEach(s => s.ping())
+  deviceClients.forEach(s => s.ping())
+}, 1000 * 5)
 
 router.ws('/', async (ws: WebSocket, req: express.Request) => {
 
@@ -81,9 +80,9 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
 
   // Store socket connection
   if (userId)
-    webClients[userId] = ws
+    webClients.set(userId, ws)
   else
-    deviceClients[deviceId] = ws
+    deviceClients.set(deviceId, ws)
 
 
   // Handle incoming messages with event handlers
