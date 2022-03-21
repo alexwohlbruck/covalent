@@ -27,8 +27,8 @@ export const getLamp = async (id: string) => {
 }
 
 export const createLamp = async (
-  name: string,
   userId: string,
+  name: string,
   groupId: string,
   deviceData: any,
   accessCode?: string
@@ -36,7 +36,6 @@ export const createLamp = async (
 
   // TODO: If a lamp with the existing device id exists, the user needs to relink the device
   // TODO: Delete the existing lamp and the group if it is the last lamp in the group
-
 
   // TODO: Require group ID and access code and add the lamp to the group
   if (!groupId) throw new RequestException(400, 'Group ID is required.')
@@ -69,7 +68,7 @@ export const createLamp = async (
   }
 
   if (!groupExists) {
-    const newAccessCode = Math.floor(Math.random() * 1000000).toString()
+    const newAccessCode = String(Math.floor(Math.random() * 1000000).toFixed(0)).padStart(6, '0') // Generate 6 digit number string
     const newGroup = new GroupModel({
       groupId,
       accessCode: newAccessCode,
