@@ -24,10 +24,11 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 
 // Create a lamp
 router.post('/', isAuthenticated, async (req, res) => {
-  const { groupId, deviceData, accessCode } = req.body
+  const { name, groupId, deviceData, accessCode } = req.body
 
   const lamp = await createLamp(
     (req.user as User)._id,
+    name,
     groupId,
     deviceData,
     accessCode,

@@ -11,14 +11,16 @@ export const getMyLamps = async() => {
 }
 
 export const createLamp = async ({
-  groupId, accessCode, deviceData
+  name, groupId, accessCode, deviceData
 }: {
+  name: string,
   groupId: string,
   accessCode: string,
   deviceData: any
 }) => {
   try {
     const { data } = await axios.post<Lamp>('/lamps', {
+      name,
       groupId,
       deviceData,
       accessCode,

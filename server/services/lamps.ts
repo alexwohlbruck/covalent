@@ -27,6 +27,7 @@ export const getLamp = async (id: string) => {
 }
 
 export const createLamp = async (
+  name: string,
   userId: string,
   groupId: string,
   deviceData: any,
@@ -77,6 +78,7 @@ export const createLamp = async (
   }
 
   const lamp = new LampModel({
+    name,
     state: {
       color: '#ff0000',
       touching: false,

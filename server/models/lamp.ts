@@ -11,6 +11,7 @@ export interface LampState {
 
 export interface Lamp {
   _id: string
+  name: string
   state: LampState
   group: Group
   user: User
@@ -20,6 +21,10 @@ export interface Lamp {
 }
 
 const LampSchema = new Schema<Lamp>({
+  name: {
+    type: String,
+    default: 'My lamp',
+  },
   state: {
     color: {
       type: String,

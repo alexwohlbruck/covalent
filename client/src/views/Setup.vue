@@ -56,6 +56,15 @@ v-container
     v-stepper-content(step='3')
       v-form.d-flex.flex-column.gap-sm(ref='groupForm' @submit.prevent='createLamp')
 
+        v-text-field(
+          v-model='name'
+          label='Lamp name'
+          outlined
+          dense 
+          hide-details
+          placeholder='My lamp'
+        )
+
         v-radio-group(v-model='groupMethod')
           v-radio(value='new' label='Create new group')
           v-radio(value='existing' label='Add to existing group')
@@ -114,6 +123,7 @@ export default class Setup extends Vue {
   connectingToNetwork = false
   connectedNetwork: Network | null = null
 
+  name = ''
   groupMethod = 'new'
   groupId = ''
   accessCode = ''
@@ -185,6 +195,7 @@ export default class Setup extends Vue {
 
   async createLamp() {
     const requestBody: any = {
+      name: this.name,
       groupId: this.groupId,
       // deviceData: this.deviceData,
       deviceData: {

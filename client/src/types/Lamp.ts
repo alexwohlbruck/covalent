@@ -8,6 +8,7 @@ export interface LampState {
 
 export interface Lamp {
   _id: string;
+  name: string;
   state: LampState;
   group?: Group;
   groupId?: string;
