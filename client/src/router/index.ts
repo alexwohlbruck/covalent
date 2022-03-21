@@ -21,6 +21,11 @@ const routes: RouteConfig[] = [
     component: () => import('../views/Lamps.vue'),
   },
   {
+    path: '/lamps/:id/settings',
+    name: 'lamp-settings',
+    component: () => import('../views/LampSettings.vue'),
+  },
+  {
     path: '/group/:id',
     name: 'group',
     component: () => import('../views/Group.vue'),

@@ -9,7 +9,12 @@ v-container
         selectedColor='#000000'
       )
       v-card-text.d-flex.flex-column
-        span.text-h6 {{ lamp.name }}
+        .d-flex
+          .text-h6 {{ lamp.name }}
+          v-spacer
+          v-btn(icon :to="{name: 'lamp-settings', params: {id: lamp._id}}")
+            v-icon mdi-cog
+          
         span Group: {{ lamp.group.groupId }}
         span Access code: {{ lamp.group.accessCode }}
         v-btn(:to="{ name: 'group', params: { id: lamp.group._id } }") Open group

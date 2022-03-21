@@ -14,13 +14,17 @@ v-container.group
   )
 
   v-list(v-if='group')
-    v-subheader Participants
+    v-subheader Group members
     
-    v-list-item(v-for='lamp in group.lamps' :key='lamp._id')
+    v-list-item(v-for='member in members' :key='member._id')
       v-list-item-avatar
-        v-img(:src='lamp.user.picture')
+        v-img(:src='member.picture')
       v-list-item-content
-        v-list-item-title {{ lamp.user.name }}
+        v-list-item-title {{ member.name }}
+
+      v-list-item-action
+        p.text-body-2
+          span(v-for='lamp in member.lamps' :key='lamp._id') {{ lamp.name }}
 
 </template>
 
@@ -28,7 +32,13 @@ v-container.group
 import { Vue, Component } from 'vue-property-decorator'
 import { getGroup } from '@/services/group'
 import { Group as IGroup } from '@/types/Group'
+import { User } from '@/types/User'
+import { Lamp } from '@/types/Lamp'
 import LampVisualizer from '@/components/LampVisualizer.vue'
+
+interface Member extends User {
+  lamps: Lamp[]
+}
 
 @Component({
   components: {
@@ -50,6 +60,28 @@ export default class Group extends Vue {
 
   get myLamp() {
     return this.group?.lamps?.find((lamp) => lamp.user?._id === this.me?._id)
+  }
+
+  get members() {
+    // Collate group members into a unique list with their lamps in a list
+    const members = new Map<string, Member>()
+
+    this.group?.lamps?.forEach((lamp) => {
+      const user: User = lamp.user as User
+      const uid = user?._id
+      if (!uid) return
+
+      if (members.has(uid)) {
+        members.get(uid)?.lamps.push(lamp)
+      } else {
+        members.set(uid, {
+          lamps: [lamp],
+          ...user,
+        })
+      }
+    })
+
+    return [...members.values()]
   }
 }
 </script>
