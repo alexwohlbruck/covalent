@@ -70,21 +70,36 @@ v-container.d-flex.flex-column(style='gap: 2rem')
     )
 
   //- Delete lamp
-  div
-    v-btn(color='error')
-      v-icon(left) mdi-delete
-      | Delete lamp
+  v-dialog(v-model='deleteLampDialog' max-width='500')
+    template(v-slot:activator='{ on, attrs }')
+      div
+        v-btn(color='error' @click='deleteLampDialog = true')
+          v-icon(left) mdi-delete
+          | Delete lamp
+    v-card
+      v-card-title.text-h5 Delete {{ name }}?
+      v-card-text
+        | Are you sure you want to delete this lamp?
+      v-card-actions
+        v-spacer
+        v-btn(text @click='deleteLampDialog = false') Cancel
+        v-btn(text color='error' @click='deleteLamp' :loading='deleting')
+          v-icon(left) mdi-delete
+          | Delete
+
 </template>
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
-import { getLamp, renameLamp } from '@/services/lamp'
+import { deleteLamp, getLamp, renameLamp } from '@/services/lamp'
 import { kelvinToRGB } from '@/util'
 
 @Component
 export default class LampSettings extends Vue {
 
   saving = false
+  deleting = false
+  deleteLampDialog = false
 
   name = ''
   settings = {
@@ -124,5 +139,11 @@ export default class LampSettings extends Vue {
   }
 
 
+  async deleteLamp() {
+    this.deleting = true
+    await deleteLamp(this.$route.params.id)
+    this.deleting = false
+    this.$router.push('/lamps')
+  }
 }
 </script>

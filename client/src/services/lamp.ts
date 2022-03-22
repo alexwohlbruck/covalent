@@ -45,7 +45,7 @@ export const renameLamp = async (id: string, name: string) => {
     const { data } = await axios.put<Lamp>(`/lamps/${id}/name`, {
       name,
     })
-    Store.commit('UPDATE_LAMP', data)
+    Store.commit('ADD_LAMP', data)
     return data
   }
   catch (error: any) {
@@ -72,4 +72,10 @@ export const sendCommand = async ({
   catch (error: any) {
     Store.dispatch('error', error.message)
   }
+}
+
+export const deleteLamp = async (id: string) => {
+  const { data } = await axios.delete<Lamp>(`/lamps/${id}`)
+  Store.commit('REMOVE_LAMP', id)
+  return data
 }

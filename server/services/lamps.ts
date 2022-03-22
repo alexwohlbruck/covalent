@@ -41,6 +41,16 @@ export const createLamp = async (
   if (!groupId) throw new RequestException(400, 'Group ID is required.')
   if (!deviceData) throw new RequestException(400, 'Device data is required.')
 
+  const { deviceId } = deviceData
+
+  if (!deviceId) throw new RequestException(400, 'Device ID is required.')
+
+  // Check if the device has already been registered. If so, let's make a new one
+  const existingLamp = await LampModel.findOne({ 'deviceData.deviceId': deviceId })
+  if (existingLamp) {
+    await deleteLamp(existingLamp._id)
+  }
+
   // We either create a new group or add the lamp to an existing group
   // This boolean tracks whether we are creating a new group or not
   const creatingGroup = accessCode ? false : true

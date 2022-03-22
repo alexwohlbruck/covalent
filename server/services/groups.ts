@@ -50,15 +50,12 @@ export const updateGroupState = async (groupId: string, lampId: string, state: L
     $set: convertToDotNotation(state, {}, 'state.'),
   })
 
-
   if (!lamp) throw new RequestException(404, `Lamp id: ${lampId} not found.`)
 
   // Get lamps in the same group
   const lamps = await getLamps({ groupId })
 
   let active = true
-
-  console.log(lamps)
 
   // Find colors of lamps that are active
   const colors = lamps
@@ -68,8 +65,6 @@ export const updateGroupState = async (groupId: string, lampId: string, state: L
     .map((l: Lamp) => {
       return l.state.color
     })
-
-  console.log(colors)
 
   if (colors.length === 0) active = false
 
