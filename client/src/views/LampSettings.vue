@@ -1,7 +1,7 @@
 <template lang="pug">
 v-container.d-flex.flex-column(style='gap: 2rem')
   .d-flex
-    h1.text-h4.font-weight-bold Lamp settings
+    h1.text-h4.font-weight-bold {{ name && name.length ? name : (lamp ? lamp.name : 'Lamp') }} settings
     v-spacer
     .d-flex(v-if='saving')
       span.mr-2 Saving
@@ -32,30 +32,30 @@ v-container.d-flex.flex-column(style='gap: 2rem')
     p.text-caption.mt-2 When enabled, the lamp will turn off when the room is dark.
 
     v-slide-y-transition
-      v-slider(
-        v-show='settings.nightMode'
-        v-model='settings.nightModeSensitivity'
-        label='Minimum light level'
-        :disabled='!settings.nightMode'
-        :discrete='false'
-        min='0'
-        max='1'
-        step='.1'
-        ticks='always'
-        :tick-labels="['Pitch black', '', '', '', '', 'Dark', '', '', '', '', 'Dim']"
-      )
+      div(v-show='settings.nightMode')
+        h6.text-body-1 Minimum light level
+        v-slider(
+          v-model='settings.nightModeSensitivity'
+          :disabled='!settings.nightMode'
+          discrete
+          min='0'
+          max='1'
+          step='.1'
+          :tick-labels="['Pitch black', '', '', '', '', 'Dark', '', '', '', '', 'Dim']"
+          :label='settings.nightModeSensitivity * 100 + "%"'
+        )
 
   //- Touch panel sensitivity
   div
     h6.text-body-1 Touch panel sensitivity
     v-slider(
       v-model='settings.touchPanelSensitivity'
-      :discrete='false'
+      discrete
       min='0'
       max='1'
       step='.1'
-      ticks='always'
       :tick-labels="['Light touch', '', '', '', '', 'Normal touch', '', '', '', '', 'Heavy press']"
+      :label='settings.touchPanelSensitivity * 100 + "%"'
     )
 
   //- Reading light color temp
@@ -73,13 +73,7 @@ v-container.d-flex.flex-column(style='gap: 2rem')
 
   //- Delete lamp
   div
-    v-btn(
-      v-if='!saving'
-      color='error'
-      :disabled='saving'
-      :loading='saving'
-      :loading-text='saving ? "Deleting..." : "Delete"'
-    )
+    v-btn(color='error')
       v-icon(left) mdi-delete
       | Delete lamp
 </template>
@@ -96,10 +90,10 @@ export default class LampSettings extends Vue {
 
   name = ''
   settings = {
-    nightMode: false,
-    nightModeSensitivity: 0,
-    touchPanelSensitivity: 0,
-    readingLightColorTemp: 0,
+    nightMode: true,
+    nightModeSensitivity: .5,
+    touchPanelSensitivity: .5,
+    readingLightColorTemp: 6000,
   }
   
   async mounted() {
