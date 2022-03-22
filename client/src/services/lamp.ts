@@ -10,6 +10,12 @@ export const getMyLamps = async() => {
   return lamps
 }
 
+export const getLamp = async(id: string) => {
+  const { data: lamp } = await axios.get<Lamp>(`/lamps/${id}`)
+  Store.commit('ADD_LAMP', lamp)
+  return lamp
+}
+
 export const createLamp = async ({
   name, groupId, accessCode, deviceData
 }: {

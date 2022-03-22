@@ -195,12 +195,11 @@ export default class Setup extends Vue {
 
   async createLamp() {
     const requestBody: any = {
-      name: this.name,
       groupId: this.groupId,
-      // deviceData: this.deviceData,
-      deviceData: {
-        deviceId: '1234',
-      }
+      deviceData: this.deviceData,
+    }
+    if (this.name.length) {
+      requestBody.name = this.name
     }
     if (this.groupMethod === 'existing') {
       requestBody.accessCode = this.accessCode

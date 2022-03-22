@@ -1,10 +1,13 @@
 <template lang="pug">
 v-container.group
-  .d-flex
-    v-btn(icon :to="{ name: 'lamps' }")
+  .d-flex.align-center
+    v-btn.mr-2(icon :to="{ name: 'lamps' }")
       v-icon mdi-arrow-left
 
-    h1.text-h5.font-weight-medium {{ group.groupId }}
+    .d-flex.flex-column
+      h1.text-h5.font-weight-medium {{ group.groupId }}
+      h6.text-caption Access code: {{ group.accessCode }}
+
 
   lamp-visualizer.px-15(
     v-if='myLamp'
