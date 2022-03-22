@@ -1,8 +1,9 @@
-import { Lamp, LampModel } from '../models/lamp'
+import { Lamp, LampModel, LampState } from '../models/lamp'
 import { Types } from 'mongoose'
 import { RequestException } from '../routes'
 import { getLamps } from './lamps'
 import { GroupModel } from '../models/group'
+import { convertToDotNotation } from '../helpers'
 
 // List a user's groups
 export const listGroups = async (userId: string) => {
@@ -41,39 +42,49 @@ export const getGroup = async (userId: string, groupId: string) => {
   }
 }
 
-// Recompute the colors and active state on a group and save in DB
-export const updateGroupState = async (groupId: string) => {
 
-  // Get lamps in group
+// Recompute the colors and active state on a group and save in DB
+export const updateGroupState = async (groupId: string, lampId: string, state: LampState) => {
+
+  const lamp = await LampModel.findByIdAndUpdate(lampId, {
+    $set: convertToDotNotation(state, {}, 'state.'),
+  })
+
+
+  if (!lamp) throw new RequestException(404, `Lamp id: ${lampId} not found.`)
+
+  // Get lamps in the same group
   const lamps = await getLamps({ groupId })
 
   let active = true
 
+  console.log(lamps)
+
   // Find colors of lamps that are active
-  let colors = lamps
-    .filter((lamp: Lamp) => {
-      return lamp.state.touching
+  const colors = lamps
+    .filter((l: Lamp) => {
+      return l.state.touching
     })
-    .map((lamp: Lamp) => {
-      return lamp.state.color
+    .map((l: Lamp) => {
+      return l.state.color
     })
 
-  // If no colors are active, use the last color
-  if (colors.length === 0) {
-    const defaultColor = lamps[0].state.color || '#ff0000'
-    console.log('defaultColor', defaultColor)
-    colors = [defaultColor]
-    active = false
+  console.log(colors)
+
+  if (colors.length === 0) active = false
+
+  const query: any = {
+    'state.active': active,
+  }
+  if (active) {
+    query['state.colors'] = colors
   }
 
   const updated = await GroupModel.findByIdAndUpdate(groupId, {
-    $set: {
-      'state.colors': colors,
-      'state.active': active,
-    }
+    $set: query
   }, {
     new: true,
   })
 
-  return updated
+  return updated.state
 }

@@ -1,6 +1,6 @@
 import { Types } from 'mongoose'
 import { RequestException } from '../routes'
-import { convertToDotNotation, toKebab } from '../helpers'
+import { toKebab } from '../helpers'
 import { LampModel, LampState } from '../models/lamp'
 import { GroupModel } from '../models/group'
 import { updateGroupState } from './groups'
@@ -128,60 +128,6 @@ export const moveLampToGroup = async (id: string, groupId: string, accessCode: s
   return res
 }
 
-interface GroupState {
-  lampId: string
-  color: string
-  touching: boolean
-}
-
-// Store states for each group in memory for fast access
-const statesCache: {
-  [key: string]: GroupState[]
-} = {}
-
-// Update the state of a group in cache
-const updateGroupStateCache = (groupId: string, lampId: string, state: LampState) => {
-  const group = statesCache[groupId] || []
-  const newState = {
-    lampId,
-    ...state,
-  }
-
-  statesCache[groupId] = group.filter((s: GroupState) => {
-    return s.lampId !== lampId
-  }).concat(newState)
-}
-
-// Compute the colors and active state of a group
-const groupState = (groupId: string) => {
-
-  let active = false
-  const group = statesCache[groupId]
-
-  if (!group) return { active, colors: [] }
-
-  let colors = group
-    .filter((state: GroupState) => {
-      return state.touching
-    })
-    .map((state: GroupState) => {
-      return state.color
-    })
-
-  if (colors.length === 0) {
-    // If no colors are active, use the last color
-    colors = [group[0].color] || ['#ff0000']
-  }
-  else {
-    active = true
-  }
-
-  return {
-    colors,
-    active,
-  }
-}
-
 export const renameLamp = async (userId: string, lampId: string, name: string) => {
 
   if (!name || !name.length) throw new RequestException(400, 'Name is required.')
@@ -214,28 +160,29 @@ export const sendCommand = async (lampId: string, state: LampState) => {
   // if (lamp.user._id.toString() !== userId.toString())
   //   throw new RequestException(403, 'You do not own this lamp.')
 
-  lamp.state = {
+  state = {
     ...lamp.state,
     ...state,
   }
 
-  // TODO: Broadcast lamp state update
-  lamp.save() // Save in background
-
   const groupId = lamp.group._id
 
-  updateGroupStateCache(groupId, lampId, state)
-  updateGroupState(groupId) // Save new group state in DB in the background
+  const newState = await updateGroupState(groupId, lampId, state)
 
   const response = {
     groupId,
-    state: groupState(groupId),
+    state: newState,
   }
 
+  // TODO: Broadcast lamp state update
+
+  // TODO: Only broadcast to those in group
   broadcast({
     name: 'GROUP_STATE_CHANGED',
     data: response
   })
+
+  await lamp.save() // Save in background
 
   return response
 }

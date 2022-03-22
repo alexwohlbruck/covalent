@@ -8,7 +8,6 @@ v-container.d-flex.flex-column(style='gap: 2rem')
       v-progress-circular(indeterminate size='20')
     
 
-
   //- Lamp name
   v-text-field(
     v-model='name'
@@ -18,7 +17,6 @@ v-container.d-flex.flex-column(style='gap: 2rem')
     placeholder='My lamp'
     hide-details
   )
-
 
   //- Night mode
   div
@@ -60,7 +58,7 @@ v-container.d-flex.flex-column(style='gap: 2rem')
 
   //- Reading light color temp
   div
-    h6.text-body-1 Reading light color temp
+    h6.text-body-1 Reading light color temperature
     v-slider(
       v-model='settings.readingLightColorTemp'
       label='Reading light color temperature'

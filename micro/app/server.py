@@ -17,7 +17,10 @@ class WebSocket():
     
     def send(self, data):
         message = json.dumps(data)
-        self.websocket.send(message)
+        try:
+            self.websocket.send(message)
+        except:
+            print('Failed to send data: {}'.format(message))
 
     def listen(self):
         while (True):
