@@ -108,13 +108,16 @@ export const createLamp = async (
   // Get populated lamp
   const res = await LampModel.findById(lamp._id)
 
+  console.log('created')
   if (groupExists) {
+    console.log('group exists', res.group._id)
     broadcastToGroup(res.group._id, {
       name: 'ADD_LAMP',
       data: res
     })
   }
   else {
+    console.log('group does not exist', [userId])
     broadcastToUsers([userId], {
       name: 'ADD_LAMP',
       data: res,

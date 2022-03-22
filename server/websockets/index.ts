@@ -7,11 +7,11 @@ const router = express.Router()
 
 // Store socket connections from web app
 // keyed by userId
-const webClients = new Map<string, WebSocket>()
+const webClients = new Map<string, WebSocket[]>()
 
 // Store socket connections from lamps
 // keyed by deviceId
-const deviceClients = new Map<string, WebSocket>()
+const deviceClients = new Map<string, WebSocket[]>()
 
 export interface WSPayload {
   name: string
@@ -22,26 +22,32 @@ export interface WSPayload {
 export const broadcast = (data: WSPayload) => {
   const payload = JSON.stringify(data)
 
-  webClients.forEach(ws => {
-    ws.send(payload)
+  webClients.forEach(clients => {
+    clients.forEach(ws => ws.send(payload))
   })
 
-  deviceClients.forEach(ws => {
-    ws.send(payload)
+  deviceClients.forEach(clients => {
+    clients.forEach(ws => ws.send(payload))
   })
 }
 
 // Send a message to a user on the web app
 export const broadcastToUsers = (userIds: string[], payload: WSPayload) => {
   userIds.forEach((userId) => {
-    webClients.get(userId)?.send(JSON.stringify(payload))
+    const clients = webClients.get(userId.toString())
+    if (clients) {
+      clients.forEach(ws => ws.send(JSON.stringify(payload)))
+    }
   })
 }
 
 // Send a message to a device
 export const broadcastToDevices = (deviceIds: string[], payload: WSPayload) => {
   deviceIds.forEach((deviceId) => {
-    deviceClients.get(deviceId)?.send(JSON.stringify(payload))
+    const clients = deviceClients.get(deviceId)
+    if (clients) {
+      clients.forEach(ws => ws.send(JSON.stringify(payload)))
+    }
   })
 }
 
@@ -57,8 +63,8 @@ const events = {
 
 // Ping clients on an interval
 setInterval(() => {
-  webClients.forEach(s => s.ping())
-  deviceClients.forEach(s => s.ping())
+  webClients.forEach(clients => clients.forEach(s => s.ping()))
+  deviceClients.forEach(clients => clients.forEach(s => s.ping()))
 }, 1000 * 5)
 
 router.ws('/', async (ws: WebSocket, req: express.Request) => {
@@ -79,11 +85,22 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
   }
 
   // Store socket connection
-  if (userId)
-    webClients.set(userId.toString(), ws)
-  else
-    deviceClients.set(deviceId, ws)
-
+  if (userId) {
+    if (webClients.has(userId.toString())){
+      webClients.get(userId.toString()).push(ws)
+    }
+    else {
+      webClients.set(userId.toString(), [ws])
+    }
+  }
+  else {
+    if (deviceClients.has(deviceId)) {
+      deviceClients.get(deviceId).push(ws)
+    }
+    else {
+      deviceClients.set(deviceId, [ws])
+    }
+  }
 
   // Handle incoming messages with event handlers
   ws.on('message', (message: any) => {
