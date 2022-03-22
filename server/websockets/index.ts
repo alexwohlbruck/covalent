@@ -80,7 +80,7 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
 
   // Store socket connection
   if (userId)
-    webClients.set(userId, ws)
+    webClients.set(userId.toString(), ws)
   else
     deviceClients.set(deviceId, ws)
 

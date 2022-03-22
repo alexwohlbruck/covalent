@@ -9,7 +9,9 @@ import vuetify from './plugins/vuetify'
 
 Vue.config.productionTip = false
 
-const wsUrl = window.origin.toString().replace('http', 'ws')
+let wsUrl = window.origin.toString().replace('http', 'ws')
+if (process.env.NODE_ENV === 'development')
+  wsUrl = wsUrl.replace('8080', '3000')
 
 Vue.use(VueNativeSock, wsUrl, {
   store, reconnection: true,

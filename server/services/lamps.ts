@@ -7,9 +7,9 @@ import { updateGroupState } from './groups'
 import { broadcast, broadcastToDevices, broadcastToUsers, WSPayload } from '../websockets'
 
 // Send a message to all the members of a group with the given lamp ID
-const broadcastToGroup = async (lampId: string, payload: WSPayload) => {
-  const lampsInGroup = await LampModel.find({ group: lampId })
-  broadcastToUsers(lampsInGroup.map(l => l.user._id), payload)
+const broadcastToGroup = async (groupId: string, payload: WSPayload) => {
+  const lampsInGroup = await LampModel.find({ group: groupId })
+  broadcastToUsers(lampsInGroup.map(l => l.user._id.toString()), payload)
 }
 
 export const getLamps = async (options: {
@@ -109,7 +109,7 @@ export const createLamp = async (
   const res = await LampModel.findById(lamp._id)
 
   if (groupExists) {
-    broadcastToGroup(lamp._id, {
+    broadcastToGroup(res.group._id, {
       name: 'ADD_LAMP',
       data: res
     })
@@ -145,7 +145,7 @@ export const moveLampToGroup = async (id: string, groupId: string, accessCode: s
 
   const res = await LampModel.findByIdAndUpdate(id, { group: group._id }, { new: true })
 
-  broadcastToGroup(lamp._id, {
+  broadcastToGroup(res.group._id, {
     name: 'ADD_LAMP',
     data: res,
   })
@@ -166,7 +166,7 @@ export const renameLamp = async (userId: string, lampId: string, name: string) =
 
   await lamp.save()
 
-  broadcastToGroup(lamp._id, {
+  broadcastToGroup(lamp.group._id, {
     name: 'ADD_LAMP',
     data: lamp,
   })
@@ -227,10 +227,10 @@ export const deleteLamp = async (id: string) => {
     data: {}
   })
 
-  broadcastToUsers(lamps.map(l => l.user._id), {
+  broadcastToGroup(lamp.group._id, {
     name: 'REMOVE_LAMP',
     data: {
-      id,
+      _id: id,
     },
   })
 

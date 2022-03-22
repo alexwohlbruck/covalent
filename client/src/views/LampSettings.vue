@@ -76,6 +76,7 @@ v-container.d-flex.flex-column(style='gap: 2rem')
         v-btn(color='error' @click='deleteLampDialog = true')
           v-icon(left) mdi-delete
           | Delete lamp
+          
     v-card
       v-card-title.text-h5 Delete {{ name }}?
       v-card-text
