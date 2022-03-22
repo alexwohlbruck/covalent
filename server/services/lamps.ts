@@ -182,17 +182,45 @@ const groupState = (groupId: string) => {
   }
 }
 
-export const sendCommand = async (lampId: string, state: LampState) => {
+export const renameLamp = async (userId: string, lampId: string, name: string) => {
 
-  const lamp = await LampModel.findByIdAndUpdate(lampId, {
-    $set: convertToDotNotation({
-      state,
-    }),
-  }, {
-    new: true,
-  })
+  if (!name || !name.length) throw new RequestException(400, 'Name is required.')
+
+  const lamp = await LampModel.findById(lampId)
 
   if (!lamp) throw new RequestException(404, `Lamp id: ${lampId} not found.`)
+  if (lamp.user._id.toString() !== userId.toString())
+    throw new RequestException(403, 'You do not own this lamp.')
+
+  lamp.name = name
+
+  await lamp.save()
+
+  broadcastToUsers([userId], {
+    name: 'ADD_LAMP',
+    data: lamp,
+  })
+
+  return lamp
+}
+
+export const sendCommand = async (lampId: string, state: LampState) => {
+
+  const lamp = await LampModel.findById(lampId)
+
+  if (!lamp) throw new RequestException(404, `Lamp id: ${lampId} not found.`)
+
+  // TODO: Check ownership without adding much latency
+  // if (lamp.user._id.toString() !== userId.toString())
+  //   throw new RequestException(403, 'You do not own this lamp.')
+
+  lamp.state = {
+    ...lamp.state,
+    ...state,
+  }
+
+  // TODO: Broadcast lamp state update
+  lamp.save() // Save in background
 
   const groupId = lamp.group._id
 

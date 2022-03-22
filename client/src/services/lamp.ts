@@ -40,6 +40,19 @@ export const createLamp = async ({
   }
 }
 
+export const renameLamp = async (id: string, name: string) => {
+  try {
+    const { data } = await axios.put<Lamp>(`/lamps/${id}/name`, {
+      name,
+    })
+    Store.commit('UPDATE_LAMP', data)
+    return data
+  }
+  catch (error: any) {
+    Store.dispatch('error', error.message)
+  }
+}
+
 export const sendCommand = async ({
   lampId, color, touching
 }: {

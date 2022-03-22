@@ -1,6 +1,6 @@
 import express from 'express'
 import { User } from '../models/user'
-import { getLamps, getLamp, createLamp, moveLampToGroup, sendCommand, deleteLamp } from '../services/lamps'
+import { getLamps, getLamp, createLamp, moveLampToGroup, sendCommand, deleteLamp, renameLamp } from '../services/lamps'
 import { isAuthenticated } from '../middleware'
 
 const router = express.Router()
@@ -50,9 +50,25 @@ router.put('/:id/group', isAuthenticated, async (req, res) => {
   return res.status(200).json(lamp)
 })
 
+router.put('/:id/name', isAuthenticated, async(req, res) => {
+  const { name } = req.body
+
+  const lamp = await renameLamp(
+    (req.user as User)._id,
+    req.params.id,
+    name,
+  )
+
+  return res.status(200).json(lamp)
+})
+
 // Send a command to lamp
 router.patch('/:id/state', isAuthenticated, async (req, res) => {
-  const lamp = await sendCommand(req.params.id, req.body)
+  const lamp = await sendCommand(
+    // (req.user as User)._id,
+    req.params.id,
+    req.body
+  )
   return res.status(200).json(lamp)
 })
 
