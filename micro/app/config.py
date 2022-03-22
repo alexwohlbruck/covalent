@@ -43,3 +43,6 @@ def add_config(key, value):
 def get_config_item(key):
   config = load_config()
   return config[key]
+
+def reset_config():
+  write_config(default_config)

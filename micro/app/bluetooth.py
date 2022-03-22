@@ -37,6 +37,7 @@ class ESP32_BLE():
         self.register()
         self.advertiser()
         self.callback = callback # When a message is received
+        
 
     def connected(self):
         print('connected')
@@ -52,6 +53,12 @@ class ESP32_BLE():
     def disconnect(self):
         self.ble.gap_disconnect(0)
         self.disconnected()
+
+    def deinit(self):
+        # Turn off bluetooth
+        self.disconnect()
+        self.ble.active(False)
+        self.timer1.deinit()
 
     def ble_irq(self, event, data):
             print('BLE IRQ: ' + str(event))
@@ -175,5 +182,5 @@ def run_setup():
     while not setup_finished:
         sleep_ms(1000)
 
-    ble.disconnect()
+    ble.deinit()
     print('Setup finished')

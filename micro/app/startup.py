@@ -36,10 +36,6 @@ def run_startup():
     # Install updates if available
     check_update_and_install()
 
-    print ('getting lamp id')
-    
-    # Internet successfully connected
-    
     try:
         lamp_id = get_config_item('lampId')
     except KeyError:

@@ -1,7 +1,8 @@
 import express from 'express'
-import { User, UserModel } from '../models/user'
-import WebSocket, { WebSocketServer } from 'ws'
+import { User } from '../models/user'
+import WebSocket from 'ws'
 import { sendCommand } from '../services/lamps'
+import { LampModel } from '../models/lamp'
 
 const router = express.Router()
 
@@ -98,6 +99,12 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
       deviceClients.get(deviceId).push(ws)
     }
     else {
+      // Check that lamp exists in database
+      const lamp = await LampModel.findOne({
+        'deviceData.deviceId': deviceId,
+      })
+      if (!lamp) return ws.close()
+
       deviceClients.set(deviceId, [ws])
     }
   }

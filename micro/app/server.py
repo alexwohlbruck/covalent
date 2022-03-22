@@ -2,7 +2,8 @@ import _thread as thread
 import json
 from time import sleep_ms
 import app.uwebsockets.client as wsclient
-from app.config import get_device_id
+from app.config import get_device_id, reset_config
+from machine import reset
 
 # TODO: Move IO operations to a separate file
 from machine import Pin, TouchPad
@@ -61,6 +62,11 @@ class Server():
                 led.value(1)
             else:
                 led.value(0)
+        
+        if name == 'FACTORY_RESET':
+            self.ws.stop()
+            reset_config()
+            reset()
     
     def send_lamp_command(self, color, touching):
 

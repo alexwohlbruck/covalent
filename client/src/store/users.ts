@@ -36,9 +36,9 @@ const mutations = {
     addUser(state, user)
   },
 
-  REMOVE_USER(state: UsersState, userId: string) {
-    Vue.delete(state.byId, userId)
-    state.all = state.all.filter(id => id !== userId)
+  REMOVE_USER(state: UsersState, user: User) {
+    Vue.delete(state.byId, user._id)
+    state.all = state.all.filter(id => id !== user._id)
   },
 }
 

@@ -14,12 +14,19 @@ Payload:
 }
 ```
 
+## Server to web client events
 
-## Server to client events
+All these events correspond to mutations in the Vuex store (💻) or are send to the board to perform an action (⚛️).
 
-All these events correspond to mutations in the Vuex store.
+### ⚛️ `FACTORY_RESET`
+Removes the config file and reset the board to its default state.
 
-### `GROUP_STATE_CHANGED`
+Payload:
+```json
+{}
+```
+
+### ⚛️💻 `GROUP_STATE_CHANGED`
 Fired when a user in your group starts or stops touching their lamp. 
 Returns a new group state with the computed colors and active flag.
 
@@ -35,14 +42,65 @@ Payload:
 
 
 
-### `ADD_USER`
+### 💻 `ADD_USER`
+Updates or adds a user to the store
 
-### `REMOVE_USER`
+Payload:
+```json
+{
+  "_id": "xxxxxxxxxxxxxxxxxxxxxxxx",
+  "googleId": "xxxxxxxxxxxxxxxxxxxxx",
+  "name": "Alex Wohlbruck",
+  "familyName": "Wohlbruck",
+  "givenName": "Alex",
+  "email": "alexwohlbruck@gmail.com",
+  "picture": "https://lh3.googleusercontent.com/a-/AOh14GhYgUCf9yFuj-Xt6_X_cDz-5gSusrGde-lerdKqXxA=s96-c",
+  "createdAt": "2022-03-08T01:50:46.226Z",
+  "updatedAt": "2022-03-08T01:50:46.226Z",
+  "__v": 0
+}
+```
 
-### `ADD_LAMP`
 
-### `REMOVE_LAMP`
+### 💻 `REMOVE_USER`
+Removes a user from the store
 
-### `ADD_GROUP`
+Payload:
+```json
+{
+  "_id": "xxxxxxxxxxxxxxxxxxxxxxxx",
+}
+```
 
-### `REMOVE_GROUP`
+### 💻 `ADD_LAMP`
+Updates or adds a lamp to the store
+
+Payload:
+```json
+{
+  "state": {
+    "color": "#ff0000",
+    "touching": false
+  },
+  "deviceData": {
+    "deviceId": "xxxxxxxxxxx"
+  },
+  "_id": "xxxxxxxxxxxxxxxxxxxxxxxx",
+  "name": "My lamp",
+  "createdAt": "2022-03-22T21:38:02.337Z",
+  "updatedAt": "2022-03-22T21:38:02.337Z",
+  "__v": 0,
+  "userId": "xxxxxxxxxxxxxxxxxxxxxxxx",
+  "groupId": "xxxxxxxxxxxxxxxxxxxxxxxx"
+}
+```
+
+### 💻 `REMOVE_LAMP`
+Removes a lamp from the store
+
+Payload:
+```json
+{
+  "_id": "xxxxxxxxxxxxxxxxxxxxxxxx",
+}
+```
