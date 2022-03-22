@@ -76,6 +76,6 @@ export const sendCommand = async ({
 
 export const deleteLamp = async (id: string) => {
   const { data } = await axios.delete<Lamp>(`/lamps/${id}`)
-  Store.commit('REMOVE_LAMP', id)
+  Store.commit('REMOVE_LAMP', {_id: id})
   return data
 }

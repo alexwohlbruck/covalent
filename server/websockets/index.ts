@@ -13,7 +13,7 @@ const webClients = new Map<string, WebSocket>()
 // keyed by deviceId
 const deviceClients = new Map<string, WebSocket>()
 
-interface WSPayload {
+export interface WSPayload {
   name: string
   data: object
 }

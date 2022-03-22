@@ -4,7 +4,13 @@ import { toKebab } from '../helpers'
 import { LampModel, LampState } from '../models/lamp'
 import { GroupModel } from '../models/group'
 import { updateGroupState } from './groups'
-import { broadcast, broadcastToUsers } from '../websockets'
+import { broadcast, broadcastToDevices, broadcastToUsers, WSPayload } from '../websockets'
+
+// Send a message to all the members of a group with the given lamp ID
+const broadcastToGroup = async (lampId: string, payload: WSPayload) => {
+  const lampsInGroup = await LampModel.find({ group: lampId })
+  broadcastToUsers(lampsInGroup.map(l => l.user._id), payload)
+}
 
 export const getLamps = async (options: {
   userId?: string;
@@ -101,10 +107,19 @@ export const createLamp = async (
 
   // Get populated lamp
   const res = await LampModel.findById(lamp._id)
-  broadcastToUsers([userId], {
-    name: 'ADD_LAMP',
-    data: res,
-  })
+
+  if (groupExists) {
+    broadcastToGroup(lamp._id, {
+      name: 'ADD_LAMP',
+      data: res
+    })
+  }
+  else {
+    broadcastToUsers([userId], {
+      name: 'ADD_LAMP',
+      data: res,
+    })
+  }
 
   return res
 }
@@ -130,8 +145,7 @@ export const moveLampToGroup = async (id: string, groupId: string, accessCode: s
 
   const res = await LampModel.findByIdAndUpdate(id, { group: group._id }, { new: true })
 
-  // TODO: Notify other users in group
-  broadcastToUsers([lamp.user._id], {
+  broadcastToGroup(lamp._id, {
     name: 'ADD_LAMP',
     data: res,
   })
@@ -152,7 +166,7 @@ export const renameLamp = async (userId: string, lampId: string, name: string) =
 
   await lamp.save()
 
-  broadcastToUsers([userId], {
+  broadcastToGroup(lamp._id, {
     name: 'ADD_LAMP',
     data: lamp,
   })
@@ -206,6 +220,18 @@ export const deleteLamp = async (id: string) => {
   // Get lamps that are in the same group
   const lamps = await LampModel.find({
     group: new Types.ObjectId(lamp.group._id),
+  })
+
+  broadcastToDevices([lamp.deviceData.deviceId], {
+    name: 'FACTORY_RESET',
+    data: {}
+  })
+
+  broadcastToUsers(lamps.map(l => l.user._id), {
+    name: 'REMOVE_LAMP',
+    data: {
+      id,
+    },
   })
 
   // If there are no other lamps in the group, delete the group
