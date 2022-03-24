@@ -7,6 +7,7 @@ import json
 from machine import Pin
 from app.wifi import connect_wifi, scan_wifi
 from app.config import get_device_id, add_config
+from app.led import set_color, flash, pulse
 
 DEVICE_DATA = 'DEVICE_DATA'
 REQUEST_NETWORKS = 'REQUEST_NETWORKS'
@@ -44,6 +45,7 @@ class ESP32_BLE():
         self.led.value(1)
         self.timer1.deinit()
         self.is_connected = True
+        flash()
 
     def disconnected(self):
         print('disconnected')
@@ -104,6 +106,10 @@ class ESP32_BLE():
         name = bytes(self.name, 'UTF-8')
         adv_data = bytearray('\x02\x01\x02') + bytearray((len(name) + 1, 0x09)) + name
         self.ble.gap_advertise(100, adv_data)
+
+        # Set led to blue for pairing mode
+        set_color(0, 0, 255)
+        pulse()
 
 def run_setup():
 

@@ -9,12 +9,20 @@ from machine import reset
 from machine import Pin, TouchPad
 led = Pin(32, Pin.OUT)
 
+MAX_RECONNECT_ATTEMPTS = 5
+
 class WebSocket():
     def __init__(self, uri, callback):
         print('Connecting to server')
+        self.uri = uri
         self.callback = callback
-        self.websocket = wsclient.connect(uri)
-        thread.start_new_thread(self.listen, ())
+        self.reconnect_attempts = 0
+        self.connect()
+
+    def connect(self):
+        self.websocket = wsclient.connect(self. uri)
+        self.thread = thread.start_new_thread(self.listen, ())
+
     
     def send(self, data):
         message = json.dumps(data)
@@ -26,6 +34,11 @@ class WebSocket():
     def listen(self):
         while (True):
             message = self.websocket.recv()
+
+            if (not self.websocket.open):
+                self.reconnect()
+                return
+
             if message is None or len(message) == 0:
                 return
 
@@ -39,6 +52,23 @@ class WebSocket():
     
     def stop(self):
         self.websocket.close()
+
+    # Attempt to reconnect, after a few attempts restart the device
+    def reconnect(self):
+        print(f'Reconnecting to server (Attempt { self.reconnect_attempts })')
+        self.stop()
+
+        if self.reconnect_attempts != 0 and self.reconnect_attempts != MAX_RECONNECT_ATTEMPTS:
+            sleep(10)
+
+        if self.reconnect_attempts > MAX_RECONNECT_ATTEMPTS:
+            reset()
+            return
+
+        self.reconnect_attempts += 1
+        self.connect()
+
+
 
 # Main server class to send and receive messages
 # TODO: Move event names to constants
