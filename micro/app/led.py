@@ -4,7 +4,7 @@ import _thread as thread
 
 DEFAULT_BRIGHTNESS = .1
 led_count = 72
-pin = 25
+pin = 14
 np = neopixel.NeoPixel(machine.Pin(pin), led_count)
 
 # Save state of LEDs in an array
@@ -59,7 +59,7 @@ def set_color(r, g, b, brightness=None):
     brightness = brightness or DEFAULT_BRIGHTNESS
 
     for i in range(led_count):
-        np[i] = tuple(int(p * brightness) for p in (r, g, b))\
+        np[i] = tuple(int(p * brightness) for p in (r, g, b))
     np.write()
 
 # Get a color out of the color wheel
