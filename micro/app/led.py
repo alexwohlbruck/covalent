@@ -7,6 +7,13 @@ led_count = 72
 pin = 14
 np = neopixel.NeoPixel(machine.Pin(pin), led_count)
 
+def rgb_to_hex(r, g, b):
+    return '#%02x%02x%02x' % (r, g, b)
+
+# Convert hex string #RRGGBB to (r, g, b)
+def hex_to_rgb(str):
+    return tuple(int(str[i:i+2], 16) for i in (1, 3, 5))
+
 # Save state of LEDs in an array
 def copy():
     state = [0] * led_count
@@ -55,10 +62,13 @@ def pulse_thread(state):
 
 
 # TODO: Fade new color
-def set_color(r, g, b, brightness=None):
+def set_color(r, g, b, brightness=None, top=False):
     brightness = brightness or DEFAULT_BRIGHTNESS
 
-    for i in range(led_count):
+    # if top is set, get top half of leds
+    leds = range((led_count // 2) if top else 0, led_count)
+
+    for i in leds:
         np[i] = tuple(int(p * brightness) for p in (r, g, b))
     np.write()
 

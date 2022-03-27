@@ -4,10 +4,7 @@ from time import sleep_ms
 import app.uwebsockets.client as wsclient
 from app.config import get_device_id, reset_config
 from machine import reset
-
-# TODO: Move IO operations to a separate file
-from machine import Pin, TouchPad
-led = Pin(32, Pin.OUT)
+from app.led import set_color, hex_to_rgb
 
 MAX_RECONNECT_ATTEMPTS = 5
 
@@ -86,12 +83,15 @@ class Server():
     
         # TODO: Move this switch to a dict outside
         if name == 'GROUP_STATE_CHANGED':
+            print('Group state changed')
             state = data.get('state')
             active = state.get('active')
+            print(state)
             if active:
-                led.value(1)
+                print(*hex_to_rgb(state.get('colors')[0]))
+                set_color(*hex_to_rgb(state.get('colors')[0]))
             else:
-                led.value(0)
+                set_color(0, 0, 0)
         
         if name == 'FACTORY_RESET':
             self.ws.stop()

@@ -3,7 +3,7 @@ from time import sleep_ms
 from time import sleep, sleep_ms
 from machine import Pin, TouchPad, ADC
 from app.rotary.rotary_irq_esp import RotaryIRQ
-from app.led import wheel, set_color
+from app.led import wheel, set_color, rgb_to_hex
 
 server = None
 
@@ -30,15 +30,15 @@ r = RotaryIRQ(
     pull_up=True
 )
 
+last_color = (255, 0, 0)
+
 def button_pressed(pin):
-    # led.value(1)
     if (server):
-        server.send_lamp_command('#00ff00', True)
+        server.send_lamp_command(rgb_to_hex(*last_color), True)
 
 def button_released(pin):
-    # led.value(0)
     if (server):
-        server.send_lamp_command('#00ff00', False)
+        server.send_lamp_command(rgb_to_hex(*last_color), False)
 
 # Start watcher for input events
 def input_watcher(_server):
@@ -60,8 +60,9 @@ def input_watcher(_server):
     
         if rotary_old != rotary_new:
             rotary_old = rotary_new
-
-            set_color(*wheel(int((rotary_new / ROTARY_STEPS) * 255)))
+            global last_color
+            last_color = wheel(int((rotary_new / ROTARY_STEPS) * 255))
+            set_color(*last_color, top=True)
 
             print('result =', rotary_new)
 
