@@ -62,7 +62,7 @@ def input_watcher(_server):
             rotary_old = rotary_new
             global last_color
             last_color = wheel(int((rotary_new / ROTARY_STEPS) * 255))
-            set_color(*last_color, top=True)
+            set_color(last_color, top=True)
 
             print('result =', rotary_new)
 

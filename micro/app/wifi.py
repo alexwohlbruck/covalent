@@ -1,6 +1,7 @@
 import network
 from time import sleep
 from app.config import add_config, load_config
+from app.led import flash, pulse, set_color
 
 sta_if = network.WLAN(network.STA_IF)
 sta_if.active(True)
@@ -45,6 +46,7 @@ def connect_wifi_from_config():
 # Returns True if the connection was successful
 def connect_wifi(ssid, password):
     print('Connecting to ' + ssid + '...')
+    set_color((255, 50, 0))
 
     sta_if.connect(ssid, password)
 
@@ -60,6 +62,7 @@ def connect_wifi(ssid, password):
 
     else:
         print('Successfully connected to ' + ssid + '\n')
+        flash()
         
         add_config('wifi', {
             'ssid': ssid,

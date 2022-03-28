@@ -7,7 +7,7 @@ import json
 from machine import Pin
 from app.wifi import connect_wifi, scan_wifi
 from app.config import get_device_id, add_config
-from app.led import set_color, flash, pulse
+from app.led import flash, pulse
 
 DEVICE_DATA = 'DEVICE_DATA'
 REQUEST_NETWORKS = 'REQUEST_NETWORKS'
@@ -108,8 +108,7 @@ class ESP32_BLE():
         self.ble.gap_advertise(100, adv_data)
 
         # Set led to blue for pairing mode
-        set_color(0, 0, 255)
-        pulse()
+        pulse((0, 0, 255))
 
 def run_setup():
 

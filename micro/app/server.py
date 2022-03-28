@@ -4,7 +4,7 @@ from time import sleep_ms
 import app.uwebsockets.client as wsclient
 from app.config import get_device_id, reset_config
 from machine import reset
-from app.led import set_color, hex_to_rgb
+from app.led import set_color, hex_to_rgb, pulse
 
 MAX_RECONNECT_ATTEMPTS = 5
 
@@ -88,10 +88,12 @@ class Server():
             active = state.get('active')
             print(state)
             if active:
-                print(*hex_to_rgb(state.get('colors')[0]))
-                set_color(*hex_to_rgb(state.get('colors')[0]))
+                pulse(hex_to_rgb(state.get('colors')[0]))
             else:
-                set_color(0, 0, 0)
+                color = hex_to_rgb(state.get('colors')[0])
+                # Dim each tuple value to 5%
+                dimmed = tuple(map(lambda x: x // 20, color))
+                set_color(dimmed)
         
         if name == 'FACTORY_RESET':
             self.ws.stop()
