@@ -12,7 +12,7 @@ np = neopixel.NeoPixel(machine.Pin(pin), led_count)
 
 # Current lamp state
 effect = None # Current animation effect
-colors = [(255,0,0),(0,255,0),(0,0,255)] # Gradient of current colors displayed
+colors = [(255,0,255)] # Gradient of current colors displayed
 preview = None # Reserve a section of the LEDs for previewing a selected color from rotary input
 
 ## Color helpers
@@ -51,6 +51,12 @@ def linear_gradient(n, start, finish):
 
 # Generate a gradient from a list of colors
 def polylinear_gradient(n, colors):
+    if len(colors) == 0:
+        return [(0,0,0)] * n
+
+    if len(colors) == 1:
+        return [colors[0]] * n
+
     sections = len(colors) - 1
     section_length = n // sections
 
