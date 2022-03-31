@@ -1,9 +1,11 @@
 import machine, neopixel
 import time
 import _thread as thread
+import math
 
 EFFECT_PULSE = 1
 EFFECT_RAINBOW_CYLCLE = 2
+EFFECT_ROTATE = 3
 
 DEFAULT_BRIGHTNESS = 1
 led_count = 72
@@ -12,7 +14,7 @@ np = neopixel.NeoPixel(machine.Pin(pin), led_count)
 
 # Current lamp state
 effect = None # Current animation effect
-colors = [(255,0,255)] # Gradient of current colors displayed
+colors = [(128,0,15),(128, 15, 0),(128,0,0),(128,0,15)] # Gradient of current colors displayed
 preview = None # Reserve a section of the LEDs for previewing a selected color from rotary input
 
 ## Color helpers
@@ -24,17 +26,41 @@ def rgb_to_hex(r, g, b):
 def hex_to_rgb(str):
     return tuple(int(str[i:i+2], 16) for i in (1, 3, 5))
 
-# Get a color out of the color wheel
-def wheel(pos):
-    if pos < 0 or pos > 255:
-        return (0, 0, 0)
-    if pos < 85:
-        return (255 - pos * 3, pos * 3, 0)
-    if pos < 170:
-        pos -= 85
-        return (0, 255 - pos * 3, pos * 3)
-    pos -= 170
-    return (pos * 3, 0, 255 - pos * 3)
+# Convert rgb value into hue in degrees
+def rgb_to_hue(r, g, b):
+    mx = max(r, g, b)
+    mn = min(r, g, b)
+    df = mx - mn
+    if mx == mn:
+        h = 0
+    elif mx == r:
+        h = (60 * ((g - b) / df) + 360) % 360
+    elif mx == g:
+        h = (60 * ((b - r) / df) + 120) % 360
+    elif mx == b:
+        h = (60 * ((r - g) / df) + 240) % 360
+    return int(h)
+
+
+# Convert hsl values into rgb color
+def hsl_to_rgb(h, s, l):    
+    c = (1 - abs(2 * l - 1)) * s
+    x = c * (1 - abs((h / 60) % 2 - 1))
+    m = l - c / 2
+    if h < 60:
+        r, g, b = c, x, 0
+    elif h < 120:
+        r, g, b = x, c, 0
+    elif h < 180:
+        r, g, b = 0, c, x
+    elif h < 240:
+        r, g, b = 0, x, c
+    elif h < 300:
+        r, g, b = x, 0, c
+    else:
+        r, g, b = c, 0, x
+    return tuple(int(255 * (r + m)) for r in (r, g, b))
+    
 
 def linear_gradient(n, start, finish):
     ''' Generate a gradient from two colors '''
@@ -100,9 +126,19 @@ def set_color(color, brightness=None, top=False):
     np.write()
 
 
-# Set the lamp to the current colors list
-def update_gradient():
-    global colors
+# Pass a color and create a slight gradient from it
+def set_color_gradient(hue, brightness=None):
+    # TODO: Shift more when hue is green/blue, less when it is red/yellow
+    shift = int(-25 * math.cos(hue) + 30
+    )
+    upper = hsl_to_rgb((hue + shift) % 360, 1, .5)
+    base = hsl_to_rgb(hue, 1, .5)
+    lower = hsl_to_rgb((hue - shift) % 360, 1, .5)
+    print(lower, base, upper)
+    set_gradient([lower, base, upper, base, lower])
+
+# Set the gradient colors and update
+def set_gradient(colors):
     state = polylinear_gradient(led_count, colors)
     set(state)
 
@@ -133,7 +169,7 @@ def flash(color=None):
 # Slowly pulse all LEDs
 def pulse(color=None, state=None):
     if color:
-        set_color(color)
+        set_color_gradient(color)
 
     global effect
     effect = EFFECT_PULSE
@@ -160,7 +196,26 @@ def pulse_thread(state):
             np.write()
             time.sleep_ms(15)
 
-def rainbow_cycle(wait, brightness=None):
+# Rotate the current state along the light strip
+def rotate(wait=100, reverse=False):
+    global effect
+    effect = EFFECT_ROTATE
+    state = copy()
+    
+    while (effect == EFFECT_ROTATE):
+        if reverse:
+            # Shift state to the left by 1, wrapping around
+            state = state[1:] + state[:1]
+        else:
+            # Shift state to the right by 1, wrapping around
+            state = state[-1:] + state[:-1]
+
+        set(state)
+        time.sleep_ms(wait)
+    
+
+
+def rainbow_cycle(wait=10, brightness=None):
     global effect
     effect = EFFECT_RAINBOW_CYLCLE
     brightness = brightness or DEFAULT_BRIGHTNESS
@@ -168,7 +223,7 @@ def rainbow_cycle(wait, brightness=None):
     for j in range(255):
         for i in range(led_count):
             rc_index = (i * 256 // led_count) + j
-            rgb = wheel(rc_index & 255)
+            rgb = hsl_to_rgb(rc_index & 255)
             np[i] = tuple(int(p * brightness) for p in rgb)
         if effect != EFFECT_RAINBOW_CYLCLE:
             return

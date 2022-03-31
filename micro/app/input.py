@@ -3,7 +3,7 @@ from time import sleep_ms
 from time import sleep, sleep_ms
 from machine import Pin, TouchPad, ADC
 from app.rotary.rotary_irq_esp import RotaryIRQ
-from app.led import wheel, set_color, rgb_to_hex
+from app.led import set_color, rgb_to_hex, hsl_to_rgb
 
 server = None
 
@@ -57,13 +57,13 @@ def input_watcher(_server):
         touchpad_raw = touchpad.read()
         touchpad_new = touchpad_raw < 250
         light = light_sensor.read()
-    
+
         if rotary_old != rotary_new:
             rotary_old = rotary_new
             global last_color
-            last_color = wheel(int((rotary_new / ROTARY_STEPS) * 255))
+            val = int((rotary_new / ROTARY_STEPS) * 360)
+            last_color = hsl_to_rgb(val, 1, 0.5)
             set_color(last_color, top=True)
-
             print('result =', rotary_new)
 
         if motion_old != motion_new:
