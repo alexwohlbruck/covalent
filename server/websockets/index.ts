@@ -124,6 +124,26 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
     }
   })
 
+  ws.on('error', (e: any) => {
+    console.error(e)
+  })
+
+  ws.on('close', () => {
+    if (userId) {
+      const clients = webClients.get(userId.toString())
+      if (clients) {
+        const index = clients.indexOf(ws)
+        if (index > -1) clients.splice(index, 1)
+      }
+    }
+    else {
+      const clients = deviceClients.get(deviceId)
+      if (clients) {
+        const index = clients.indexOf(ws)
+        if (index > -1) clients.splice(index, 1)
+      }
+    }
+  })
 })
 
 export default router

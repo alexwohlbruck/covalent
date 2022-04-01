@@ -144,7 +144,9 @@ def set_color_gradient(hue, brightness=None):
 
 # Set the gradient colors and update
 def set_gradient(colors, fade=True):
-    thread.start_new_thread(set_gradient_thread, (colors, fade))
+    state = polylinear_gradient(led_count, colors)
+    set(state)
+    # thread.start_new_thread(set_gradient_thread, (colors, fade))
 
 def set_gradient_thread(colors, fade):
     state = polylinear_gradient(led_count, colors)
@@ -161,17 +163,8 @@ def transition(state1, state2, duration):
     state1 = state1 or copy()
     state2 = state2 or copy()
 
-    thread.start_new_thread(transition_thread, (state1, state2, duration))
+    # TODO
 
-def transition_thread(state1, state2, duration):
-    start = time.time()
-    end = start + duration
-    while time.time() < end:
-        progress = (time.time() - start) / duration
-        set(tween(state1, state2, progress))
-        time.sleep(.01)
-    set(state2)
-    effect = None
 
 # Turn off all LEDs and then fade them in
 def flash(color=None):
