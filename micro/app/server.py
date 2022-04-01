@@ -90,7 +90,7 @@ class Server():
             if active:
                 hue = rgb_to_hue(*hex_to_rgb(state.get('colors')[0]))
                 set_color_gradient(hue)
-                # rotate()
+                rotate()
                 # pulse()
             else:
                 color = hex_to_rgb(state.get('colors')[0])

@@ -6,6 +6,7 @@ import math
 EFFECT_PULSE = 1
 EFFECT_RAINBOW_CYLCLE = 2
 EFFECT_ROTATE = 3
+EFFECT_TRANSITION = 4
 
 DEFAULT_BRIGHTNESS = 1
 led_count = 72
@@ -118,8 +119,10 @@ def set_color(color, brightness=None, top=False):
     effect = None
     brightness = brightness or DEFAULT_BRIGHTNESS
 
-    # if top is set, get top half of leds
-    leds = range((led_count // 2) if top else 0, led_count)
+    # if top is set, get top third of leds
+    # leds = range((led_count // 3) if top else 0, led_count)
+    # TODO: I reversed these because for the prototype the light strip is upside down
+    leds = range(0, (led_count // 3) if top else led_count)
 
     for i in leds:
         np[i] = tuple(int(p * brightness) for p in color)
@@ -128,22 +131,47 @@ def set_color(color, brightness=None, top=False):
 
 # Pass a color and create a slight gradient from it
 def set_color_gradient(hue, brightness=None):
-    # TODO: Shift more when hue is green/blue, less when it is red/yellow
-    shift = int(-25 * math.cos(hue) + 30
-    )
+
+    # https://www.desmos.com/calculator/3q33srr3yw
+    radians = math.radians(hue)
+    shift = int(-25 * math.cos(radians + (math.pi / 4)) + 30)
+
     upper = hsl_to_rgb((hue + shift) % 360, 1, .5)
     base = hsl_to_rgb(hue, 1, .5)
     lower = hsl_to_rgb((hue - shift) % 360, 1, .5)
-    print(lower, base, upper)
+    
     set_gradient([lower, base, upper, base, lower])
 
 # Set the gradient colors and update
-def set_gradient(colors):
+def set_gradient(colors, fade=True):
+    thread.start_new_thread(set_gradient_thread, (colors, fade))
+
+def set_gradient_thread(colors, fade):
     state = polylinear_gradient(led_count, colors)
+    if fade:
+        transition(copy(), state, .5)
     set(state)
 
-
 ## Effects
+
+# Transition from state1 to state 2 with a smooth fade
+def transition(state1, state2, duration):
+    global effect
+    effect = EFFECT_TRANSITION
+    state1 = state1 or copy()
+    state2 = state2 or copy()
+
+    thread.start_new_thread(transition_thread, (state1, state2, duration))
+
+def transition_thread(state1, state2, duration):
+    start = time.time()
+    end = start + duration
+    while time.time() < end:
+        progress = (time.time() - start) / duration
+        set(tween(state1, state2, progress))
+        time.sleep(.01)
+    set(state2)
+    effect = None
 
 # Turn off all LEDs and then fade them in
 def flash(color=None):
@@ -197,11 +225,15 @@ def pulse_thread(state):
             time.sleep_ms(15)
 
 # Rotate the current state along the light strip
-def rotate(wait=100, reverse=False):
+def rotate(wait=20, reverse=False):
     global effect
     effect = EFFECT_ROTATE
     state = copy()
     
+    thread.start_new_thread(rotate_thread, (state, wait, reverse))
+
+def rotate_thread(state, wait, reverse):
+
     while (effect == EFFECT_ROTATE):
         if reverse:
             # Shift state to the left by 1, wrapping around

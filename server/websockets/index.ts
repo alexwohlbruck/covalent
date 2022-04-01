@@ -111,11 +111,16 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
 
   // Handle incoming messages with event handlers
   ws.on('message', (message: any) => {
-    const { name, data } = JSON.parse(message)
-    const handler = (events as any)[name]
+    try {
+      const { name, data } = JSON.parse(message)
+      const handler = (events as any)[name]
 
-    if (handler) {
-      handler(data)
+      if (handler) {
+        handler(data)
+      }
+    }
+    catch (e) {
+      console.error(e)
     }
   })
 
