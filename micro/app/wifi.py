@@ -12,13 +12,19 @@ def scan_wifi():
 
     for wifi in wifis:
         ssid = wifi[0].decode('utf-8')
+        rssi = wifi[3]
 
         # Filter out hidden networks
         if len(ssid.strip()) > 0:
             ssids.append({
                 'ssid': ssid,
+                'rssi': rssi,
             })
     
+    # Order by signal strength
+    ssids.sort(key=lambda x: x['rssi'], reverse=True)
+    
+    print(ssids)
     return ssids
 
 
