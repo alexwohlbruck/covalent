@@ -9,6 +9,7 @@ def get_device_id():
 config_filename = 'config.json'
 default_config = {
   'deviceId': get_device_id(),
+  'wifi': [],
 }
 
 def load_config():
@@ -42,7 +43,7 @@ def add_config(key, value):
 
 def get_config_item(key):
   config = load_config()
-  return config[key]
+  return config.get(key, default_config.get(key, None))
 
 def reset_config():
   write_config(default_config)

@@ -1,6 +1,6 @@
 import network
 from time import sleep
-from app.config import add_config, load_config
+from app.config import load_config, get_config_item, add_config
 from app.led import flash, pulse, set_color
 
 sta_if = network.WLAN(network.STA_IF)
@@ -27,20 +27,28 @@ def scan_wifi():
 # Otherwise, return if the connection was successful
 def connect_wifi_from_config():
 
-    config = load_config()
-    wifi = config.get('wifi', None)
+    wifis = get_config_item('wifi')
 
-    if wifi is None:
+    if wifis is None:
         return False
-        
-    ssid = wifi.get('ssid', None)
-    password = wifi.get('password', None)
 
-    if ssid is None or password is None:
-        return False
+    # If a network exists that is in the config, connect to it
     
-    return connect_wifi(ssid, password)
+    found_wifis = scan_wifi()
 
+    # TODO: Order by signal strength
+    for wifi in wifis:
+        ssid = wifi.get('ssid', None)
+        password = wifi.get('password', None)
+
+        for found_wifi in found_wifis:
+            if ssid == found_wifi.get('ssid', None):
+                if ssid is None or password is None:
+                    return False
+
+                return connect_wifi(ssid, password)
+    
+    return False
     
 # Connect to wifi using the given ssid and password
 # Returns True if the connection was successful
@@ -63,11 +71,19 @@ def connect_wifi(ssid, password):
     else:
         print('Successfully connected to ' + ssid + '\n')
         flash()
+
+        wifis = get_config_item('wifi')
+
+        if wifis is None:
+            wifis = []
         
-        add_config('wifi', {
+        wifis.append({
             'ssid': ssid,
             'password': password,
         })
+
+        add_config('wifi', wifis)
+
         return True
 
 
