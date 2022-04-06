@@ -3,6 +3,7 @@ import time
 import _thread as thread
 import math
 import random
+import gc
 
 DEFAULT_BRIGHTNESS = 1
 led_count = 72
@@ -11,68 +12,25 @@ np = neopixel.NeoPixel(machine.Pin(pin), led_count)
 
 refresh_rate = 30 # frames per second
 
+def timed_function(f, *args, **kwargs):
+    myname = str(f).split(' ')[1]
+    def new_func(*args, **kwargs):
+        t = time.ticks_us()
+        result = f(*args, **kwargs)
+        delta = time.ticks_diff(time.ticks_us(), t)
+        print('{} took {} us'.format(myname, delta/1000))
+        return result
+    return new_func
 
-# Current lamp state
+# Current lamp statef
 
 # List of effects that are currently running
-effects = [
-    # {
-    # 'id': 456,
-    # 'effect': 'pulse',
-    # 'state': blue_green,
-    # 'opacity': 1,
-    # },{
-    #     'id': 123,
-    #     'effect': 'pulse',
-    #     'state': pink_red,
-    #     'opacity': 1,
-    # },
-]
+effects = []
 
 # List of keyframes that are currently being tweened
-keyframes = {
-    # 123: [
-    #     {
-    #         'start_frame': 0,
-    #         'duration': 100,
-    #         'ease': 'ease_in_out_cubic',
-    #         'start': {
-    #             'opacity': 0,
-    #         },
-    #         'end': {
-    #             'opacity': 1,
-    #         },
-    #     },
-    #     {
-    #         'start_frame': 100,
-    #         'duration': 100,
-    #         'ease': 'ease_in_out_cubic',
-    #         'start': {
-    #             'opacity': 1,
-    #         },
-    #         'end': {
-    #             'opacity': 0,
-    #         },
-    #     },
-    # ],
-    # 456: [
-    #     {
-    #         'start_frame': 220,
-    #         'duration': 100,
-    #         'ease': 'ease_in_out_cubic',
-    #         'start': {
-    #             'opacity': 1,
-    #         },
-    #         'end': {
-    #             'opacity': 0,
-    #         },
-    #     },
-    # ],
-}
+keyframes = {}
 colors = [(128,0,15),(128, 15, 0),(128,0,0),(128,0,15)] # Gradient of current colors displayed
 preview = None # Reserve a section of the LEDs for previewing a selected color from rotary input
-
-
 
 
 def ease_in_cubic(t):
@@ -128,14 +86,17 @@ def animate():
     # Open new thread
     def thread_animate():
         
+        global keyframes
         global effects
         frame = 0
 
         while True:
 
+            tstart = time.ticks_us()
+
             frame_state = [(0,0,0)] * led_count
 
-            for effect in effects:
+            for effect_index, effect in enumerate(effects):
                 
                 effect_state = rotate(effect.get('state', copy()))
                 effect['state'] = effect_state
@@ -148,30 +109,64 @@ def animate():
                     keyframe = keyframe_queue[0]
 
                     if keyframe:
+
                         if not keyframe.get('start_frame', None):
                             keyframe['start_frame'] = frame
 
                         opacity = tween_opacity(keyframe, frame) or opacity
                         effect['opacity'] = opacity
+
+                        start_opacity = keyframe['start']['opacity']
+                        end_opacity = keyframe['end']['opacity']
+                        start_frame = keyframe['start_frame']
+                        duration = keyframe['duration']
+                        end_frame = start_frame + duration
+
+                        # If start opacity is 1, remove all other effects and unrelated keyframes
+                        if frame == start_frame and start_opacity == 1:
+                            print('start frame opacity 1, remove all other effects')
+                            effects = [effect]
+                            keyframes = {k: v for k, v in keyframes.items() if k == effect['id']}
                         
-                        # If this keyframe is finished, remove it
-                        if frame == keyframe['start_frame'] + keyframe['duration']:
+                        # If this keyframe is finished
+                        if frame == end_frame:
+                            print('keyframe finished')
+
+                            # End opacity is one, remove all other effects and unrelated keyframes
+                            if end_opacity == 1:
+                                print('end opacity 1, remove all other effects')
+                                effects = [effect]
+                                keyframes = {k: v for k, v in keyframes.items() if k == effect['id']}
+
+
+                            # If end opacity is 0, remove effect
+                            if end_opacity == 0:
+                                print('opacity is 0, remove ffect')
+                                del effects[effect_index]
+
+                            # Remove keyframe
+                            print ('remove keyframe')
                             if len(keyframes[effect['id']]) > 1:
                                 keyframes[effect['id']].pop(0)
                             else:
                                 del keyframes[effect['id']]
+                                
 
-                            # Remove effect if end opacity is 0
-                            if keyframe['end']['opacity'] == 0:
-                                effects.remove(effect)
 
                 # We layer the new effect with it's opacity on top of the existing frame_state
-                frame_state = [overlay(frame_state[i], effect_state[i], opacity) for i in range(led_count)]
+                for i in range(led_count):
+                    frame_state[i] = overlay(frame_state[i], effect_state[i], opacity)
 
             
             set(frame_state)
+            gc.collect()
 
             frame += 1
+
+            tend = time.ticks_us()
+
+            print((tend - tstart) / 1000, 'ms')
+
             time.sleep_ms(1)
     
     thread.start_new_thread(thread_animate, ())
@@ -211,7 +206,7 @@ def start_effect(name, initial_state=None, transition=20, ease='ease_in_out_cubi
     return effect_id
 
 
-def stop_effect(effect_id, transition=150, ease='ease_in_out_cubic'):
+def stop_effect(effect_id, transition=30, ease='ease_in_out_cubic'):
 
     # If the effect is running, add a new keyframe to fade it out
     keyframe = {
