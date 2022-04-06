@@ -2,21 +2,241 @@ import machine, neopixel
 import time
 import _thread as thread
 import math
-
-EFFECT_PULSE = 1
-EFFECT_RAINBOW_CYLCLE = 2
-EFFECT_ROTATE = 3
-EFFECT_TRANSITION = 4
+import random
 
 DEFAULT_BRIGHTNESS = 1
 led_count = 72
 pin = 14
 np = neopixel.NeoPixel(machine.Pin(pin), led_count)
 
+refresh_rate = 30 # frames per second
+
+
 # Current lamp state
-effect = None # Current animation effect
+
+# List of effects that are currently running
+effects = [
+    # {
+    # 'id': 456,
+    # 'effect': 'pulse',
+    # 'state': blue_green,
+    # 'opacity': 1,
+    # },{
+    #     'id': 123,
+    #     'effect': 'pulse',
+    #     'state': pink_red,
+    #     'opacity': 1,
+    # },
+]
+
+# List of keyframes that are currently being tweened
+keyframes = {
+    # 123: [
+    #     {
+    #         'start_frame': 0,
+    #         'duration': 100,
+    #         'ease': 'ease_in_out_cubic',
+    #         'start': {
+    #             'opacity': 0,
+    #         },
+    #         'end': {
+    #             'opacity': 1,
+    #         },
+    #     },
+    #     {
+    #         'start_frame': 100,
+    #         'duration': 100,
+    #         'ease': 'ease_in_out_cubic',
+    #         'start': {
+    #             'opacity': 1,
+    #         },
+    #         'end': {
+    #             'opacity': 0,
+    #         },
+    #     },
+    # ],
+    # 456: [
+    #     {
+    #         'start_frame': 220,
+    #         'duration': 100,
+    #         'ease': 'ease_in_out_cubic',
+    #         'start': {
+    #             'opacity': 1,
+    #         },
+    #         'end': {
+    #             'opacity': 0,
+    #         },
+    #     },
+    # ],
+}
 colors = [(128,0,15),(128, 15, 0),(128,0,0),(128,0,15)] # Gradient of current colors displayed
 preview = None # Reserve a section of the LEDs for previewing a selected color from rotary input
+
+
+
+
+def ease_in_cubic(t):
+    return t**3
+
+def ease_out_cubic(t):
+    return (t-1)**3 + 1
+
+def ease_in_out_cubic(t):
+    return 4 * t**3 if t < 0.5 else 1 - (-2 * t + 2)**3 / 2
+
+# Compute the intermediate value between two values given a percent
+def tween(start, end, percent, ease=None):
+
+    # If no ease function is specified, use linear
+    if ease:
+        function = globals().get(ease, None)
+        if function:
+            percent = function(percent)
+
+    return start + (end - start) * percent
+
+def tween_opacity(keyframe, current_fame):
+    start = keyframe['start']
+    end = keyframe['end']
+    start_frame = keyframe['start_frame']
+    duration = keyframe['duration']
+    end_frame = start_frame + duration
+
+    if current_fame >= start_frame and current_fame <= end_frame:
+        progress = (current_fame - start_frame) / duration
+        return tween(start['opacity'], end['opacity'], progress) # , ease=keyframe['ease']
+    else:
+        return None
+
+
+# Overlay a color with a given opacity (color2, opacity) on top of another color (color1)
+def overlay(color1, color2, opacity):
+    return tuple(int(color1[i] * (1 - opacity) + color2[i] * opacity) for i in range(3))
+
+# Start animation loop
+'''
+We have a list of effects and a list of keyframes
+Both are a active list of currently running animations
+Effects contain a state which is updated throughout the animation loop and an effect name that points to an effect function
+Keyframes contain a start and end state, a duration, and an easing function for fading effects in and out
+When a keyframe starts, it is tweened and the effects are overlapped
+When a keyframe ends, it is removed
+When an effect is animated to 0 opacity, it is removed
+'''
+def animate():
+
+    # Open new thread
+    def thread_animate():
+        
+        global effects
+        frame = 0
+
+        while True:
+
+            frame_state = [(0,0,0)] * led_count
+
+            for effect in effects:
+                
+                effect_state = rotate(effect.get('state', copy()))
+                effect['state'] = effect_state
+
+                # Get current opacity for the current frame of the effect
+                keyframe_queue = keyframes.get(effect['id'], None)
+                opacity = effect.get('opacity', 1)
+
+                if keyframe_queue:
+                    keyframe = keyframe_queue[0]
+
+                    if keyframe:
+                        if not keyframe.get('start_frame', None):
+                            keyframe['start_frame'] = frame
+
+                        opacity = tween_opacity(keyframe, frame) or opacity
+                        effect['opacity'] = opacity
+                        
+                        # If this keyframe is finished, remove it
+                        if frame == keyframe['start_frame'] + keyframe['duration']:
+                            if len(keyframes[effect['id']]) > 1:
+                                keyframes[effect['id']].pop(0)
+                            else:
+                                del keyframes[effect['id']]
+
+                            # Remove effect if end opacity is 0
+                            if keyframe['end']['opacity'] == 0:
+                                effects.remove(effect)
+
+                # We layer the new effect with it's opacity on top of the existing frame_state
+                frame_state = [overlay(frame_state[i], effect_state[i], opacity) for i in range(led_count)]
+
+            
+            set(frame_state)
+
+            frame += 1
+            time.sleep_ms(1)
+    
+    thread.start_new_thread(thread_animate, ())
+
+
+def start_effect(name, initial_state=None, transition=20, ease='ease_in_out_cubic'):
+
+    # If no initial state is given, use the current state
+    if not initial_state:
+        initial_state = copy()
+
+    # If the effect is not running, add it to the effects list
+    effect_id = math.floor(random.random() * 100000)
+
+    fade = transition > 0
+
+    effects.append({
+        'id': effect_id,
+        'effect': name,
+        'state': initial_state,
+        'opacity': 0 if fade else 1,
+    })
+
+    if fade:
+        # Start a new keyframe
+        keyframes[effect_id] = [{
+            'duration': transition,
+            'ease': ease,
+            'start': {
+                'opacity': 0,
+            },
+            'end': {
+                'opacity': 1,
+            },
+        }]
+    
+    return effect_id
+
+
+def stop_effect(effect_id, transition=150, ease='ease_in_out_cubic'):
+
+    # If the effect is running, add a new keyframe to fade it out
+    keyframe = {
+        'duration': transition,
+        'ease': ease,
+        'start': {
+            'opacity': 1,
+        },
+        'end': {
+            'opacity': 0,
+        },
+    }
+
+    if effect_id in keyframes:
+        keyframes[effect_id].append(keyframe)
+    else:
+        keyframes[effect_id] = [keyframe]
+
+
+
+
+EFFECT_PULSE = 1
+EFFECT_RAINBOW_CYLCLE = 2
+EFFECT_ROTATE = 3
+EFFECT_TRANSITION = 4
 
 ## Color helpers
 
@@ -146,33 +366,29 @@ def set_color_gradient(hue, brightness=None):
 def set_gradient(colors, fade=True):
     current_state = copy()
     new_state = polylinear_gradient(led_count, colors)
-    # if fade:
-    #     transition(current_state, new_state, .5)
-    # else:
-    #     set(new_state)
     set(new_state)
 
 ## Effects
 
-# TODO: Transition from state1 to state 2 with a smooth fade
-# state: list of rgb tuples [(R, G, B)]
-def transition(state1, state2, duration):
-    step_duration = 1 # duration of each step in ms
-    global effect
-    effect = EFFECT_TRANSITION
-    state1 = state1 or copy()
-    state2 = state2 or copy()
+# # TODO: Transition from state1 to state 2 with a smooth fade
+# # state: list of rgb tuples [(R, G, B)]
+# def transition(state1, state2, duration):
+#     step_duration = 1 # duration of each step in ms
+#     global effect
+#     effect = EFFECT_TRANSITION
+#     state1 = state1 or copy()
+#     state2 = state2 or copy()
 
-    steps = int(duration * 1000 / step_duration)
+#     steps = int(duration * 1000 / step_duration)
 
-    for i in range(steps):
-        progress = i / steps
-        for j in range(led_count):
-            state1[j] = tuple(int(s1 + (s2 - s1) * progress) for s1, s2 in zip(state1[j], state2[j]))
-        set(state1)
-        time.sleep_ms(step_duration)
-    set(state2)
-    effect = None
+#     for i in range(steps):
+#         progress = i / steps
+#         for j in range(led_count):
+#             state1[j] = tuple(int(s1 + (s2 - s1) * progress) for s1, s2 in zip(state1[j], state2[j]))
+#         set(state1)
+#         time.sleep_ms(step_duration)
+#     set(state2)
+#     effect = None
 
 
 # Turn off all LEDs and then fade them in
@@ -226,40 +442,22 @@ def pulse_thread(state):
             np.write()
             time.sleep_ms(15)
 
-# Rotate the current state along the light strip
-def rotate(wait=20, reverse=False):
-    global effect
-    effect = EFFECT_ROTATE
-    state = copy()
-    
-    thread.start_new_thread(rotate_thread, (state, wait, reverse))
+def rotate(state, reverse=False):
+    if reverse:
+        # Shift state to the left by 1, wrapping around
+        state = state[1:] + state[:1]
+    else:
+        # Shift state to the right by 1, wrapping around
+        state = state[-1:] + state[:-1]
 
-def rotate_thread(state, wait, reverse):
-
-    while (effect == EFFECT_ROTATE):
-        if reverse:
-            # Shift state to the left by 1, wrapping around
-            state = state[1:] + state[:1]
-        else:
-            # Shift state to the right by 1, wrapping around
-            state = state[-1:] + state[:-1]
-
-        set(state)
-        time.sleep_ms(wait)
+    return state
     
 
-
-def rainbow_cycle(wait=10, brightness=None):
-    global effect
-    effect = EFFECT_RAINBOW_CYLCLE
-    brightness = brightness or DEFAULT_BRIGHTNESS
-
-    for j in range(255):
-        for i in range(led_count):
-            rc_index = (i * 256 // led_count) + j
-            rgb = hsl_to_rgb(rc_index & 255)
-            np[i] = tuple(int(p * brightness) for p in rgb)
-        if effect != EFFECT_RAINBOW_CYLCLE:
-            return
-        np.write()
-        time.sleep_ms(wait)
+def rainbow_cycle(frame):
+    state = [(0,0,0)] * led_count
+    for i in range(led_count):
+        rc_index = (i * 256 // led_count) + frame
+        rgb = hsl_to_rgb(rc_index % 256, 1, .5)
+        state[i] = tuple(int(p) for p in rgb)
+        
+    return state
