@@ -5,14 +5,6 @@ v-app-bar(app color='transparent' flat)
     router-link(:to="{ name: 'home' }") Covalent
 
   v-spacer
-  
-  v-btn.ml-4(
-    text
-    :to="{name: 'setup'}"
-  )
-    v-icon(left) mdi-plus
-    span Add lamp
-  
 
   div(v-if='me')
     v-menu(

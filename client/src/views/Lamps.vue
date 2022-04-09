@@ -24,6 +24,15 @@ v-container
         )
           | Send pulse
       div.color-slider
+    
+  .d-flex.justify-center
+    v-btn.ml-4(
+      text
+      :to="{name: 'setup'}"
+    )
+      v-icon(left) mdi-plus
+      span Add lamp
+
 </template>
 
 <script lang="ts">
