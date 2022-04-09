@@ -35,6 +35,10 @@ v-container
               )
                 v-list-item-content
                   v-list-item-title {{ network.ssid }}
+                
+                v-list-item-action
+                  v-btn(icon)
+                    v-icon {{ wifiStrengthIcon(network.rssi) }}
 
           .mt-4(v-if='networkSelected')
             v-text-field(
@@ -176,6 +180,19 @@ export default class Setup extends Vue {
   async requestNetworks() {
     this.loadingAvailableNetworks = true
     await requestNetworks()
+  }
+
+  wifiStrengthIcon(dbm: number) {
+    if (dbm > -60) {
+      return 'mdi-wifi-strength-4'
+    }
+    if (dbm > -70) {
+      return 'mdi-wifi-strength-3'
+    }
+    if (dbm > -80) {
+      return 'mdi-wifi-strength-2'
+    }
+    return 'mdi-wifi-strength-1'
   }
 
   get selectedNetwork() {

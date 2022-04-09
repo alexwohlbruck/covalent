@@ -100,12 +100,13 @@ def animate():
 
         while True:
 
-            t('start')
+            # t('start')
             frame_state = [(0,0,0)] * led_count
+
+            print(len(effects))
 
             for effect_index, effect in enumerate(effects):
 
-                
                 # TODO: Speed this up
                 effect_state = rotate(effect.get('state', copy()))
                 effect['state'] = effect_state
@@ -157,7 +158,8 @@ def animate():
                                 
 
                 # We layer the new effect with it's opacity on top of the existing state
-                frame_state = [overlay(frame_state[i], effect_state[i], opacity) for i in range(led_count)]
+                for i in range(led_count):
+                    frame_state[i] = overlay(frame_state[i], effect_state[i], opacity)
                 collect()
             
             set(frame_state)
@@ -169,7 +171,7 @@ def animate():
     start_new_thread(thread_animate, ())
 
 
-def start_effect(name, initial_state=None, colors=None, transition=20, ease='ease_in_out_cubic'):
+def start_effect(name, initial_state=None, colors=None, transition=10, ease='ease_in_out_cubic'):
 
     print('start effect')
 
@@ -448,7 +450,7 @@ def pulse_thread(state):
             np.write()
             sleep_ms(15)
 
-@timed_function
+# @timed_function
 def rotate(state, reverse=False):
     if reverse:
         # Shift state to the left by 1, wrapping around

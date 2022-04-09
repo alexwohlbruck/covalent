@@ -18,6 +18,7 @@ export interface RootState {
 }
 export interface Network {
   ssid: string
+  rssi: number
 }
 
 const storeConfig: StoreOptions<RootState> = {
