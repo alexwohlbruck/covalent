@@ -29,16 +29,23 @@ export default class App extends Vue {
 </script>
 
 <style>
-  .gap-sm {
-    gap: 8px;
-  }
-  .gap-md {
-    gap: 16px;
-  }
-  .gap-lg {
-    gap: 24px;
-  }
-  .gap-xl {
-    gap: 32px;
-  }
+.gap-sm {
+  gap: 8px;
+}
+.gap-md {
+  gap: 16px;
+}
+.gap-lg {
+  gap: 24px;
+}
+.gap-xl {
+  gap: 32px;
+}
+.v-card {
+  border-radius: 2rem !important;
+  background: linear-gradient(#ffffff, #e8e8e8);
+}
+.v-card.red {
+  background: linear-gradient(hsl(303, 100%, 50%),hsl(0, 100%, 50%),hsl(25, 100%, 50%)) no-repeat center center fixed;
+}
 </style>

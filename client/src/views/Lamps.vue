@@ -1,22 +1,29 @@
 <template lang="pug">
 v-container
-  v-card.mb-4(v-for='(lamp, i) in myLamps' :key='i')
-    .d-flex.flex-column.flex-sm-row.align-center.align-sm-start
-      lamp-visualizer.px-15(
-        :state='lamp.group ? lamp.group.state : lamp.state'
-        :lampId='lamp._id'
-        selectedColor='#000000'
-      )
+  v-card.mb-4.pa-6.red(v-for='(lamp, i) in myLamps' :key='i')
+    .d-flex.flex-column.mb-4
+      .text-h6 My group
+      .text-subtitle-2 2 lamps
+        
+    v-card(light)
       v-card-text.d-flex.flex-column
         .d-flex
-          .text-h6 {{ lamp.name }}
+          .text-h5.font-weight-bold.red--text {{ lamp.name }}
           v-spacer
-          v-btn(icon :to="{name: 'lamp-settings', params: {id: lamp._id}}")
+          v-btn(icon color='black' :to="{name: 'lamp-settings', params: {id: lamp._id}}")
             v-icon mdi-cog
-          
-        span Group: {{ lamp.group.groupId }}
-        span Access code: {{ lamp.group.accessCode }}
-        v-btn(:to="{ name: 'group', params: { id: lamp.group._id } }") Open group
+      .d-flex.align-end.justify-space-between.pa-6
+        lamp-visualizer.px-15(
+          :state='lamp.group ? lamp.group.state : lamp.state'
+          :lampId='lamp._id'
+          selectedColor='#000000'
+        )
+        v-btn(
+          color='red'
+          x-large
+        )
+          | Send pulse
+      div.color-slider
 </template>
 
 <script lang="ts">
@@ -40,3 +47,11 @@ export default class Lamps extends Vue {
   }
 }
 </script>
+
+<style>
+.color-slider {
+  width: 100%;
+  height: 3rem;
+  background: linear-gradient(to right, red, #ff8000, yellow, #80ff00, lime, #00ff80, aqua, #0080ff, blue, #8000ff, fuchsia, #ff0080, red);
+}
+</style>
