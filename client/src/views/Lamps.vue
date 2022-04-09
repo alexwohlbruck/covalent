@@ -1,6 +1,5 @@
 <template lang="pug">
 v-container
-  h1.text-h4.mb-4 My lamps
   v-card.mb-4(v-for='(lamp, i) in myLamps' :key='i')
     .d-flex.flex-column.flex-sm-row.align-center.align-sm-start
       lamp-visualizer.px-15(
