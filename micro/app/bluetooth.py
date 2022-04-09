@@ -7,7 +7,7 @@ import json
 from machine import Pin
 from app.wifi import connect_wifi, scan_wifi
 from app.config import get_device_id, add_config
-from app.led import flash, pulse, set_color_gradient, rgb_to_hue
+from app.led import flash, pulse, get_color_gradient, set_gradient, rgb_to_hue
 
 DEVICE_DATA = 'DEVICE_DATA'
 REQUEST_NETWORKS = 'REQUEST_NETWORKS'
@@ -109,7 +109,7 @@ class ESP32_BLE():
 
         # Set led to blue for pairing mode
         hue = rgb_to_hue(0, 0, 255)
-        set_color_gradient(223)
+        set_gradient(get_color_gradient(223))
         pulse()
 
 def run_setup():

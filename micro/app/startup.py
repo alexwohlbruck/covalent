@@ -6,6 +6,7 @@ from app.config import load_config, get_config_item
 from app.server import Server
 from app.ota.ota_updater import OTAUpdater
 import app.input as inputio
+from app.led import animate
 
 def start_setup_mode():
     run_setup()
@@ -39,6 +40,9 @@ def run_startup():
 
     # Connect to server
     server = Server('project-covalent.herokuapp.com', lamp_id)
+
+    # Run LED animation loop
+    animate()
 
     # Read hardware inputs
     inputio.input_watcher(server)

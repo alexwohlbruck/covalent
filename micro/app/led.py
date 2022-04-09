@@ -1,24 +1,25 @@
-import machine, neopixel
-import time
-import _thread as thread
-import math
-import random
-import gc
+from machine import Pin
+from neopixel import NeoPixel
+from time import sleep_ms, ticks_us, ticks_ms, ticks_diff
+from _thread import start_new_thread
+from math import floor, radians, cos, pi
+from random import random
+from gc import collect
 
 DEFAULT_BRIGHTNESS = 1
 led_count = 72
 pin = 14
-np = neopixel.NeoPixel(machine.Pin(pin), led_count)
+np = NeoPixel(Pin(pin), led_count)
 
 refresh_rate = 30 # frames per second
 
 def timed_function(f, *args, **kwargs):
     myname = str(f).split(' ')[1]
     def new_func(*args, **kwargs):
-        t = time.ticks_us()
+        t = ticks_us()
         result = f(*args, **kwargs)
-        delta = time.ticks_diff(time.ticks_us(), t)
-        print('{} took {} us'.format(myname, delta/1000))
+        delta = ticks_diff(ticks_us(), t)
+        print('{} took {} ms'.format(myname, delta/1000))
         return result
     return new_func
 
@@ -71,6 +72,13 @@ def tween_opacity(keyframe, current_fame):
 def overlay(color1, color2, opacity):
     return tuple(int(color1[i] * (1 - opacity) + color2[i] * opacity) for i in range(3))
 
+last = 0
+def t(name):
+    global last
+    new = ticks_ms()
+    print(new - last, name)
+    last = new
+
 # Start animation loop
 '''
 We have a list of effects and a list of keyframes
@@ -85,19 +93,20 @@ def animate():
 
     # Open new thread
     def thread_animate():
-        
+                    
         global keyframes
         global effects
         frame = 0
 
         while True:
 
-            tstart = time.ticks_us()
-
+            t('start')
             frame_state = [(0,0,0)] * led_count
 
             for effect_index, effect in enumerate(effects):
+
                 
+                # TODO: Speed this up
                 effect_state = rotate(effect.get('state', copy()))
                 effect['state'] = effect_state
 
@@ -124,64 +133,65 @@ def animate():
 
                         # If start opacity is 1, remove all other effects and unrelated keyframes
                         if frame == start_frame and start_opacity == 1:
-                            print('start frame opacity 1, remove all other effects')
                             effects = [effect]
                             keyframes = {k: v for k, v in keyframes.items() if k == effect['id']}
                         
                         # If this keyframe is finished
                         if frame == end_frame:
-                            print('keyframe finished')
 
                             # End opacity is one, remove all other effects and unrelated keyframes
                             if end_opacity == 1:
-                                print('end opacity 1, remove all other effects')
                                 effects = [effect]
                                 keyframes = {k: v for k, v in keyframes.items() if k == effect['id']}
 
 
                             # If end opacity is 0, remove effect
                             if end_opacity == 0:
-                                print('opacity is 0, remove ffect')
                                 del effects[effect_index]
 
                             # Remove keyframe
-                            print ('remove keyframe')
                             if len(keyframes[effect['id']]) > 1:
                                 keyframes[effect['id']].pop(0)
                             else:
                                 del keyframes[effect['id']]
                                 
 
-
-                # We layer the new effect with it's opacity on top of the existing frame_state
-                for i in range(led_count):
-                    frame_state[i] = overlay(frame_state[i], effect_state[i], opacity)
-
+                # We layer the new effect with it's opacity on top of the existing state
+                frame_state = [overlay(frame_state[i], effect_state[i], opacity) for i in range(led_count)]
+                collect()
             
             set(frame_state)
-            gc.collect()
-
+            collect()
             frame += 1
 
-            tend = time.ticks_us()
-
-            print((tend - tstart) / 1000, 'ms')
-
-            time.sleep_ms(1)
+            sleep_ms(1)
     
-    thread.start_new_thread(thread_animate, ())
+    start_new_thread(thread_animate, ())
 
 
-def start_effect(name, initial_state=None, transition=20, ease='ease_in_out_cubic'):
+def start_effect(name, initial_state=None, colors=None, transition=20, ease='ease_in_out_cubic'):
+
+    print('start effect')
 
     # If no initial state is given, use the current state
     if not initial_state:
-        initial_state = copy()
+        if colors:
+            if len(colors) == 1:
+                colors = get_color_gradient(rgb_to_hue(*hex_to_rgb(colors[0])))
+            else:
+                colors = [hex_to_rgb(c) for c in colors]
+            initial_state = polylinear_gradient(led_count, colors)
+        else:
+            initial_state = copy()
 
     # If the effect is not running, add it to the effects list
-    effect_id = math.floor(random.random() * 100000)
+    effect_id = floor(random() * 100000)
 
     fade = transition > 0
+
+    # Remove oldest effect if we have reached the limit
+    if len(effects) == 2:
+        del effects[0]
 
     effects.append({
         'id': effect_id,
@@ -216,7 +226,7 @@ def stop_effect(effect_id, transition=30, ease='ease_in_out_cubic'):
             'opacity': 1,
         },
         'end': {
-            'opacity': 0,
+            'opacity': .05,
         },
     }
 
@@ -240,6 +250,7 @@ def rgb_to_hex(r, g, b):
 
 # Convert hex string #RRGGBB to (r, g, b)
 def hex_to_rgb(str):
+    print(str)
     return tuple(int(str[i:i+2], 16) for i in (1, 3, 5))
 
 # Convert rgb value into hue in degrees
@@ -345,17 +356,17 @@ def set_color(color, brightness=None, top=False):
 
 
 # Pass a color and create a slight gradient from it
-def set_color_gradient(hue, brightness=None):
+def get_color_gradient(hue, brightness=None):
 
     # https://www.desmos.com/calculator/3q33srr3yw
-    radians = math.radians(hue)
-    shift = int(-25 * math.cos(radians + (math.pi / 4)) + 30)
+    rads = radians(hue)
+    shift = int(-25 * cos(rads + (pi / 4)) + 30)
 
     upper = hsl_to_rgb((hue + shift) % 360, 1, .5)
     base = hsl_to_rgb(hue, 1, .5)
     lower = hsl_to_rgb((hue - shift) % 360, 1, .5)
     
-    set_gradient([lower, base, upper, base, lower])
+    return [lower, base, upper, base, lower]
 
 # Set the gradient colors and update
 def set_gradient(colors, fade=True):
@@ -381,7 +392,7 @@ def set_gradient(colors, fade=True):
 #         for j in range(led_count):
 #             state1[j] = tuple(int(s1 + (s2 - s1) * progress) for s1, s2 in zip(state1[j], state2[j]))
 #         set(state1)
-#         time.sleep_ms(step_duration)
+#         sleep_ms(step_duration)
 #     set(state2)
 #     effect = None
 
@@ -405,17 +416,17 @@ def flash(color=None):
         for j in range(led_count):
             np[j] = tuple(int(p * (i / 10)) for p in state[j])
         np.write()
-        time.sleep_ms(50)
+        sleep_ms(50)
 
 # Slowly pulse all LEDs
 def pulse(color=None, state=None):
     if color:
-        set_color_gradient(color)
+        set_gradient(set_color_gradient(color))
 
     global effect
     effect = EFFECT_PULSE
     state = state or copy()
-    thread.start_new_thread(pulse_thread, (state,))
+    start_new_thread(pulse_thread, (state,))
 
 def pulse_thread(state):
     while (effect == EFFECT_PULSE):
@@ -426,7 +437,7 @@ def pulse_thread(state):
             if effect != EFFECT_PULSE:
                 return
             np.write()
-            time.sleep_ms(15)
+            sleep_ms(15)
         
         # Fade out from 50% to 100%
         for i in range(20):
@@ -435,8 +446,9 @@ def pulse_thread(state):
             if effect != EFFECT_PULSE:
                 return
             np.write()
-            time.sleep_ms(15)
+            sleep_ms(15)
 
+@timed_function
 def rotate(state, reverse=False):
     if reverse:
         # Shift state to the left by 1, wrapping around

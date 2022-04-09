@@ -4,7 +4,7 @@ from time import sleep_ms
 import app.uwebsockets.client as wsclient
 from app.config import get_device_id, reset_config
 from machine import reset
-from app.led import set_color, set_color_gradient, hex_to_rgb, pulse, rotate, rgb_to_hue
+from app.led import rotate, start_effect, stop_effect
 
 MAX_RECONNECT_ATTEMPTS = 5
 
@@ -67,6 +67,8 @@ class WebSocket():
 
 
 
+effect = None
+
 # Main server class to send and receive messages
 # TODO: Move event names to constants
 class Server():
@@ -87,16 +89,11 @@ class Server():
             state = data.get('state')
             active = state.get('active')
             print(state)
+            global effect
             if active:
-                hue = rgb_to_hue(*hex_to_rgb(state.get('colors')[0]))
-                set_color_gradient(hue)
-                rotate()
-                # pulse()
+                effect = start_effect('rotate', colors=state.get('colors'))
             else:
-                color = hex_to_rgb(state.get('colors')[0])
-                # Dim each tuple value to 5%
-                dimmed = tuple(map(lambda x: x // 20, color))
-                set_color(dimmed)
+                stop_effect(effect)
         
         if name == 'FACTORY_RESET':
             self.ws.stop()
