@@ -79,3 +79,9 @@ export function kelvinToRGB(kelvin: number) {
   }
   return `#${Math.round(r).toString(16)}${Math.round(g).toString(16)}${Math.round(b).toString(16)}`
 }
+
+export function gradientFromHue(hue: number, direction?: string) {
+  direction = direction || 'to bottom'
+  const shift = 15
+  return `linear-gradient(${direction},hsl(${hue - shift}, 100%, 50%),hsl(${hue}, 100%, 50%),hsl(${hue + shift}, 100%, 50%))`
+}

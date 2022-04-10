@@ -1,145 +1,120 @@
 <template lang="pug">
-.d-flex.flex-column.align-center
-  span.flex-shrink-1.lamp(
-    :style='visualizerStyle'
-    :class='{pulse: incomingMessage, active: state.active}'
-    @mousedown='updateLamp(true)'
-    @touchstart='updateLamp(true)'
-    @mouseup='updateLamp(false)'
-    @touchend='updateLamp(false)'
-    @contextmenu='() => {return false}'
-  )
-  
-  //- Color picker
-  //- .d-flex.flex-column.align-center
-  //-   .d-flex
-  v-slider(
-    style='width: 150px'
-    v-model='hue'
-    min='0'
-    max='360'
-    :color='selectedColor'
-    :track-color='shiftedColor'
-  )
+.lamp-visualizer
+  //- div(:style='`width: 100px; height: 100px; background: ${state.colors[0]}`')
+
+  .lamp
+    .section.lid(style='z-index: 3;')
+      .bottom
+      .middle
+      .top
+      
+    .section.light(style='z-index: 2;')
+      .bottom(:style='`background: ${state.colors[0]}`')
+      .middle(:style='`background: ${state.colors[0]}`')
+
+    .section.base(style='z-index: 1;')
+      .bottom
+      .middle
+
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
-import { hslToHexString, hexStringToHsl } from '@/util'
-import { LampState } from '@/types/Lamp'
+import { Component, Vue, Prop } from 'vue-property-decorator'
 import { GroupState } from '@/types/Group'
-import { sendCommand } from '@/services/lamp'
 
-let timeout: any
 
 type State = GroupState
 
 @Component
 export default class LampVisualizer extends Vue {
-
   @Prop(Object) state!: State
-  @Prop(String) lampId!: string
-  @Prop(Boolean) active!: boolean
-
-  hue = 0
-  cooldown = false
-  touching = false
-
-  get incomingMessage() {
-    return this.state.active && !this.touching
-  }
-
-  @Watch('state')
-  onStateChanged() {
-    this.cooldown = (this.state as any).active
-    // this.cooldown = true
-    // clearTimeout(timeout)
-    // timeout = setTimeout(() => {
-    //   this.cooldown = false
-    // }, 10000)
-  }
-
-  get visualizerStyle() {
-
-    if (!this.state) {
-      return {}
-    }
-
-    let colors = this.state.colors
-
-    colors = [...colors]
-
-    const firstColor = colors[0]
-
-    if (colors.length == 1) {
-      // Add a second color that is slightly shifted
-      const hsl = hexStringToHsl(firstColor)
-      hsl[0] = hsl[0] + 40
-      const shiftedColor = hslToHexString(...hsl)
-      colors.push(shiftedColor)
-    }
-
-    return {
-      'box-shadow': `0px 0px 50px 30px ${firstColor}`,
-      background: `black linear-gradient(135deg, ${colors.join(',')})`,
-    }
-  }
-  
-  get selectedColor(): string {
-    return hslToHexString(this.hue, 100, 50)
-  }
-
-  get shiftedColor(): string {
-    const hsl = hexStringToHsl(this.selectedColor)
-    hsl[0] = hsl[0] + 40
-    return hslToHexString(...hsl)
-  }
-
-  async updateLamp(touching: boolean) {
-    this.touching = touching
-
-    await sendCommand({
-      lampId: this.lampId,
-      touching,
-      color: this.selectedColor,
-    })
-  }
 }
 </script>
 
 <style lang="scss">
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  20% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-}
 
-$size: 200px;
+$lamp-width: 10em;
+$lamp-height: 15em;
+$perspective: 3em;
+
+$lid-height: .04 * $lamp-height;
+$light-height: .76 * $lamp-height;
+$base-height: .2 * $lamp-height;
 
 .lamp {
-  display: block;
-  margin: 50px 0;
-  width: $size;
-  height: $size;
-  border-radius: 50%;
-  transition: all 1s ease;
-  opacity: 0.2;
+  position: relative;
+  width: $lamp-width;
+  height: $lamp-height;
+  margin-bottom: $lamp-height * .23;
+  
+  .section {
+    position: relative;
+    width: $lamp-width;
+    top: $lid-height;
 
-  &.active {
-    opacity: 1;
+    .top{
+      position: absolute;
+      width: $lamp-width;
+      height: $perspective;
+      border-radius: 50%;
+      background-color: rgb(214, 214, 214);
+    }
+
+    .middle {
+      position: absolute;
+      top: $perspective / 2;
+      width: $lamp-width;
+      background-color: rgb(161, 161, 161);
+    }
+    .bottom {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: $lamp-width;
+      height: $perspective;
+      border-radius: 50%;
+      background-color: rgb(161, 161, 161);
+    }
   }
 
-  &.pulse {
-    animation: pulse 1s ease-in-out infinite;
+  .lid {
+    .top {
+      top: 0;
+    }
+    .middle {
+      top: $perspective / 2;
+      height: $lid-height;
+    }
+    .bottom {
+      top: $lid-height;
+    }
   }
+
+  .light {
+    .middle {
+      top: $perspective / 2 + $lid-height;
+      height: $light-height;
+    }
+    .bottom {
+      top: $lid-height + $light-height;
+    }
+    .middle, .bottom {
+      background-color: red;
+    }
+  }
+
+  .base {
+    .middle {
+      top: $perspective / 2 + $lid-height + $light-height;
+      height: $base-height;
+    }
+    .bottom {
+      top: $lid-height + $light-height + $base-height;
+    }
+    .middle, .bottom {
+      background-color: rgb(207, 109, 43);
+    }
+  }
+
 }
 </style>

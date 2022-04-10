@@ -103,8 +103,6 @@ def animate():
             # t('start')
             frame_state = [(0,0,0)] * led_count
 
-            print(len(effects))
-
             for effect_index, effect in enumerate(effects):
 
                 # TODO: Speed this up
