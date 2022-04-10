@@ -45,7 +45,7 @@ $base-height: .2 * $lamp-height;
   position: relative;
   width: $lamp-width;
   height: $lamp-height;
-  margin-bottom: $lamp-height * .23;
+  margin-bottom: $lamp-height * .25;
   
   .section {
     position: relative;

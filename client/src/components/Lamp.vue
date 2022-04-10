@@ -9,22 +9,22 @@ v-card(light)
       v-btn(icon color='black' :to="{name: 'lamp-settings', params: {id: lamp._id}}")
         v-icon mdi-cog
 
-  .d-flex.align-end.justify-space-between.pa-6
-    lamp-visualizer.px-15(
-      :state='lamp.group.state'
-      :lampId='lamp._id'
-    )
-    v-btn.px-8.py-7(
-      @mousedown='activate'
-      @touchstart='activate'
-      @mouseup='deactivate'
-      @mouseleave='deactivate'
-      @touchend='deactivate'
-      @touchcancel='deactivate'
-      dark
-      :style='`background: ${gradientFromHue(selectedColor.h)}`'
-    )
-      | Send pulse
+    .d-flex.align-sm-end.justify-space-between.flex-column.flex-sm-row
+      lamp-visualizer.mb-4(
+        :state='lamp.group.state'
+        :lampId='lamp._id'
+      )
+      v-btn.px-8.py-7(
+        @mousedown='activate'
+        @touchstart='activate'
+        @mouseup='deactivate'
+        @mouseleave='deactivate'
+        @touchend='deactivate'
+        @touchcancel='deactivate'
+        dark
+        :style='`background: ${gradientFromHue(selectedColor.h)}`'
+      )
+        | Send pulse
   
   v-color-picker(
     v-model='selectedColor'
