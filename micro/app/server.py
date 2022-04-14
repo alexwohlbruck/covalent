@@ -41,7 +41,7 @@ class WebSocket():
 
             try:
                 data = json.loads(message)
-                print('Received data: {}'.format(data))
+                # print('Received data: {}'.format(data))
                 self.callback(data)
             except ValueError:
                 print('Received invalid JSON: "{}"'.format(message))

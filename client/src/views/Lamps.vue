@@ -6,7 +6,7 @@ v-container
     :style='`background: ${gradient(group.group.state)}`'
   )
     .d-flex.flex-column.mb-4
-      .text-h6 My group
+      .text-h6 {{ group.group.groupId }}
       .text-subtitle-2 {{ group.lamps.length }} {{ group.lamps.length === 1 ? 'lamp' : 'lamps' }}
 
     lamp(v-for='lamp in group.lamps' :key='lamp._id' :lamp='lamp')
@@ -63,11 +63,14 @@ export default class Lamps extends Vue {
   gradient(group: any) {
     if (!group?.colors) return 'black'
 
-    if (group?.colors?.length == 1) {
+    if (group.colors.length == 1) {
       const hue = hexStringToHsl(group.colors[0])[0]
       return gradientFromHue(hue)
     }
 
+    else {
+      return `linear-gradient(to right, ${group.colors.join(', ')})`
+    }
   }
 }
 </script>

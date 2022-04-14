@@ -42,7 +42,7 @@ def run_startup():
     server = Server('project-covalent.herokuapp.com', lamp_id)
 
     # Run LED animation loop
-    animate()
+    # animate()
 
     # Read hardware inputs
     inputio.input_watcher(server)

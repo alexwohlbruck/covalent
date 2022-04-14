@@ -1,25 +1,27 @@
 
 from time import sleep_ms
-from time import sleep, sleep_ms
-from machine import Pin, TouchPad, ADC
+from time import sleep, sleep_ms, ticks_ms
+from machine import Pin, ADC
 from app.rotary.rotary_irq_esp import RotaryIRQ
 from app.led import set_color, rgb_to_hex, hsl_to_rgb
 
 server = None
 
 ROTARY_STEPS = 32
-LIGHT_SENSITIVITY = 3600
-SENSITIVITY_RANGE = 300
+LIGHT_SENSITIVITY = 3325
+SENSITIVITY_RANGE = 20
+OUTLIER_RANGE = 100
+DOUBLE_PRESS_WAIT = 350 # Usually 500, I like it a little quicker
+HOLD_PRESS_WAIT = 5000 # Time to wait for factory reset
+LOOP_WAIT = 5
+LIGHT_WAIT = 2000 # How long to wait to register light change
 
+pushbutton = Pin(27, Pin.IN, Pin.PULL_UP)
 builtin = Pin(2, Pin.OUT)
-touchpad = TouchPad(Pin(27, Pin.IN, Pin.PULL_UP))
-touchpad.config(500)
 motion_sensor = Pin(17, Pin.IN, Pin.PULL_UP)
 light_sensor = ADC(Pin(33, Pin.IN, Pin.PULL_UP))
 light_sensor.atten(ADC.ATTN_11DB)
 
-# a = Pin(25, Pin.IN)
-# b = Pin(32, Pin.IN)
 r = RotaryIRQ(
     pin_num_clk=32, 
     pin_num_dt=25, 
@@ -32,11 +34,11 @@ r = RotaryIRQ(
 
 last_color = (255, 0, 0)
 
-def button_pressed(pin):
+def send_pulse(pin):
     if (server):
         server.send_lamp_command(rgb_to_hex(*last_color), True)
 
-def button_released(pin):
+def stop_pulse(pin):
     if (server):
         server.send_lamp_command(rgb_to_hex(*last_color), False)
 
@@ -45,19 +47,73 @@ def input_watcher(_server):
     global server
     server = _server
 
+    # Pushbutton stuff
+    pushbutton_old = pushbutton.value()
+    pressed_time = ticks_ms()
+    released_time = ticks_ms()
+    press_count = 0
+    holding = False
+    
+    # Other inputs
     rotary_old = r.value()
     motion_old = motion_sensor.value()
-    touchpad_old = touchpad.read()
+    light_old = light_sensor.read()
+    reads_dark = False
     is_dark = False
+    past_threshold = False
+    light_time = ticks_ms() # Time since light threshold was crossed
     
-    while (True):
+    # Keep rolling average of last 50 light values
+    light_values = []
+    light_avg_max = 50
 
+    while 1:
+
+        pushbutton_new = pushbutton.value()
         rotary_new = r.value()
         motion_new = motion_sensor.value()
-        touchpad_raw = touchpad.read()
-        touchpad_new = touchpad_raw < 250
-        light = light_sensor.read()
+        light_new = light_sensor.read()
 
+
+
+        # Pushbutton
+        if pushbutton_new != pushbutton_old:
+            if pushbutton_new == 0:
+                # Pressed
+                pressed_time = ticks_ms()
+                press_count += 1
+            else:
+                # Released
+                released_time = ticks_ms()
+                
+                if holding:
+                    print('released')
+                    holding = False
+
+                if press_count == 2:
+                    print('double pressed')
+        
+        if press_count > 0:
+
+            now = ticks_ms()
+
+            # Reset press count if button is released for more than a fraction of a second
+            if pushbutton_new == 1 and now - released_time > DOUBLE_PRESS_WAIT:
+                press_count = 0
+
+            # Send signal if single press is held for more than fraction of a second
+            if not holding and press_count == 1 and pushbutton_new == 0 and now - pressed_time > DOUBLE_PRESS_WAIT:
+                holding = True
+                print('single press hold')
+
+            # Check if user has held double press for a few seconds
+            if press_count == 2 and pushbutton_new == 1 and now - pressed_time > HOLD_PRESS_WAIT:
+                print('factory reset')
+                press_count = 0
+
+        pushbutton_old = pushbutton_new
+
+        # Rotary input
         if rotary_old != rotary_new:
             rotary_old = rotary_new
             global last_color
@@ -66,28 +122,43 @@ def input_watcher(_server):
             set_color(last_color, top=True)
             print('result =', rotary_new)
 
+        # Motion sensor
         if motion_old != motion_new:
             print('motion =', motion_new)
             motion_old = motion_new
         
-        # If light level passes sensitivity threshold, update is_dark
-        if is_dark and light > (LIGHT_SENSITIVITY + SENSITIVITY_RANGE):
-            print(f'room is light ({light})')
-            is_dark = False
+        # Light sensor
+        
+        light_values.append(light_new)
+        if len(light_values) > light_avg_max:
+            light_values.pop(0)
+        
+        light_avg = sum(light_values) / len(light_values)
 
-        elif not is_dark and light < (LIGHT_SENSITIVITY - SENSITIVITY_RANGE):
-            print(f'room is dark ({light})')
-            is_dark = True
+        # Ignore outliers
+        if light_new <= light_avg + OUTLIER_RANGE and light_new >= light_avg - OUTLIER_RANGE:
 
-        if (touchpad_new != touchpad_old):
-            if (touchpad_new):
-                button_pressed(touchpad)
-            else:
-                button_released(touchpad)
-            touchpad_old = touchpad_new
+            # # If light level passes sensitivity threshold, update reads_dark
+            if reads_dark and light_new > (LIGHT_SENSITIVITY + SENSITIVITY_RANGE):
+                reads_dark = False
+                past_threshold = True
 
+            elif not reads_dark and light_new < (LIGHT_SENSITIVITY - SENSITIVITY_RANGE):
+                reads_dark = True
+                light_time = ticks_ms()
+                past_threshold = True
+            
+            if past_threshold:
 
-        # print('rotary_old: %d, rotary_new: %d' % (rotary_old, rotary_new))
-        # print(str(light_sensor.read()) + ' ' + str(motion_sensor.value()))
+                now = ticks_ms()
+                if now - light_time > LIGHT_WAIT:
+                    if reads_dark != is_dark:
+                        is_dark = reads_dark
+                        if is_dark:
+                            set_color((0,0,255), brightness=0)
+                        else:
+                            set_color((0,0,255), brightness=.5)
 
-        sleep_ms(5)
+                    past_threshold = False
+
+        sleep_ms(LOOP_WAIT)
