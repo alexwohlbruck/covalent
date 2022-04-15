@@ -3,14 +3,13 @@ from time import sleep_ms
 from time import sleep, sleep_ms, ticks_ms
 from machine import Pin, ADC
 from app.rotary.rotary_irq_esp import RotaryIRQ
-from app.led import set_color, rgb_to_hex, hsl_to_rgb
-
-server = None
+from app.led import set_color, rgb_to_hex, hsl_to_rgb, turn_off
+from app.commander import activate, toggle_reading_light, deactivate, factory_reset
 
 ROTARY_STEPS = 32
-LIGHT_SENSITIVITY = 3325
-SENSITIVITY_RANGE = 20
-OUTLIER_RANGE = 100
+LIGHT_SENSITIVITY = 3400
+SENSITIVITY_RANGE = 100
+OUTLIER_RANGE = 35
 DOUBLE_PRESS_WAIT = 350 # Usually 500, I like it a little quicker
 HOLD_PRESS_WAIT = 5000 # Time to wait for factory reset
 LOOP_WAIT = 5
@@ -34,18 +33,10 @@ r = RotaryIRQ(
 
 last_color = (255, 0, 0)
 
-def send_pulse(pin):
-    if (server):
-        server.send_lamp_command(rgb_to_hex(*last_color), True)
-
-def stop_pulse(pin):
-    if (server):
-        server.send_lamp_command(rgb_to_hex(*last_color), False)
-
 # Start watcher for input events
-def input_watcher(_server):
-    global server
-    server = _server
+def input_watcher():
+
+    global last_color
 
     # Pushbutton stuff
     pushbutton_old = pushbutton.value()
@@ -74,8 +65,6 @@ def input_watcher(_server):
         motion_new = motion_sensor.value()
         light_new = light_sensor.read()
 
-
-
         # Pushbutton
         if pushbutton_new != pushbutton_old:
             if pushbutton_new == 0:
@@ -87,11 +76,11 @@ def input_watcher(_server):
                 released_time = ticks_ms()
                 
                 if holding:
-                    print('released')
+                    deactivate()
                     holding = False
 
                 if press_count == 2:
-                    print('double pressed')
+                    toggle_reading_light()
         
         if press_count > 0:
 
@@ -104,11 +93,11 @@ def input_watcher(_server):
             # Send signal if single press is held for more than fraction of a second
             if not holding and press_count == 1 and pushbutton_new == 0 and now - pressed_time > DOUBLE_PRESS_WAIT:
                 holding = True
-                print('single press hold')
+                activate(last_color)
 
             # Check if user has held double press for a few seconds
             if press_count == 2 and pushbutton_new == 1 and now - pressed_time > HOLD_PRESS_WAIT:
-                print('factory reset')
+                factory_reset()
                 press_count = 0
 
         pushbutton_old = pushbutton_new
@@ -116,7 +105,6 @@ def input_watcher(_server):
         # Rotary input
         if rotary_old != rotary_new:
             rotary_old = rotary_new
-            global last_color
             val = int((rotary_new / ROTARY_STEPS) * 360)
             last_color = hsl_to_rgb(val, 1, 0.5)
             set_color(last_color, top=True)
@@ -155,9 +143,9 @@ def input_watcher(_server):
                     if reads_dark != is_dark:
                         is_dark = reads_dark
                         if is_dark:
-                            set_color((0,0,255), brightness=0)
+                            turn_off()
                         else:
-                            set_color((0,0,255), brightness=.5)
+                            set_color((0,0,255), brightness=.05)
 
                     past_threshold = False
 

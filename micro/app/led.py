@@ -289,9 +289,13 @@ def hsl_to_rgb(h, s, l):
     return tuple(int(255 * (r + m)) for r in (r, g, b))
     
 
+# TODO: make n default None
 def linear_gradient(n, start, finish):
     ''' Generate a gradient from two colors '''
     # Generate list of colors
+    if n is None:
+        n = led_count
+
     colors = []
     for i in range(n):
         colors.append(
@@ -302,8 +306,12 @@ def linear_gradient(n, start, finish):
         )
     return colors
 
+# TODO: make n default None
 # Generate a gradient from a list of colors
 def polylinear_gradient(n, colors):
+    if n is None:
+        n = led_count
+
     if len(colors) == 0:
         return [(0,0,0)] * n
 
@@ -353,6 +361,9 @@ def set_color(color, brightness=None, top=False):
     for i in leds:
         np[i] = tuple(int(p * brightness) for p in color)
     np.write()
+
+def turn_off():
+    set([(0,0,0)] * led_count)
 
 
 # Pass a color and create a slight gradient from it

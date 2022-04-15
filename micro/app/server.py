@@ -2,9 +2,8 @@ import _thread as thread
 import json
 from time import sleep_ms
 import app.uwebsockets.client as wsclient
-from app.config import get_device_id, reset_config
-from machine import reset
-from app.led import rotate, start_effect, stop_effect
+from app.config import get_device_id, get_config_item
+from app.wifi import disconnect_wifi
 
 MAX_RECONNECT_ATTEMPTS = 5
 
@@ -67,8 +66,6 @@ class WebSocket():
 
 
 
-effect = None
-
 # Main server class to send and receive messages
 # TODO: Move event names to constants
 class Server():
@@ -78,27 +75,18 @@ class Server():
         
         uri = 'ws://' + address + '/?deviceId=' + self.device_id
         self.ws = WebSocket(uri, self.on_message)
+        self.callbacks = []
     
     def on_message(self, message):
         name = message.get('name')
         data = message.get('data')
+
+        for callback in self.callbacks:
+            callback(name, data)
     
-        # TODO: Move this switch to a dict outside
-        if name == 'GROUP_STATE_CHANGED':
-            print('Group state changed')
-            state = data.get('state')
-            active = state.get('active')
-            print(state)
-            global effect
-            if active:
-                effect = start_effect('rotate', colors=state.get('colors'))
-            else:
-                stop_effect(effect)
-        
-        if name == 'FACTORY_RESET':
-            self.ws.stop()
-            reset_config()
-            reset()
+    # Publish incoming messsages
+    def subscribe(self, cb):
+        self.callbacks.append(cb)
     
     def send_lamp_command(self, color, touching):
 
@@ -114,3 +102,13 @@ class Server():
             }
         })
     
+def start_server():
+    try:
+        lamp_id = get_config_item('lampId')
+    except KeyError:
+        print('no lamp id configured')
+        disconnect_wifi()
+        run_setup()
+        # run_startup()
+
+    return Server('project-covalent.herokuapp.com', lamp_id)
