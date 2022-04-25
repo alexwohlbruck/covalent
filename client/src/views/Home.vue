@@ -3,7 +3,7 @@
 v-container.d-flex.flex-column.align-center
   v-img(src='@/assets/logo.svg' width='500')
 
-  google-sign-in-button(v-if='!me')
+  google-sign-in-button.black--text(v-if='!me')
   v-btn.black--text(v-if='me' color='white' :to="{ name: 'lamps' }") Open app
 
 </template>

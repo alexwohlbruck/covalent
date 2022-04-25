@@ -1,8 +1,10 @@
 <template lang="pug">
 v-container
 
-  div(v-if='!(myLamps && myLamps.length)')
-    p No lamps yet
+  .d-flex.flex-column.align-center(v-if='!(myLamps && myLamps.length)' style='padding-top: calc(50vh - 260px)')
+    p.text-h6 You have no lamps.
+    v-img.mt-5.mb-10(src='@/assets/undraw_signal_searching.svg' width='300')
+
 
   .d-flex.flex-column.align-center(v-else)
     v-card.lamp-card.mb-4.pa-6(

@@ -33,10 +33,7 @@ v-app-bar(app :color="$vuetify.breakpoint.mdAndUp ? 'transparent' : 'black'" fla
             v-list-item-content
               v-list-item-title {{ me.name }}
               v-list-item-subtitle {{ me.email }}
-            
-            v-list-item-action(icon)
-              v-icon mdi-heart
-        
+
         v-divider
         
         v-card-actions
