@@ -2,7 +2,9 @@
 
 v-app-bar(app color='transparent' flat)
   v-toolbar-title
-    router-link(:to="{ name: 'home' }") Covalent
+    router-link.d-flex(:to="{ name: 'home' }")
+      v-img(src='@/assets/icon.svg' width='40')
+      v-img(src='@/assets/logotype.svg' height='25' width='110' style='margin: 8px 0 0 8px')
 
   v-spacer
 
@@ -40,14 +42,7 @@ v-app-bar(app color='transparent' flat)
         v-card-actions
           v-spacer
           v-btn(@click='signOut' color='primary' text) Sign out
-        
-          
 
-  v-btn(
-    v-else
-    text
-    :to="{ name: 'login' }"
-  ) Sign in
 
 
 </template>

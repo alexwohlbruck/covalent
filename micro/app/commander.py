@@ -29,11 +29,13 @@ def deactivate(color=(0,0,0)):
         server.send_lamp_command(rgb_to_hex(*color), False)
 
 def turn_on_reading_light():
+	print('on')
 	global reading_light_on
 	reading_light_on = True
-	set_color((255,255,255), 1)
+	set_color((255,255,255))
 
 def turn_off_reading_light():
+	print('off')
 	global reading_light_on
 	reading_light_on = False
 	turn_off()

@@ -7,7 +7,7 @@ from random import random
 from gc import collect
 
 DEFAULT_BRIGHTNESS = 1
-led_count = 72
+led_count = 60
 pin = 14
 np = NeoPixel(Pin(pin), led_count)
 
@@ -23,8 +23,8 @@ def timed_function(f, *args, **kwargs):
         return result
     return new_func
 
-# Current lamp statef
-
+# Current lamp state
+w
 # List of effects that are currently running
 effects = []
 

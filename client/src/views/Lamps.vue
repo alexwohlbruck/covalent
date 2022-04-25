@@ -1,15 +1,20 @@
 <template lang="pug">
 v-container
-  v-card.mb-4.pa-6(
-    v-for='(group, groupId) in groups'
-    :key='groupId'
-    :style='`background: ${gradient(group.group.state)}`'
-  )
-    .d-flex.flex-column.mb-4
-      .text-h6 {{ group.group.groupId }}
-      .text-subtitle-2 {{ group.lamps.length }} {{ group.lamps.length === 1 ? 'lamp' : 'lamps' }}
 
-    lamp(v-for='lamp in group.lamps' :key='lamp._id' :lamp='lamp')
+  div(v-if='!(myLamps && myLamps.length)')
+    p No lamps yet
+
+  div(v-else)
+    v-card.mb-4.pa-6(
+      v-for='(group, groupId) in groups'
+      :key='groupId'
+      :style='`background: ${gradient(group.group.state)}`'
+    )
+      .d-flex.flex-column.mb-4
+        .text-h6 {{ group.group.groupId }}
+        .text-subtitle-2 {{ group.lamps.length }} {{ group.lamps.length === 1 ? 'lamp' : 'lamps' }}
+
+      lamp(v-for='lamp in group.lamps' :key='lamp._id' :lamp='lamp')
     
   .d-flex.justify-center
     v-btn.ml-4(
