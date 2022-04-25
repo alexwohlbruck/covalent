@@ -124,7 +124,7 @@ export default class Setup extends Vue {
   
   deviceData: any = null
 
-  step = 3
+  step = 1
   password = ''
   selectedNetworkIndex = -1
   availableNetworks: Network[] = [{ssid: 'test', rssi: 1}, {ssid: 'test2', rssi: 2}]
