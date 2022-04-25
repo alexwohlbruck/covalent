@@ -10,9 +10,13 @@ v-container
 
     v-stepper-content(step='1')
       v-sheet(color='transparent')
-        v-card-text Allow Bluetooth access and then connect to your lamp in the devices list.
         v-card-text
-          v-btn(@click='pairBluetooth' color='blue darken-1') Pair with bluetooth
+          p Allow Bluetooth access and then connect to your lamp in the devices list.
+          p.mb-0.font-weight-bold *Firefox, Safari, and iOS devices are not yet supported.
+        v-card-text
+          v-btn(@click='pairBluetooth' color='blue darken-1')
+            v-icon(left) mdi-bluetooth-connect
+            | Pair with bluetooth
 
     //- Wifi config
     v-stepper-step(:complete='step > 2' step='2')
@@ -27,18 +31,19 @@ v-container
           v-sheet(color='transparent')
             v-card-text Select your Wifi network and enter the password
           
-          v-list
-            v-list-item-group(v-model='selectedNetworkIndex')
-              v-list-item(
-                v-for='(network, i) in availableNetworks'
-                :key='i'
-              )
-                v-list-item-content
-                  v-list-item-title {{ network.ssid }}
-                
-                v-list-item-action
-                  v-btn(icon)
-                    v-icon {{ wifiStrengthIcon(network.rssi) }}
+          v-card
+            v-list
+              v-list-item-group(v-model='selectedNetworkIndex')
+                v-list-item(
+                  v-for='(network, i) in availableNetworks'
+                  :key='i'
+                )
+                  v-list-item-content
+                    v-list-item-title {{ network.ssid }}
+                  
+                  v-list-item-action
+                    v-btn(icon)
+                      v-icon {{ wifiStrengthIcon(network.rssi) }}
 
           .mt-4(v-if='networkSelected')
             v-text-field(
@@ -48,9 +53,9 @@ v-container
               v-model='password'
             )
 
-            v-btn(
+            v-btn.black--text(
               @click='connectToNetwork'
-              color='blue darken-1'
+              color='primary'
               :loading='connectingToNetwork'
             ) Connect
 
@@ -91,7 +96,7 @@ v-container
         )
 
       .mt-4
-        v-btn(color='primary' type='submit' @click='createLamp') Continue
+        v-btn.black--text(color='primary' type='submit' @click='createLamp') Continue
         v-btn(text) Cancel
 
 </template>
@@ -119,10 +124,10 @@ export default class Setup extends Vue {
   
   deviceData: any = null
 
-  step = 1
+  step = 3
   password = ''
   selectedNetworkIndex = -1
-  availableNetworks: Network[] = []
+  availableNetworks: Network[] = [{ssid: 'test', rssi: 1}, {ssid: 'test2', rssi: 2}]
   loadingAvailableNetworks = false
   connectingToNetwork = false
   connectedNetwork: Network | null = null
@@ -228,3 +233,13 @@ export default class Setup extends Vue {
   }
 }
 </script>
+
+<style lang="scss">
+  .v-stepper__step__step.primary {
+    color: #000 !important;
+
+    i {
+      color: #000 !important;
+    }
+  }
+</style>
