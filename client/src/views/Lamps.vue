@@ -4,11 +4,11 @@ v-container
   div(v-if='!(myLamps && myLamps.length)')
     p No lamps yet
 
-  div(v-else)
-    v-card.mb-4.pa-6(
+  .d-flex.flex-column.align-center(v-else)
+    v-card.lamp-card.mb-4.pa-6(
       v-for='(group, groupId) in groups'
       :key='groupId'
-      :style='`background: ${gradient(group.group.state)}`'
+      :style='`background: ${gradient(group.group.state)}; width: 600px; max-width: 100%; box-shadow: ${shadow(group.group.state)};`'
     )
       .d-flex.flex-column.mb-4
         .text-h6 {{ group.group.groupId }}
@@ -30,7 +30,7 @@ v-container
 import { Component, Vue } from 'vue-property-decorator'
 import { getMyLamps } from '@/services/lamp'
 import Lamp from '@/components/Lamp.vue'
-import { gradientFromHue } from '@/util'
+import { colorShadow, gradientFromHue } from '@/util'
 import { hexStringToHsl } from '@/util'
 
 @Component({
@@ -59,6 +59,11 @@ export default class Lamps extends Vue {
       }
       return acc
     }, {})
+  }
+
+  shadow(state: any) {
+    const hue = hexStringToHsl(state.colors[0])[0]
+    return colorShadow(hue)
   }
 
   async mounted() {

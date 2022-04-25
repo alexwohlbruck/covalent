@@ -1,6 +1,8 @@
 <template lang="pug">
 v-container.d-flex.flex-column(style='gap: 2rem')
   .d-flex
+    v-btn.mr-2(icon @click='$router.back()')
+      v-icon mdi-arrow-left
     h1.text-h4.font-weight-bold {{ name && name.length ? name : (lamp ? lamp.name : 'Lamp') }} settings
     v-spacer
     .d-flex(v-if='saving')

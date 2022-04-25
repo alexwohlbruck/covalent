@@ -41,11 +41,11 @@ export default class App extends Vue {
 .gap-xl {
   gap: 32px;
 }
-.v-card {
+.lamp-card {
   border-radius: 2rem !important;
   background: linear-gradient(#ffffff, #e8e8e8);
 }
-.v-card.red {
+.lamp-card.red {
   background: linear-gradient(hsl(303, 100%, 50%),hsl(0, 100%, 50%),hsl(25, 100%, 50%)) no-repeat center center fixed;
 }
 </style>

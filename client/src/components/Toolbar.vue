@@ -1,8 +1,8 @@
 <template lang="pug">
 
-v-app-bar(app color='transparent' flat)
+v-app-bar(app :color="$vuetify.breakpoint.mdAndUp ? 'transparent' : 'black'" flat)
   v-toolbar-title
-    router-link.d-flex(:to="{ name: 'home' }")
+    router-link.d-flex(:to="{ name: 'home' }" v-if='$route.name !== "home"')
       v-img(src='@/assets/icon.svg' width='40')
       v-img(src='@/assets/logotype.svg' height='25' width='110' style='margin: 8px 0 0 8px')
 
@@ -42,8 +42,6 @@ v-app-bar(app color='transparent' flat)
         v-card-actions
           v-spacer
           v-btn(@click='signOut' color='primary' text) Sign out
-
-
 
 </template>
 

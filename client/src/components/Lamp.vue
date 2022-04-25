@@ -1,5 +1,5 @@
 <template lang="pug">
-v-card(light)
+v-card.lamp-card(light)
   v-card-text.d-flex.flex-column
     .d-flex
       .text-h5.font-weight-bold(:style='`color: ${lamp.group.state.colors[0]}`')
@@ -22,7 +22,7 @@ v-card(light)
         @touchend='deactivate'
         @touchcancel='deactivate'
         dark
-        :style='`background: ${gradientFromHue(selectedColor.h)}`'
+        :style='`background: ${gradientFromHue(selectedColor.h)}; box-shadow: ${colorShadow(selectedColor.h)}; transition: none;`'
       )
         | Send pulse
   
@@ -38,7 +38,7 @@ v-card(light)
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import LampVisualizer from '@/components/LampVisualizer.vue'
 import { sendCommand } from '@/services/lamp'
-import { gradientFromHue, hslToHexString } from '@/util'
+import { gradientFromHue, hslToHexString, colorShadow } from '@/util'
 
 type Hsl = {
   h: number
@@ -63,6 +63,10 @@ export default class Lamp extends Vue {
 
   gradientFromHue(hue: number) {
     return gradientFromHue(hue, 'to right')
+  }
+
+  colorShadow(hue: number) {
+    return colorShadow(hue)
   }
 
   activate() {

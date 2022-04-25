@@ -1,11 +1,10 @@
 <template lang="pug">
 
 v-container.d-flex.flex-column.align-center
-  v-img(src='@/assets/logo.svg' width='40%')
-
+  v-img(src='@/assets/logo.svg' width='500')
 
   google-sign-in-button(v-if='!me')
-  v-btn(v-if='me' color='primary' :to="{ name: 'lamps' }") Open app
+  v-btn.black--text(v-if='me' color='white' :to="{ name: 'lamps' }") Open app
 
 </template>
 

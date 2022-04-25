@@ -85,3 +85,7 @@ export function gradientFromHue(hue: number, direction?: string) {
   const shift = 15
   return `linear-gradient(${direction},hsl(${hue - shift}, 100%, 50%),hsl(${hue}, 100%, 50%),hsl(${hue + shift}, 100%, 50%))`
 }
+
+export function colorShadow(hue: number) {
+  return `0 0 50px 10px hsla(${hue}, 100%, 50%, .15), 0 0 25px 5px hsla(${hue - 20}, 100%, 50%, .3), 0 0 5px 2px hsla(${hue + 20}, 100%, 50%, .5)`
+}
