@@ -1,7 +1,7 @@
 <template lang="pug">
 
-v-container.d-flex.flex-column.align-center.px-12(:style='$vuetify.breakpoint.mdAndUp ? `` : `padding-top: calc(40vh - 180px)`')
-  v-img(src='@/assets/logo.svg' width='500')
+v-container.d-flex.flex-column.align-center.px-12(style='padding-top: calc(35vh - 180px)')
+  v-img(src='@/assets/logo.svg' width='400')
 
   google-sign-in-button.black--text(v-if='!me')
   v-btn.black--text(v-if='me' color='white' :to="{ name: 'lamps' }") Open app

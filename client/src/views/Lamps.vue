@@ -22,6 +22,7 @@ v-container
     v-btn.ml-4(
       text
       :to="{name: 'setup'}"
+      outlined
     )
       v-icon(left) mdi-plus
       span Add lamp

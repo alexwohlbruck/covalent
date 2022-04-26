@@ -4,103 +4,104 @@ v-container
   v-btn.mb-3(icon @click='$router.back()')
     v-icon mdi-arrow-left
 
-  v-stepper(v-model='step' vertical)
+  v-card(flat outlined)
+    v-stepper(v-model='step' vertical style='background: none;')
 
-    //- Bluetooth pairing
-    v-stepper-step(:complete='step > 1' step='1')
-      | Connect to your lamp
-      small.success--text.font-weight-bold.mt-1(v-if='btDevice') {{ btDevice.name }}
+      //- Bluetooth pairing
+      v-stepper-step(:complete='step > 1' step='1')
+        | Connect to your lamp
+        small.success--text.font-weight-bold.mt-1(v-if='btDevice') {{ btDevice.name }}
 
-    v-stepper-content(step='1')
-      v-sheet(color='transparent')
-        v-card-text
-          p Allow Bluetooth access and then connect to your lamp in the devices list.
-          p.mb-0.font-weight-bold *Firefox, Safari, and iOS devices are not yet supported.
-        v-card-text
-          v-btn(@click='pairBluetooth' color='blue darken-1')
-            v-icon(left) mdi-bluetooth-connect
-            | Pair with bluetooth
+      v-stepper-content(step='1')
+        v-sheet(color='transparent')
+          v-card-text
+            p Allow Bluetooth access and then connect to your lamp in the devices list.
+            p.mb-0.font-weight-bold *Firefox, Safari, and iOS devices are not yet supported.
+          v-card-text
+            v-btn(@click='pairBluetooth' color='blue darken-1')
+              v-icon(left) mdi-bluetooth-connect
+              | Pair with bluetooth
 
-    //- Wifi config
-    v-stepper-step(:complete='step > 2' step='2')
-      | Connect your lamp to Wifi
-      small.success--text.font-weight-bold.mt-1(v-if='connectedNetwork') {{ connectedNetwork.ssid }}
+      //- Wifi config
+      v-stepper-step(:complete='step > 2' step='2')
+        | Connect your lamp to Wifi
+        small.success--text.font-weight-bold.mt-1(v-if='connectedNetwork') {{ connectedNetwork.ssid }}
 
-    v-stepper-content(step='2')
-      .d-flex.flex-column(v-if='availableNetworks.length || loadingAvailableNetworks')
-        v-progress-circular(v-if='loadingAvailableNetworks' indeterminate)
+      v-stepper-content(step='2')
+        .d-flex.flex-column(v-if='availableNetworks.length || loadingAvailableNetworks')
+          v-progress-circular(v-if='loadingAvailableNetworks' indeterminate)
 
-        div(v-else)
-          v-sheet(color='transparent')
-            v-card-text Select your Wifi network and enter the password
-          
-          v-card
-            v-list
-              v-list-item-group(v-model='selectedNetworkIndex')
-                v-list-item(
-                  v-for='(network, i) in availableNetworks'
-                  :key='i'
-                )
-                  v-list-item-content
-                    v-list-item-title {{ network.ssid }}
-                  
-                  v-list-item-action
-                    v-btn(icon)
-                      v-icon {{ wifiStrengthIcon(network.rssi) }}
+          div(v-else)
+            v-sheet(color='transparent')
+              v-card-text Select your Wifi network and enter the password
+            
+            v-card
+              v-list
+                v-list-item-group(v-model='selectedNetworkIndex')
+                  v-list-item(
+                    v-for='(network, i) in availableNetworks'
+                    :key='i'
+                  )
+                    v-list-item-content
+                      v-list-item-title {{ network.ssid }}
+                    
+                    v-list-item-action
+                      v-btn(icon)
+                        v-icon {{ wifiStrengthIcon(network.rssi) }}
 
-          .mt-4(v-if='networkSelected')
-            v-text-field(
-              autofocus
-              outlined
-              label='Wifi password'
-              v-model='password'
-            )
+            .mt-4(v-if='networkSelected')
+              v-text-field(
+                autofocus
+                outlined
+                label='Wifi password'
+                v-model='password'
+              )
 
-            v-btn.black--text(
-              @click='connectToNetwork'
-              color='primary'
-              :loading='connectingToNetwork'
-            ) Connect
+              v-btn.black--text(
+                @click='connectToNetwork'
+                color='primary'
+                :loading='connectingToNetwork'
+              ) Connect
 
-    //- Group config
-    v-stepper-step(:complete='step > 3' step='3') Add your lamp to a group
-    
-    v-stepper-content(step='3')
-      v-form.d-flex.flex-column.gap-sm(ref='groupForm' @submit.prevent='createLamp')
+      //- Group config
+      v-stepper-step(:complete='step > 3' step='3') Add your lamp to a group
+      
+      v-stepper-content(step='3')
+        v-form.d-flex.flex-column.gap-sm(ref='groupForm' @submit.prevent='createLamp')
 
-        v-text-field(
-          v-model='name'
-          label='Lamp name'
-          outlined
-          dense 
-          hide-details
-          placeholder='My lamp'
-        )
+          v-text-field(
+            v-model='name'
+            label='Lamp name'
+            outlined
+            dense 
+            hide-details
+            placeholder='My lamp'
+          )
 
-        v-radio-group(v-model='groupMethod')
-          v-radio(value='new' label='Create new group')
-          v-radio(value='existing' label='Add to existing group')
+          v-radio-group(v-model='groupMethod')
+            v-radio(value='new' label='Create new group')
+            v-radio(value='existing' label='Add to existing group')
 
-        v-text-field(
-          v-model='groupId'
-          label='Group ID'
-          outlined
-          dense
-          hide-details
-          :placeholder='groupMethod == "new" ? "Make up a unique name for your group" : ""'
-        )
-        v-text-field(
-          v-if='groupMethod == "existing"'
-          v-model='accessCode'
-          label='Access code'
-          outlined
-          dense
-          hide-details
-        )
+          v-text-field(
+            v-model='groupId'
+            label='Group ID'
+            outlined
+            dense
+            hide-details
+            :placeholder='groupMethod == "new" ? "Make up a unique name for your group" : ""'
+          )
+          v-text-field(
+            v-if='groupMethod == "existing"'
+            v-model='accessCode'
+            label='Access code'
+            outlined
+            dense
+            hide-details
+          )
 
-      .mt-4
-        v-btn.black--text(color='primary' type='submit' @click='createLamp') Continue
-        v-btn(text) Cancel
+        .mt-4
+          v-btn.black--text(color='primary' type='submit' @click='createLamp') Continue
+          v-btn(text) Cancel
 
 </template>
 
