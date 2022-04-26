@@ -1,6 +1,9 @@
 <template lang="pug">
 
 v-container
+  v-btn.mb-3(icon @click='$router.back()')
+    v-icon mdi-arrow-left
+
   v-stepper(v-model='step' vertical)
 
     //- Bluetooth pairing
