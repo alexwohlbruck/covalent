@@ -1,6 +1,6 @@
 <template lang="pug">
 
-v-app-bar(app :color="$vuetify.breakpoint.mdAndUp ? 'transparent' : 'black'" flat)
+v-app-bar(app :color="$vuetify.breakpoint.mdAndUp ? 'transparent' : '#121212'" flat)
   v-toolbar-title
     router-link.d-flex(:to="{ name: 'home' }" v-if='$route.name !== "home"')
       v-img(src='@/assets/icon.svg' width='40')

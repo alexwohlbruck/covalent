@@ -1,6 +1,6 @@
 <template lang="pug">
 
-v-container.d-flex.flex-column.align-center
+v-container.d-flex.flex-column.align-center.px-12(:style='$vuetify.breakpoint.mdAndUp ? `` : `padding-top: calc(40vh - 180px)`')
   v-img(src='@/assets/logo.svg' width='500')
 
   google-sign-in-button.black--text(v-if='!me')
