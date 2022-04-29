@@ -116,7 +116,8 @@ def input_watcher():
             motion_old = motion_new
         
         # Light sensor
-        
+        if light_new != 4095:
+            print(light_new)
         light_values.append(light_new)
         if len(light_values) > light_avg_max:
             light_values.pop(0)

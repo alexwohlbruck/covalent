@@ -24,7 +24,7 @@ def timed_function(f, *args, **kwargs):
     return new_func
 
 # Current lamp state
-w
+
 # List of effects that are currently running
 effects = []
 
