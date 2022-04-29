@@ -1,8 +1,7 @@
-# ⚛️ Project Covalent
+<img src='https://raw.githubusercontent.com/alexwohlbruck/covalent/main/designs/Logo%20full%20white%20bg.png' width='300'>
 
 ### Covalent (adjective, chemistry)
 
-![](https://raw.githubusercontent.com/covalent/covalent/master/assets/images/covalent-logo.png)
 #### /ˌkōˈvālənt/
 relating to or denoting chemical bonds formed by the sharing of electrons between atoms
 
