@@ -3,6 +3,7 @@
 ## Table of contents
 - [User guide](#user-guide)
   - [Table of contents](#table-of-contents)
+  - [LED indicator colors](#led-indicator-colors)
   - [Signing in](#signing-in)
   - [Pairing a lamp](#pairing-a-lamp)
   - [Sending messages](#sending-messages)
@@ -13,6 +14,21 @@
     - [From the app](#from-the-app-1)
     - [From the lamp](#from-the-lamp-1)
   - [Signing out](#signing-out)
+
+## LED indicator colors
+
+| Color         | Lamp mode              |
+|---------------|------------------------|
+| Blue pulsing  | Bluetooth pairing mode |
+| Blue solid    | Bluetooth connected    |
+| Amber pulsing | Connecting to wifi     |
+| Amber solid   | Connected to wifi      |
+| Green pulsing | Connecting to server   |
+| Green solid   | Successfully set up    |
+| Red pulsing   | Error                  |
+| Orange pulsing| Factory resetting      |
+
+
 ## Signing in
 Visit https://project-covalent.herokuapp.com and sign in with your Google account. You will be redirected to the home page where you see your lamp or pair a new one.
 
