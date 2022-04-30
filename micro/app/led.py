@@ -308,7 +308,11 @@ def linear_gradient(n, start, finish):
 
 # TODO: make n default None
 # Generate a gradient from a list of colors
-def polylinear_gradient(n, colors):
+def polylinear_gradient(n, colors, brightness=None):
+
+    if brightness is None:
+        brightness = DEFAULT_BRIGHTNESS or 1
+
     if n is None:
         n = led_count
 
@@ -327,7 +331,7 @@ def polylinear_gradient(n, colors):
         end_index = start_index + section_length
         gradient = linear_gradient(section_length, colors[i], colors[i+1])
         for j in range(section_length):
-            state[start_index + j] = gradient[j]
+            state[start_index + j] = [int(v * brightness) for v in gradient[j]]
 
     return state
     
@@ -367,7 +371,7 @@ def turn_off():
 
 
 # Pass a color and create a slight gradient from it
-def get_color_gradient(hue, brightness=None):
+def get_color_gradient(hue):
 
     # https://www.desmos.com/calculator/3q33srr3yw
     rads = radians(hue)

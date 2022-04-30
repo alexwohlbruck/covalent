@@ -16,17 +16,17 @@ def on_message(name, data):
 		factory_reset()
   	
 def start_commander():
-  	global server
-  	server = start_server()
+	global server
+	server = start_server()
 	server.subscribe(on_message)
 
 def activate(color):
-    if (server):
-        server.send_lamp_command(rgb_to_hex(*color), True)
+	if (server):
+		server.send_lamp_command(rgb_to_hex(*color), True)
 
 def deactivate(color=(0,0,0)):
-    if (server):
-        server.send_lamp_command(rgb_to_hex(*color), False)
+	if (server):
+		server.send_lamp_command(rgb_to_hex(*color), False)
 
 def turn_on_reading_light():
 	print('on')
@@ -51,6 +51,14 @@ def factory_reset():
 	reset_config()
 	reset()
 
+def state_from_color_list(colors, brightness=None):
+		if len(colors) == 1:
+			colors = get_color_gradient(rgb_to_hue(*hex_to_rgb(colors[0])))
+		else:
+			colors = [hex_to_rgb(c) for c in colors]
+  
+		return polylinear_gradient(None, colors, brightness=brightness)
+  	
 def pulse_received(data):
 	state = data.get('state', None)
 	active = state.get('active', None)
@@ -58,22 +66,17 @@ def pulse_received(data):
 	if state == None and active == None:
   		return
 		  
+	colors = state.get('colors')
 	if active:
-		# effect = start_effect('rotate', colors=state.get('colors'))
-		colors = state.get('colors')
-
-		if len(colors) == 1:
-			colors = get_color_gradient(rgb_to_hue(*hex_to_rgb(colors[0])))
-		else:
-			colors = [hex_to_rgb(c) for c in colors]
-		state = polylinear_gradient(None, colors)
-
+  		# effect = start_effect('rotate', colors=state.get('colors'))
+		state = state_from_color_list(colors)
 		set(state)
 
 	else:
 		# stop_effect(effect)
 		global reading_light_on
 		if reading_light_on:
-  			turn_on_reading_light()
+  			turn_on_reading_light(colors)
 		else:
-			turn_off()
+			state = state_from_color_list(colors, .03)
+			set(state)
