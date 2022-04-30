@@ -33,9 +33,9 @@
 Visit https://project-covalent.herokuapp.com and sign in with your Google account. You will be redirected to the home page where you see your lamp or pair a new one.
 
 ## Pairing a lamp
-The app uses Bluetooth to pair to your lamp and configure it. This is not supported on iOS devices, or in the Safari browser. Compatible browsers are Chrome, Opera, Edge, and Samsung Internet. For more info about compatibility, visit [this page](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility).
+The app uses Bluetooth to pair to your lamp and configure it. This is not supported on iOS devices, or in the Safari browser. Compatible browsers are Chrome, Opera, Edge, and Samsung Internet. For more info about compatibility, visit <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility" target="_blank">this page</a>.
 
-1. Ensure your lamp is is plugged in and in pairing mode. Paring mode is indicated by a pulsing blue light. If the lamps has already been set up, follow the factory reset instructions below.
+1. Ensure your lamp is is plugged in and in pairing mode. Paring mode is indicated by a pulsing blue light. If the lamps has already been set up, follow the [factory reset instructions](#removing-or-factory-resetting-your-lamp) below.
 2. On the lamps page, click `+ ADD LAMP` to begin the pairing process.
 3. Turn on bluetooth on your device and click `PAIR WITH BLUETOOTH`. A prompt will appear with the lamp name shown. Select it and click `Pair`.
 4. Wait for the wifi network list to load, and select the network you wish to connect to. Enter the pasword if it is secured, and click `Connect`.
