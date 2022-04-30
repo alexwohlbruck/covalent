@@ -25,7 +25,7 @@
 | <img src="indicators/dot-green-pulse.svg" width='12'>  | Green pulsing          | Connecting to server   |
 | <img src="indicators/dot-green.svg" width='12'>        | Green solid            | Successfully set up    |
 | <img src="indicators/dot-red.svg" width='12'>          | Red solid              | Error                  |
-| <img src="indicators/dot-purple-pulse.svg" width='12'> | Purple pulsing         | Factory resetting      |
+| <img src="indicators/dot-white-pulse.svg" width='12'>  | White pulsing          | Factory resetting      |
 
 
 
