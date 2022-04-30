@@ -1,5 +1,18 @@
 # User guide
 
+## Table of contents
+- [User guide](#user-guide)
+  - [Table of contents](#table-of-contents)
+  - [Signing in](#signing-in)
+  - [Pairing a lamp](#pairing-a-lamp)
+  - [Sending messages](#sending-messages)
+    - [From the lamp](#from-the-lamp)
+    - [From the app](#from-the-app)
+  - [Adjusting lamp settings](#adjusting-lamp-settings)
+  - [Removing or factory resetting your lamp](#removing-or-factory-resetting-your-lamp)
+    - [From the app](#from-the-app-1)
+    - [From the lamp](#from-the-lamp-1)
+  - [Signing out](#signing-out)
 ## Signing in
 Visit https://project-covalent.herokuapp.com and sign in with your Google account. You will be redirected to the home page where you see your lamp or pair a new one.
 
