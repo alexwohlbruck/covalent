@@ -4,12 +4,12 @@ v-container
     .d-flex
       v-btn.mr-2(icon @click='$router.back()')
         v-icon mdi-arrow-left
-      h1.text-h4.font-weight-bold {{ name && name.length ? name : (lamp ? lamp.name : 'Lamp') }} settings
+      h1.text-h6.font-weight-bold(style='margin-top: 2px')
+        | {{ name && name.length ? name : (lamp ? lamp.name : 'Lamp') }} settings
       v-spacer
       .d-flex(v-if='saving')
         span.mr-2 Saving
         v-progress-circular(indeterminate size='20')
-      
 
     //- Lamp name
     v-text-field(
@@ -20,6 +20,19 @@ v-container
       placeholder='My lamp'
       hide-details
     )
+
+    //- Brightness level
+    div
+      h6.text-body-1 LED brightness level
+      v-slider(
+        v-model='settings.bightnessLevel'
+        discrete
+        min='.25'
+        max='1'
+        step='.01'
+        :label='Math.floor(settings.bightnessLevel * 100) + "%"'
+        hide-details
+      )
 
     //- Night mode
     div
@@ -34,7 +47,7 @@ v-container
 
       v-slide-y-transition
         div(v-show='settings.nightMode')
-          h6.text-body-1 Minimum light level
+          h6.text-body-1 Minimum ambient light level (night mode)
           v-slider(
             v-model='settings.nightModeSensitivity'
             :disabled='!settings.nightMode'
@@ -46,30 +59,17 @@ v-container
             :label='settings.nightModeSensitivity * 100 + "%"'
           )
 
-    //- Touch panel sensitivity
-    div
-      h6.text-body-1 Touch panel sensitivity
-      v-slider(
-        v-model='settings.touchPanelSensitivity'
-        discrete
-        min='0'
-        max='1'
-        step='.1'
-        :tick-labels="['Light touch', '', '', '', '', 'Normal touch', '', '', '', '', 'Heavy press']"
-        :label='settings.touchPanelSensitivity * 100 + "%"'
-      )
-
     //- Reading light color temp
     div
       h6.text-body-1 Reading light color temperature
       v-slider(
-        v-model='settings.readingLightColorTemp'
+        v-model='settings.readingLightColorTemperature'
         label='Reading light color temperature'
         min='2000'
         max='10000'
         unit='K'
         :color='colorTempRGB'
-        :label='`${settings.readingLightColorTemp} K`'
+        :label='`${settings.readingLightColorTemperature} K`'
       )
 
     //- Delete lamp
@@ -109,8 +109,8 @@ export default class LampSettings extends Vue {
   settings = {
     nightMode: true,
     nightModeSensitivity: .5,
-    touchPanelSensitivity: .5,
-    readingLightColorTemp: 6000,
+    bightnessLevel: 1,
+    readingLightColorTemperature: 6000,
   }
   
   async mounted() {
@@ -125,7 +125,7 @@ export default class LampSettings extends Vue {
   }
 
   get colorTempRGB() {
-    return kelvinToRGB(this.settings.readingLightColorTemp)
+    return kelvinToRGB(this.settings.readingLightColorTemperature)
   }
 
   // Auto save with debounce

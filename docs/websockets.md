@@ -40,6 +40,38 @@ Payload:
   }
 ```
 
+### ⚛️💻 `UPDATE_SETTINGS`
+Updates settings in the config file (config.json). Only the settings below are allowed to be updated.
+
+Payload:
+```json
+{
+  "brightness": 0.9,
+  "nightMode": true,
+  "minimumLightLevel": 0.2,
+  "readingLightColorTemperature": 2700
+}
+```
+
+### ⚛️💻 `GET_SETTINGS`
+Returns the config file (config.json).
+```json
+{
+  "deviceId": "xxxxxxxxxxxxxxxxxxxxxxxx",
+  "lampId": "xxxxxxxxxxxxxxxxxxxxxxxx",
+  "wifi": [
+    {
+      "ssid": "My network",
+      "password": "password"
+    }
+  ],
+  "brightness": 0.9,
+  "nightMode": true,
+  "minimumLightLevel": 0.2,
+  "readingLight_colorTemperature": 2700
+}
+```
+
 
 
 ### 💻 `ADD_USER`

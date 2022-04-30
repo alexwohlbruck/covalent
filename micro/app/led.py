@@ -357,10 +357,8 @@ def set_color(color, brightness=None, top=False):
     effect = None
     brightness = brightness or DEFAULT_BRIGHTNESS
 
-    # if top is set, get top third of leds
-    # leds = range((led_count // 3) if top else 0, led_count)
-    # TODO: I reversed these because for the prototype the light strip is upside down
-    leds = range(0, (led_count // 3) if top else led_count)
+    # If top is set, get top eighth of leds
+    leds = range((led_count // 8) * 7, led_count) if top else range(led_count)
 
     for i in leds:
         np[i] = tuple(int(p * brightness) for p in color)
