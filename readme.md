@@ -1,4 +1,4 @@
-<img src='https://raw.githubusercontent.com/alexwohlbruck/covalent/main/designs/Logo%20full%20white%20bg.png' width='300'>
+<img src='https://raw.githubusercontent.com/alexwohlbruck/covalent/main/other-files/graphics/Logo%20full%20white%20bg.png' width='300'>
 
 ### Covalent (adjective, chemistry)
 
