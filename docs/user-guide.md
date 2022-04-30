@@ -11,8 +11,8 @@
     - [From the app](#from-the-app)
   - [Adjusting lamp settings](#adjusting-lamp-settings)
   - [Removing or factory resetting your lamp](#removing-or-factory-resetting-your-lamp)
-    - [From the app](#from-the-app-1)
-    - [From the lamp](#from-the-lamp-1)
+    - [Delete from the app](#delete-from-the-app)
+    - [Factory reset from the lamp](#factory-reset-from-the-lamp)
   - [Signing out](#signing-out)
 
 ## LED indicator colors
@@ -36,8 +36,8 @@ Visit https://project-covalent.herokuapp.com and sign in with your Google accoun
 The app uses Bluetooth to pair to your lamp and configure it. This is not supported on iOS devices, or in the Safari browser. Compatible browsers are Chrome, Opera, Edge, and Samsung Internet. For more info about compatibility, visit <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility" target="_blank">this page</a>.
 
 1. Ensure your lamp is is plugged in and in pairing mode. Paring mode is indicated by a pulsing blue light. If the lamps has already been set up, follow the [factory reset instructions](#removing-or-factory-resetting-your-lamp) below.
-2. On the lamps page, click `+ ADD LAMP` to begin the pairing process.
-3. Turn on bluetooth on your device and click `PAIR WITH BLUETOOTH`. A prompt will appear with the lamp name shown. Select it and click `Pair`.
+2. On the lamps page, click <img src="plus.svg" height='15'> `ADD LAMP` to begin the pairing process.
+3. Turn on bluetooth on your device and click <img src="bluetooth.svg" height='15'> `PAIR WITH BLUETOOTH`. A prompt will appear with the lamp name shown. Select it and click `Pair`.
 4. Wait for the wifi network list to load, and select the network you wish to connect to. Enter the pasword if it is secured, and click `Connect`.
 5. After the lamp is connected, give your lamp a name and add it to a group. You can either create a new group or add it to an existing one.
     a. Create a new group
@@ -60,19 +60,19 @@ You can send a message or "pulse" to your group from the lamp itself or from the
 2. When you have found the color you want, click `SEND PULSE` and hold for as long as you like to send the pulse.
 
 ## Adjusting lamp settings
-1. Tap the cog icon on a lamp to open it's settings.
+1. Tap the cog icon (<img src="cog.svg" height='15'>) on a lamp to open it's settings.
 2. You can rename the lamp, and adjust any of the settings on the screen. After adjusting, the changes will be saved automatically.
 
 ## Removing or factory resetting your lamp
-If you wish to reset your lamp its original settings and remove it from your account, follow these steps. This will wipe all of your settings and will require you to pair the lamp again.
-### From the app
-1. Tap the cog icon on a lamp to open it's settings.
-2. Click `DELETE LAMP`.
+If you wish to reset your lamp its original settings and remove it from your account, you can delete it from the app or perform a factory reset from the lamp. This will wipe all of your settings and will require you to pair the lamp again.
+### Delete from the app
+1. Tap the cog icon (<img src="cog.svg" height='15'>) on a lamp to open it's settings.
+2. Click <img src="delete.svg" height='15'> `DELETE LAMP`.
 3. The lamp will be removed from your account and it will be factory reset if it is connected to the internet. After resetting, it will reboot into pairing mode.
 
-### From the lamp
+### Factory reset from the lamp
 1. Double press the top button and on the second press, hold for at least 10 seconds.
-2. Release the button, the lamp will reset itself and reboot into pairing mode. This will not remove the lamp from your account. If you wish to remove the lamp from your account, follow the steps in "From the app".
+2. Release the button, the lamp will reset itself and reboot into pairing mode. This will not remove the lamp from your account. If you wish to remove the lamp from your account, follow the steps in [Delete from the app](#delete-from-the-app).
 
 ## Signing out
 1. Tap your profile photo in the top right corner of the app.
