@@ -7,6 +7,6 @@ relating to or denoting chemical bonds formed by the sharing of electrons betwee
 
 ## Documentation
 
-- [User guide (TODO)](/docs/user-guide.md)
+- [User guide](/docs/user-guide.md)
 - [Bluetooth protocol](/docs/bluetooth.md)
-- [Websocket protocol (TODO)](/docs/websockets.md)
+- [Websocket protocol](/docs/websockets.md)
