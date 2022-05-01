@@ -42,9 +42,29 @@ export const createLamp = async ({
   }
 }
 
+
 export const getLampConfig = async(id: string) => {
   try {
     const { data } = await axios.get<any>(`/lamps/${id}/config`)
+    // TODO: Utilize saved config data on next load
+    Store.commit('ADD_LAMP_CONFIG', data)
+    return data
+  }
+  catch (error: any) {
+    showError(error.response.data.message)
+    return
+  }
+}
+
+export type LampConfig = {
+  brightness?: number
+  nightMode?: boolean
+  minimumLightLevel?: number
+  readingLightColorTemperature?: number
+}
+export const updateLampConfig = async(id: string, config: LampConfig) => {
+  try {
+    const { data } = await axios.patch<any>(`/lamps/${id}/config`, config)
     Store.commit('ADD_LAMP_CONFIG', data)
     return data
   }

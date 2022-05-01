@@ -11,9 +11,10 @@ v-container
       h1.text-h6.font-weight-bold(style='margin-top: 2px')
         | {{ name && name.length ? name : (lamp ? lamp.name : 'Lamp') }} settings
       v-spacer
-      .d-flex(v-if='saving')
-        span.mr-2 Saving
-        v-progress-circular(indeterminate size='20')
+      transition(name='bounce')
+        .d-flex(v-if='saving')
+          span.mr-2 Saving
+          v-progress-circular(indeterminate size='20')
 
     //- Lamp name
     v-text-field(
@@ -36,6 +37,7 @@ v-container
         step='.01'
         :label='Math.floor(config.brightness * 100) + "%"'
         hide-details
+        @change='updateBrightness'
       )
 
     //- Night mode
@@ -46,6 +48,7 @@ v-container
         color='primary'
         dense
         hide-details
+        @change='updateNightMode'
       )
       p.text-caption.mt-2 When enabled, the lamp will turn off when the room is dark.
 
@@ -61,20 +64,24 @@ v-container
             step='.1'
             :tick-labels="['Pitch black', '', '', '', '', 'Dark', '', '', '', '', 'Dim']"
             :label='config.minimumLightLevel * 100 + "%"'
+            @change='updateMinimumLightLevel'
           )
 
     //- Reading light color temp
     div
       h6.text-body-1 Reading light color temperature
-      v-slider(
-        v-model='config.readingLightColorTemperature'
-        label='Reading light color temperature'
-        min='2000'
-        max='10000'
-        unit='K'
-        :color='colorTempRGB'
-        :label='`${config.readingLightColorTemperature} K`'
-      )
+      .d-flex
+        div(:style='`width: 12px; height: 12px; background: ${colorTempRGB}; border-radius: 50%; margin: 10px 8px 0 0`')
+        v-slider(
+          v-model='config.readingLightColorTemperature'
+          label='Reading light color temperature'
+          min='2100'
+          max='10000'
+          unit='K'
+          :color='colorTempRGB'
+          :label='`${config.readingLightColorTemperature} K`'
+          @change='updateReadingLightColorTemperature'
+        )
 
     //- Delete lamp
     v-dialog(v-model='deleteLampDialog' max-width='500')
@@ -99,7 +106,7 @@ v-container
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
-import { deleteLamp, getLamp, renameLamp, getLampConfig } from '@/services/lamp'
+import { deleteLamp, getLamp, renameLamp, getLampConfig, updateLampConfig, LampConfig } from '@/services/lamp'
 import { kelvinToRGB } from '@/util'
 
 @Component
@@ -140,7 +147,7 @@ export default class LampSettings extends Vue {
     return kelvinToRGB(this.config.readingLightColorTemperature)
   }
 
-  // Auto save with debounce
+  // Auto save name with debounce
   nameTimeout: any = null
   @Watch('name')
   async onNameChange() {
@@ -154,6 +161,31 @@ export default class LampSettings extends Vue {
     }, 500)
   }
 
+  async updateBrightness(brightness: number) {
+    this.updateConfig({ brightness })
+  }
+
+  async updateNightMode(nightMode: boolean) {
+    this.updateConfig({ nightMode })
+  }
+
+  async updateMinimumLightLevel(minimumLightLevel: number) {
+    this.updateConfig({ minimumLightLevel })
+  }
+
+  async updateReadingLightColorTemperature(readingLightColorTemperature: number) {
+    this.updateConfig({ readingLightColorTemperature })
+  }
+
+  async updateConfig(newVals: LampConfig) {
+    this.saving = true
+    try {
+      await updateLampConfig(this.lamp.deviceData.deviceId, newVals)
+    }
+    finally {
+      this.saving = false
+    }
+  }
 
   async deleteLamp() {
     this.deleting = true
@@ -163,3 +195,20 @@ export default class LampSettings extends Vue {
   }
 }
 </script>
+
+<style lang="scss">
+.bounce-enter-active {
+  animation: bounce-in 1s;
+}
+.bounce-leave-active {
+  animation: bounce-in 1s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+</style>
