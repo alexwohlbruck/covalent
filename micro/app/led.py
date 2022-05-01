@@ -2,7 +2,7 @@ from machine import Pin
 from neopixel import NeoPixel
 from time import sleep_ms, ticks_us, ticks_ms, ticks_diff
 from _thread import start_new_thread
-from math import floor, radians, cos, pi
+from math import floor, radians, cos, pi, log
 from random import random
 from gc import collect
 
@@ -287,6 +287,30 @@ def hsl_to_rgb(h, s, l):
     else:
         r, g, b = c, 0, x
     return tuple(int(255 * (r + m)) for r in (r, g, b))
+
+# Convert color temp in Kelvin to rgb
+# TODO: The colors that this outputs look like shit. Fix it later.
+def kelvin_to_rgb(kelvin):
+    temp = kelvin / 100
+    r = 0
+    g = 0
+    b = 0
+    if temp <= 66:
+        r = 255
+        g = temp
+        g = 99.4708025861 * log(g) - 161.1195681661
+        if temp <= 19:
+            b = 0
+        else:
+            b = temp - 10
+            b = 138.5177312231 * log(b) - 305.0447927307
+    else:
+        r = temp - 60
+        r = 329.698727446 * pow(r, -0.1332047592)
+        g = temp - 60
+        g = 288.1221695283 * pow(g, -0.0755148492)
+        b = 255
+    return (r, g, b)
     
 
 # TODO: make n default None

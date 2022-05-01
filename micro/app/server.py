@@ -2,7 +2,7 @@ import _thread as thread
 import json
 from time import sleep_ms
 import app.uwebsockets.client as wsclient
-from app.config import get_device_id, get_config_item, load_config, add_config
+from app.config import get_device_id, get_config_item, load_config
 from app.wifi import disconnect_wifi
 
 MAX_RECONNECT_ATTEMPTS = 5
@@ -81,12 +81,6 @@ class Server():
 
         print('Got ' + name)
 
-        if name == 'REQUEST_CONFIG':
-            self.send_config()
-
-        if name == 'UPDATE_CONFIG':
-            self.update_config(data)
-
         for callback in self.callbacks:
             callback(name, data)
     
@@ -112,25 +106,6 @@ class Server():
             'name': 'CONFIG',
             'data': config
         })
-    
-    def update_config(self, config):
-        brightness = config.get('brightness', None)
-        night_mode = config.get('nightMode', None)
-        minimum_light_level = config.get('minimumLightLevel', None)
-        reading_light_color_temperature = config.get('readingLightColorTemperature', None)
-
-        if brightness is not None:
-            add_config('brightness', brightness)
-        
-        if night_mode is not None:
-            add_config('nightMode', night_mode)
-        
-        if minimum_light_level is not None:
-            add_config('minimumLightLevel', minimum_light_level)
-        
-        if reading_light_color_temperature is not None:
-            add_config('readingLightColorTemperature', reading_light_color_temperature)
-        
     
 def start_server():
     try:
