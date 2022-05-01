@@ -5,10 +5,13 @@ from app.server import start_server
 
 BRIGHTNESS = 1
 NIGHT_MODE = True
+MOTION_DETECTION = True
 MINIMUM_LIGHT_LEVEL = 0.5
 READING_LIGHT_COLOR_TEMPERATURE = 6000
 
 server = None
+last_active = False
+last_colors = [(255,255,255)]
 reading_light_on = False
 
 def on_message(name, data):
@@ -28,6 +31,7 @@ def on_message(name, data):
 def start_commander():
     global BRIGHTNESS
     global NIGHT_MODE
+    global MOTION_DETECTION
     global MINIMUM_LIGHT_LEVEL
     global READING_LIGHT_COLOR_TEMPERATURE
 
@@ -35,6 +39,7 @@ def start_commander():
     if config:
         BRIGHTNESS = config.get('brightness', BRIGHTNESS)
         NIGHT_MODE = config.get('nightMode', NIGHT_MODE)
+        MOTION_DETECTION = config.get('motionDetection', MOTION_DETECTION)
         MINIMUM_LIGHT_LEVEL = config.get('minimumLightLevel', MINIMUM_LIGHT_LEVEL)
         READING_LIGHT_COLOR_TEMPERATURE = config.get('readingLightColorTemperature', READING_LIGHT_COLOR_TEMPERATURE)
           
@@ -45,10 +50,12 @@ def start_commander():
 
 def activate(color):
     if (server):
+        active = True
         server.send_lamp_command(rgb_to_hex(*color), True)
 
 def deactivate(color=(0,0,0)):
     if (server):
+        active = False
         server.send_lamp_command(rgb_to_hex(*color), False)
 
 def turn_on_reading_light():
@@ -78,7 +85,6 @@ def factory_reset():
     reset()
 
 def state_from_color_list(colors, brightness=None):
-
     if len(colors) == 1:
         colors = get_color_gradient(rgb_to_hue(*hex_to_rgb(colors[0])))
     else:
@@ -93,10 +99,15 @@ def pulse_received(data):
     if state == None and active == None:
         return
           
+    global last_active
+    global last_colors
+    last_active = active
     colors = state.get('colors')
+    last_colors = colors
+
     if active:
         # effect = start_effect('rotate', colors=state.get('colors'))
-        state = state_from_color_list(colors)
+        state = state_from_color_list(colors, brightness=BRIGHTNESS)
         set(state)
 
     else:
@@ -105,27 +116,42 @@ def pulse_received(data):
         if reading_light_on:
             turn_on_reading_light(colors)
         else:
-            state = state_from_color_list(colors, .03)
+            state = state_from_color_list(colors, BRIGHTNESS * .05)
             set(state)
 
 def update_config(config):
     global BRIGHTNESS
     global NIGHT_MODE
+    global MOTION_DETECTION
     global MINIMUM_LIGHT_LEVEL
     global READING_LIGHT_COLOR_TEMPERATURE
     
     brightness = config.get('brightness', None)
     night_mode = config.get('nightMode', None)
+    motion_detection = config.get('motionDetection', None)
     minimum_light_level = config.get('minimumLightLevel', None)
     reading_light_color_temperature = config.get('readingLightColorTemperature', None)
 
     if brightness is not None:
         add_config('brightness', brightness)
         BRIGHTNESS = brightness
+        
+        global last_active
+        global last_colors
+        if last_active:
+            state = state_from_color_list(last_colors, brightness=BRIGHTNESS)
+            set(state)
+        else:
+            state = state_from_color_list(last_colors, brightness=BRIGHTNESS * .05)
+            set(state)
 
     if night_mode is not None:
         add_config('nightMode', night_mode)
         NIGHT_MODE = night_mode
+    
+    if motion_detection is not None:
+        add_config('motionDetection', motion_detection)
+        MOTION_DETECTION = motion_detection
 
     if minimum_light_level is not None:
         add_config('minimumLightLevel', minimum_light_level)

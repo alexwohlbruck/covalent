@@ -59,6 +59,7 @@ export const getLampConfig = async(id: string) => {
 export type LampConfig = {
   brightness?: number
   nightMode?: boolean
+  motionDetection?: boolean
   minimumLightLevel?: number
   readingLightColorTemperature?: number
 }
