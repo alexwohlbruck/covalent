@@ -10,6 +10,10 @@ config_filename = 'config.json'
 default_config = {
   'deviceId': get_device_id(),
   'wifi': [],
+  'brightness': 1,
+  'nightMode': True,
+  'minimumLightLevel': 0.5,
+  'readingLightColorTemperature': 6000
 }
 
 def load_config():
@@ -19,8 +23,19 @@ def load_config():
     f = open(config_filename, 'r')
     config = json.load(f)
     f.close()
-    return config
 
+    # If any config options are missing, add them
+    found_new = False
+    for key in default_config:
+      if key not in config:
+        config[key] = default_config[key]
+        found_new = True
+
+    if found_new:
+      write_config(config)
+
+    return config
+  
   # If file doesn't exist, create it
   except OSError:
     config = default_config

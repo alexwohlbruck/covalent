@@ -2,7 +2,7 @@ import _thread as thread
 import json
 from time import sleep_ms
 import app.uwebsockets.client as wsclient
-from app.config import get_device_id, get_config_item, load_config
+from app.config import get_device_id, get_config_item, load_config, add_config
 from app.wifi import disconnect_wifi
 
 MAX_RECONNECT_ATTEMPTS = 5
@@ -64,8 +64,6 @@ class WebSocket():
         self.reconnect_attempts += 1
         self.connect()
 
-
-
 # Main server class to send and receive messages
 # TODO: Move event names to constants
 class Server():
@@ -80,6 +78,8 @@ class Server():
     def on_message(self, message):
         name = message.get('name')
         data = message.get('data')
+
+        print('Got ' + name)
 
         if name == 'REQUEST_CONFIG':
             self.send_config()

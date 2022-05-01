@@ -82,6 +82,9 @@ def connect_wifi(ssid, password):
 
         if wifis is None:
             wifis = []
+
+        # Remove the ssid if it exists already
+        wifis = [wifi for wifi in wifis if wifi.get('ssid', None) != ssid]
         
         wifis.append({
             'ssid': ssid,
