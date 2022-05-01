@@ -4,7 +4,8 @@ import { toKebab } from '../helpers'
 import { LampModel, LampState } from '../models/lamp'
 import { GroupModel } from '../models/group'
 import { updateGroupState } from './groups'
-import { broadcast, broadcastToDevices, broadcastToUsers, WSPayload } from '../websockets'
+import { broadcast, broadcastToDevices, broadcastToUsers, WSPayload, eventEmiter } from '../websockets'
+import { pEvent } from 'p-event'
 
 // Send a message to all the members of a group with the given lamp ID
 const broadcastToGroup = async (groupId: string, payload: WSPayload) => {
@@ -108,16 +109,13 @@ export const createLamp = async (
   // Get populated lamp
   const res = await LampModel.findById(lamp._id)
 
-  console.log('created')
   if (groupExists) {
-    console.log('group exists', res.group._id)
     broadcastToGroup(res.group._id, {
       name: 'ADD_LAMP',
       data: res
     })
   }
   else {
-    console.log('group does not exist', [userId])
     broadcastToUsers([userId], {
       name: 'ADD_LAMP',
       data: res,
@@ -125,6 +123,29 @@ export const createLamp = async (
   }
 
   return res
+}
+
+export const getLampConfig = async (id: string) => {
+  broadcastToDevices([id], {
+    name: 'REQUEST_CONFIG',
+    data: {},
+  })
+  // Wait for data from CONFIG event, timeout after 10 seconds
+  return await pEvent(eventEmiter, 'CONFIG', { timeout: 10 * 1000 })
+}
+
+type LampConfig = {
+  brightness?: number
+  nightMode?: boolean
+  minimumLightLevel?: number
+  readingLightColorTemperature?: number
+}
+export const updateLampConfig = async (id: string, config: LampConfig) => {
+  // TODO: Wait for successful response using pEvent
+  broadcastToDevices([id], {
+    name: 'UPDATE_CONFIG',
+    data: config,
+  })
 }
 
 export const moveLampToGroup = async (id: string, groupId: string, accessCode: string) => {

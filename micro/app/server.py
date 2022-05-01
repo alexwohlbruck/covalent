@@ -2,7 +2,7 @@ import _thread as thread
 import json
 from time import sleep_ms
 import app.uwebsockets.client as wsclient
-from app.config import get_device_id, get_config_item
+from app.config import get_device_id, get_config_item, load_config
 from app.wifi import disconnect_wifi
 
 MAX_RECONNECT_ATTEMPTS = 5
@@ -81,6 +81,12 @@ class Server():
         name = message.get('name')
         data = message.get('data')
 
+        if name == 'REQUEST_CONFIG':
+            self.send_config()
+
+        if name == 'UPDATE_CONFIG':
+            self.update_config(data)
+
         for callback in self.callbacks:
             callback(name, data)
     
@@ -89,8 +95,6 @@ class Server():
         self.callbacks.append(cb)
     
     def send_lamp_command(self, color, touching):
-
-        # TODO: Auto resolve lamp id
         self.ws.send({
             'name': 'SEND_LAMP_COMMAND',
             'data': {
@@ -101,6 +105,32 @@ class Server():
                 }
             }
         })
+
+    def send_config(self):
+        config = load_config()
+        self.ws.send({
+            'name': 'CONFIG',
+            'data': config
+        })
+    
+    def update_config(self, config):
+        brightness = config.get('brightness', None)
+        night_mode = config.get('nightMode', None)
+        minimum_light_level = config.get('minimumLightLevel', None)
+        reading_light_color_temperature = config.get('readingLightColorTemperature', None)
+
+        if brightness is not None:
+            add_config('brightness', brightness)
+        
+        if night_mode is not None:
+            add_config('nightMode', night_mode)
+        
+        if minimum_light_level is not None:
+            add_config('minimumLightLevel', minimum_light_level)
+        
+        if reading_light_color_temperature is not None:
+            add_config('readingLightColorTemperature', reading_light_color_temperature)
+        
     
 def start_server():
     try:

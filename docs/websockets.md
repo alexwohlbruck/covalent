@@ -14,8 +14,8 @@ Payload:
 }
 ```
 
-### `SETTINGS`
-Sends the config file to the server. This is called after the server sends `REQUEST_SETTINGS`.
+### `CONFIG`
+Sends the config file to the server. This is called after the server sends `REQUEST_CONFIG`.
 ```json
 {
   "deviceId": "xxxxxxxxxxxxxxxxxxxxxxxx",
@@ -29,7 +29,7 @@ Sends the config file to the server. This is called after the server sends `REQU
   "brightness": 0.9,
   "nightMode": true,
   "minimumLightLevel": 0.2,
-  "readingLight_colorTemperature": 2700
+  "readingLightColorTemperature": 2700
 }
 ```
 
@@ -59,8 +59,8 @@ Payload:
   }
 ```
 
-### ⚛️💻 `UPDATE_SETTINGS`
-Updates settings in the config file (config.json). Only the settings below are allowed to be updated.
+### ⚛️💻 `UPDATE_CONFIG`
+Updates fields in the config file (config.json). Only the fields below are allowed to be updated.
 
 Payload:
 ```json
@@ -72,7 +72,7 @@ Payload:
 }
 ```
 
-### ⚛️💻 `REQUEST_SETTINGS`
+### ⚛️💻 `REQUEST_CONFIG`
 Requests the board to send it's config file (config.json).
 
 Payload:

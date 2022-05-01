@@ -1,6 +1,16 @@
 import express from 'express'
 import { User } from '../models/user'
-import { getLamps, getLamp, createLamp, moveLampToGroup, sendCommand, deleteLamp, renameLamp } from '../services/lamps'
+import {
+  getLamps,
+  getLamp,
+  getLampConfig,
+  updateLampConfig,
+  createLamp,
+  moveLampToGroup,
+  sendCommand,
+  deleteLamp,
+  renameLamp,
+} from '../services/lamps'
 import { isAuthenticated } from '../middleware'
 
 const router = express.Router()
@@ -37,6 +47,17 @@ router.post('/', isAuthenticated, async (req, res) => {
   return res.status(200).json(lamp)
 })
 
+router.get('/:id/config', isAuthenticated, async (req, res) => {
+  const config = await getLampConfig(req.params.id)
+  return res.status(200).json(config)
+})
+
+router.patch('/:id/config', isAuthenticated, async (req, res) => {
+  // TODO: Wait for successful response using pEvent
+  updateLampConfig(req.params.id, req.body)
+  res.status(200).json({})
+})
+
 // Move a lamp to another group
 router.put('/:id/group', isAuthenticated, async (req, res) => {
   const { groupId, accessCode } = req.body
@@ -50,7 +71,7 @@ router.put('/:id/group', isAuthenticated, async (req, res) => {
   return res.status(200).json(lamp)
 })
 
-router.put('/:id/name', isAuthenticated, async(req, res) => {
+router.put('/:id/name', isAuthenticated, async (req, res) => {
   const { name } = req.body
 
   const lamp = await renameLamp(

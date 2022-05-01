@@ -3,6 +3,9 @@ import { User } from '../models/user'
 import WebSocket from 'ws'
 import { sendCommand } from '../services/lamps'
 import { LampModel } from '../models/lamp'
+import mitt from 'mitt'
+
+export const eventEmiter = mitt()
 
 const router = express.Router()
 
@@ -55,11 +58,14 @@ export const broadcastToDevices = (deviceIds: string[], payload: WSPayload) => {
 // Client to server events
 const events = {
   SEND_LAMP_COMMAND: async (data: any) => {
-    console.log('SEND_LAMP_COMMAND', data)
     const { lampId, state } = data
     if (lampId && state)
       await sendCommand(lampId, state)
   },
+
+  CONFIG: async (data: any) => {
+    // TODO: Send config to the client who requested it
+  }
 }
 
 // Ping clients on an interval
@@ -114,6 +120,8 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
     try {
       const { name, data } = JSON.parse(message)
       const handler = (events as any)[name]
+
+      eventEmiter.emit(name, data)
 
       if (handler) {
         handler(data)
