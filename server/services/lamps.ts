@@ -1,3 +1,4 @@
+import pEvent from 'p-event'
 import { Types } from 'mongoose'
 import { RequestException } from '../routes'
 import { toKebab } from '../helpers'
@@ -5,7 +6,6 @@ import { LampModel, LampState } from '../models/lamp'
 import { GroupModel } from '../models/group'
 import { updateGroupState } from './groups'
 import { broadcast, broadcastToDevices, broadcastToUsers, WSPayload, eventEmiter } from '../websockets'
-import { pEvent } from 'p-event'
 
 // Send a message to all the members of a group with the given lamp ID
 const broadcastToGroup = async (groupId: string, payload: WSPayload) => {

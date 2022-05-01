@@ -38,7 +38,7 @@
     "mongoose": "^6.2.4",
     "mongoose-autopopulate": "^0.16.0",
     "mongoose-findorcreate": "^3.0.0",
-    "p-event": "^5.0.1",
+    "p-event": "^4.2.0",
     "passport": "^0.5.2",
     "passport-google-id-token": "^0.4.7",
     "path": "^0.12.7",

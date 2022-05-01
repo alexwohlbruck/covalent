@@ -17,6 +17,9 @@
           "info"
         ]
       }
+    ],
+    "no-var-requires": [
+      false
     ]
   },
   "rulesDirectory": []
