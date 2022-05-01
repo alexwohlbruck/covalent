@@ -14,6 +14,25 @@ Payload:
 }
 ```
 
+### `SETTINGS`
+Sends the config file to the server. This is called after the server sends `REQUEST_SETTINGS`.
+```json
+{
+  "deviceId": "xxxxxxxxxxxxxxxxxxxxxxxx",
+  "lampId": "xxxxxxxxxxxxxxxxxxxxxxxx",
+  "wifi": [
+    {
+      "ssid": "My network",
+      "password": "password"
+    }
+  ],
+  "brightness": 0.9,
+  "nightMode": true,
+  "minimumLightLevel": 0.2,
+  "readingLight_colorTemperature": 2700
+}
+```
+
 ## Server to web client events
 
 All these events correspond to mutations in the Vuex store (💻) or are send to the board to perform an action (⚛️).
@@ -53,23 +72,12 @@ Payload:
 }
 ```
 
-### ⚛️💻 `GET_SETTINGS`
-Returns the config file (config.json).
+### ⚛️💻 `REQUEST_SETTINGS`
+Requests the board to send it's config file (config.json).
+
+Payload:
 ```json
-{
-  "deviceId": "xxxxxxxxxxxxxxxxxxxxxxxx",
-  "lampId": "xxxxxxxxxxxxxxxxxxxxxxxx",
-  "wifi": [
-    {
-      "ssid": "My network",
-      "password": "password"
-    }
-  ],
-  "brightness": 0.9,
-  "nightMode": true,
-  "minimumLightLevel": 0.2,
-  "readingLight_colorTemperature": 2700
-}
+{}
 ```
 
 
