@@ -2,7 +2,7 @@
 v-container
   v-card.pa-6.d-flex.flex-column(flat outlined style='gap: 2rem')
     v-fade-transition
-      v-overlay(absolute v-if='loadingConfig')
+      v-overlay(absolute v-if='loadingConfigf')
         v-progress-circular(indeterminate)
 
     .d-flex
@@ -40,33 +40,6 @@ v-container
         @change='updateBrightness'
       )
 
-    //- Night mode
-    div
-      v-checkbox(
-        v-model='config.nightMode'
-        label='Night mode'
-        color='primary'
-        dense
-        hide-details
-        @change='updateNightMode'
-      )
-      p.text-caption.mt-2 When enabled, the lamp will turn off when the room is dark.
-
-      v-slide-y-transition
-        div(v-show='config.nightMode')
-          h6.text-body-1 Minimum ambient light level (night mode)
-          v-slider(
-            v-model='config.minimumLightLevel'
-            :disabled='!config.nightMode'
-            discrete
-            min='0'
-            max='1'
-            step='.1'
-            :tick-labels="['Pitch black', '', '', '', '', 'Dark', '', '', '', '', 'Dim']"
-            :label='config.minimumLightLevel * 100 + "%"'
-            @change='updateMinimumLightLevel'
-          )
-
     //- Reading light color temp
     div
       h6.text-body-1 Reading light color temperature
@@ -81,7 +54,48 @@ v-container
           :color='colorTempRGB'
           :label='`${config.readingLightColorTemperature} K`'
           @change='updateReadingLightColorTemperature'
+          hide-details
         )
+
+    //- Night mode
+    div
+      v-checkbox(
+        v-model='config.nightMode'
+        label='Night mode'
+        color='primary'
+        dense
+        hide-details
+        @change='updateNightMode'
+      )
+      p.text-caption.mt-2.mb-0 When enabled, the lamp will turn off when the room is dark.
+
+      v-slide-y-transition
+        div.mt-4(v-show='config.nightMode')
+          h6.text-body-1 Minimum ambient light level (night mode)
+          v-slider(
+            v-model='config.minimumLightLevel'
+            :disabled='!config.nightMode'
+            discrete
+            min='0'
+            max='1'
+            step='.1'
+            :tick-labels="['Pitch black', '', '', '', '', 'Dark', '', '', '', '', 'Dim']"
+            :label='config.minimumLightLevel * 100 + "%"'
+            @change='updateMinimumLightLevel'
+          )
+
+    //- Motion detection
+    div
+      v-checkbox(
+        v-model='config.motionDetection'
+        label='Motion detection'
+        color='primary'
+        dense
+        hide-details
+        @change='updateMotionDetection'
+      )
+      p.text-caption.mt-2 When enabled, the lamp will only activate when motion is dected.
+
 
     //- Delete lamp
     v-dialog(v-model='deleteLampDialog' max-width='500')
@@ -167,6 +181,10 @@ export default class LampSettings extends Vue {
 
   async updateNightMode(nightMode: boolean) {
     this.updateConfig({ nightMode })
+  }
+
+  async updateMotionDetection(motionDetection: boolean) {
+    this.updateConfig({ motionDetection })
   }
 
   async updateMinimumLightLevel(minimumLightLevel: number) {

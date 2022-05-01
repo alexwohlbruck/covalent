@@ -12,6 +12,7 @@ default_config = {
   'wifi': [],
   'brightness': 1,
   'nightMode': True,
+  'motionDetection': True,
   'minimumLightLevel': 0.5,
   'readingLightColorTemperature': 6000
 }
