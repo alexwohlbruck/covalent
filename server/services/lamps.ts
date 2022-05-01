@@ -131,7 +131,13 @@ export const getLampConfig = async (id: string) => {
     data: {},
   })
   // Wait for data from CONFIG event, timeout after 10 seconds
-  return await pEvent(eventEmiter, 'CONFIG', { timeout: 10 * 1000 })
+  try {
+    const config = await pEvent(eventEmiter, 'CONFIG', { timeout: 8 * 1000 })
+    return config
+  }
+  catch (err) {
+    throw new RequestException(408, 'Could not communicate with lamp.')
+  }
 }
 
 type LampConfig = {

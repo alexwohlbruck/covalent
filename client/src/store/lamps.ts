@@ -67,6 +67,13 @@ const mutations = {
     if (!state.all.includes(lamp._id)) state.all.push(lamp._id)
   },
 
+  ADD_LAMP_CONFIG(state: LampsState, config: any) {
+    Vue.set(state.byId, config.lampId, {
+     ...state.byId[config.lampId],
+      config,
+    })
+  },
+
   REMOVE_LAMP(state: LampsState, lamp: Lamp | { _id: string }) {
     Vue.delete(state.byId, lamp._id)
     const index = state.all.indexOf(lamp._id)

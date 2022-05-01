@@ -2,11 +2,13 @@ import Store from '@/store'
 import router from '@/router'
 import axios from '@/axios'
 import { Lamp } from '@/types/Lamp'
-import { AVAILABLE_NETWORKS } from './bluetooth'
+import { showError } from '@/services/app'
 
 export const getMyLamps = async() => {
   const { data: lamps } = await axios.get<Lamp[]>('/lamps/me')
-  lamps.forEach(lamp => Store.commit('ADD_LAMP', lamp))
+  lamps.forEach(lamp => {
+    Store.commit('ADD_LAMP', lamp)
+  })
   return lamps
 }
 
@@ -36,7 +38,19 @@ export const createLamp = async ({
     return data
   }
   catch (error: any) {
-    Store.dispatch('error', error.message)
+    showError(error.response.data.message)
+  }
+}
+
+export const getLampConfig = async(id: string) => {
+  try {
+    const { data } = await axios.get<any>(`/lamps/${id}/config`)
+    Store.commit('ADD_LAMP_CONFIG', data)
+    return data
+  }
+  catch (error: any) {
+    showError(error.response.data.message)
+    return
   }
 }
 
@@ -49,7 +63,7 @@ export const renameLamp = async (id: string, name: string) => {
     return data
   }
   catch (error: any) {
-    Store.dispatch('error', error.message)
+    showError(error.response.data.message)
   }
 }
 
@@ -70,7 +84,7 @@ export const sendCommand = async ({
     return data
   }
   catch (error: any) {
-    Store.dispatch('error', error.message)
+    showError(error.response.data.message)
   }
 }
 

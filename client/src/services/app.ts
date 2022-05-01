@@ -1,6 +1,6 @@
 import AppStore from '../store/app'
 
-export const error = (message: string) => {
+export const showError = (message: string) => {
   console.error(message)
   AppStore.mutations.SET_ERROR(AppStore.state, message)
   setTimeout(() => {

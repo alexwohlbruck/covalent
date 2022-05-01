@@ -1,6 +1,10 @@
 <template lang="pug">
 v-container
   v-card.pa-6.d-flex.flex-column(flat outlined style='gap: 2rem')
+    v-fade-transition
+      v-overlay(absolute v-if='loadingConfig')
+        v-progress-circular(indeterminate)
+
     .d-flex
       v-btn.mr-2(icon @click='$router.back()')
         v-icon mdi-arrow-left
@@ -25,19 +29,19 @@ v-container
     div
       h6.text-body-1 LED brightness level
       v-slider(
-        v-model='settings.bightnessLevel'
+        v-model='config.brightnessLevel'
         discrete
         min='.25'
         max='1'
         step='.01'
-        :label='Math.floor(settings.bightnessLevel * 100) + "%"'
+        :label='Math.floor(config.brightnessLevel * 100) + "%"'
         hide-details
       )
 
     //- Night mode
     div
       v-checkbox(
-        v-model='settings.nightMode'
+        v-model='config.nightMode'
         label='Night mode'
         color='primary'
         dense
@@ -46,30 +50,30 @@ v-container
       p.text-caption.mt-2 When enabled, the lamp will turn off when the room is dark.
 
       v-slide-y-transition
-        div(v-show='settings.nightMode')
+        div(v-show='config.nightMode')
           h6.text-body-1 Minimum ambient light level (night mode)
           v-slider(
-            v-model='settings.nightModeSensitivity'
-            :disabled='!settings.nightMode'
+            v-model='config.nightModeSensitivity'
+            :disabled='!config.nightMode'
             discrete
             min='0'
             max='1'
             step='.1'
             :tick-labels="['Pitch black', '', '', '', '', 'Dark', '', '', '', '', 'Dim']"
-            :label='settings.nightModeSensitivity * 100 + "%"'
+            :label='config.nightModeSensitivity * 100 + "%"'
           )
 
     //- Reading light color temp
     div
       h6.text-body-1 Reading light color temperature
       v-slider(
-        v-model='settings.readingLightColorTemperature'
+        v-model='config.readingLightColorTemperature'
         label='Reading light color temperature'
         min='2000'
         max='10000'
         unit='K'
         :color='colorTempRGB'
-        :label='`${settings.readingLightColorTemperature} K`'
+        :label='`${config.readingLightColorTemperature} K`'
       )
 
     //- Delete lamp
@@ -95,29 +99,42 @@ v-container
 
 <script lang="ts">
 import { Vue, Component, Watch } from 'vue-property-decorator'
-import { deleteLamp, getLamp, renameLamp } from '@/services/lamp'
+import { deleteLamp, getLamp, renameLamp, getLampConfig } from '@/services/lamp'
 import { kelvinToRGB } from '@/util'
 
 @Component
 export default class LampSettings extends Vue {
 
+  loadingConfig = false
   saving = false
   deleting = false
   deleteLampDialog = false
 
   name = ''
-  settings = {
+  config: any = {
     nightMode: true,
     nightModeSensitivity: .5,
-    bightnessLevel: 1,
+    brightnessLevel: 1,
     readingLightColorTemperature: 6000,
   }
   
   async mounted() {
     const lamp = await getLamp(this.$route.params.id)
-
     this.name = lamp.name
-    // this.fields.settings = lamp.settings
+    
+    this.loadingConfig = true
+    try {
+      const config = await getLampConfig(this.$route.params.id)
+      if (config) {
+        this.config = {
+          ...this.config,
+          ...config,
+        }
+      }
+    }
+    finally {
+      this.loadingConfig = false
+    }
   }
 
   get lamp() {
@@ -125,7 +142,7 @@ export default class LampSettings extends Vue {
   }
 
   get colorTempRGB() {
-    return kelvinToRGB(this.settings.readingLightColorTemperature)
+    return kelvinToRGB(this.config.readingLightColorTemperature)
   }
 
   // Auto save with debounce
