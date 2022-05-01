@@ -2,7 +2,7 @@
 v-container.d-flex.flex-column.align-center
   v-card.pa-6.d-flex.flex-column.small-container(flat outlined style='gap: 2rem')
     v-fade-transition
-      v-overlay(absolute v-if='loadingConfig')
+      v-overlay(absolute v-if='loadingConfigf')
         v-progress-circular(indeterminate)
 
     .d-flex
