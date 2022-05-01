@@ -7,10 +7,10 @@ v-container
 
 
   .d-flex.flex-column.align-center(v-else)
-    v-card.lamp-card.mb-4.pa-6(
+    v-card.lamp-card.mb-4.pa-6.small-container(
       v-for='(group, groupId) in groups'
       :key='groupId'
-      :style='`background: ${gradient(group.group.state)}; width: 600px; max-width: 100%; box-shadow: ${shadow(group.group.state)};`'
+      :style='`background: ${gradient(group.group.state)}; box-shadow: ${shadow(group.group.state)};`'
     )
       .d-flex.flex-column.mb-4
         .text-h6 {{ group.group.groupId }}
@@ -87,3 +87,11 @@ export default class Lamps extends Vue {
   }
 }
 </script>
+
+
+<style lang="scss">
+.small-container {
+  width: 600px;
+  max-width: 100%;
+}
+</style>

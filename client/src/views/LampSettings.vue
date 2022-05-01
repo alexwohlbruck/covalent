@@ -1,8 +1,8 @@
 <template lang="pug">
-v-container
-  v-card.pa-6.d-flex.flex-column(flat outlined style='gap: 2rem')
+v-container.d-flex.flex-column.align-center
+  v-card.pa-6.d-flex.flex-column.small-container(flat outlined style='gap: 2rem')
     v-fade-transition
-      v-overlay(absolute v-if='loadingConfigf')
+      v-overlay(absolute v-if='loadingConfig')
         v-progress-circular(indeterminate)
 
     .d-flex
@@ -94,27 +94,32 @@ v-container
         hide-details
         @change='updateMotionDetection'
       )
-      p.text-caption.mt-2 When enabled, the lamp will only activate when motion is dected.
+      p.text-caption.mt-2 When enabled, the lamp will only activate when motion is detected.
+
+    
+    v-sheet.d-flex.flex-column(style='background-color: rgba(255,0,0,.1)' rounded outlined)
+      v-subheader ⚠️ Danger zone!
+      v-divider(label='asdf')
 
 
-    //- Delete lamp
-    v-dialog(v-model='deleteLampDialog' max-width='500')
-      template(v-slot:activator='{ on, attrs }')
-        div
-          v-btn(color='error' @click='deleteLampDialog = true')
-            v-icon(left) mdi-delete
-            | Delete lamp
-            
-      v-card
-        v-card-title.text-h5 Delete {{ name }}?
-        v-card-text
-          | Are you sure you want to delete this lamp?
-        v-card-actions
-          v-spacer
-          v-btn(text @click='deleteLampDialog = false') Cancel
-          v-btn(text color='error' @click='deleteLamp' :loading='deleting')
-            v-icon(left) mdi-delete
-            | Delete
+      //- Delete lamp
+      v-dialog(v-model='deleteLampDialog' max-width='500')
+        template(v-slot:activator='{ on, attrs }')
+          div
+            v-btn.ma-4(color='error' @click='deleteLampDialog = true')
+              v-icon(left) mdi-delete
+              | Delete lamp
+              
+        v-card
+          v-card-title.text-h5 Delete {{ name }}?
+          v-card-text
+            | Are you sure you want to delete this lamp?
+          v-card-actions
+            v-spacer
+            v-btn(text @click='deleteLampDialog = false') Cancel
+            v-btn(text color='error' @click='deleteLamp' :loading='deleting')
+              v-icon(left) mdi-delete
+              | Delete
 
 </template>
 
