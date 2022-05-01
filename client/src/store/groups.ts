@@ -15,7 +15,6 @@ export const initialState = (): GroupsState => ({
 
 const mutations = {
   ADD_GROUP(state: GroupsState, group: Group) {
-    console.log(group)
     Vue.set(state.byId, group._id, {
       ...state.byId[group._id],
       ...group,

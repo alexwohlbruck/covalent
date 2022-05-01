@@ -49,6 +49,7 @@ router.post('/', isAuthenticated, async (req, res) => {
 
 router.get('/:id/config', isAuthenticated, async (req, res) => {
   const config = await getLampConfig(req.params.id)
+  // const config = {"deviceId":"4091519b56b8","readingLightColorTemperature":2001,"nightMode":false,"minimumLightLevel":0.8,"wifi":[{"ssid":"asu-visitor","password":""}],"brightness":0.5,"lampId":"626df507d6756882f166942c"}
   return res.status(200).json(config)
 })
 

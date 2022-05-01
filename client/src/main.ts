@@ -18,8 +18,6 @@ Vue.use(VueNativeSock, wsUrl, {
   reconnectionAttempts: 5,
   reconnectionDelay: 3000,
   passToStoreHandler: (eventName: string, event: any) => {
-    console.log(eventName, event)
-
     if (!eventName.startsWith('SOCKET_')) return
 
     switch (eventName) {

@@ -29,12 +29,12 @@ v-container
     div
       h6.text-body-1 LED brightness level
       v-slider(
-        v-model='config.brightnessLevel'
+        v-model='config.brightness'
         discrete
         min='.25'
         max='1'
         step='.01'
-        :label='Math.floor(config.brightnessLevel * 100) + "%"'
+        :label='Math.floor(config.brightness * 100) + "%"'
         hide-details
       )
 
@@ -53,14 +53,14 @@ v-container
         div(v-show='config.nightMode')
           h6.text-body-1 Minimum ambient light level (night mode)
           v-slider(
-            v-model='config.nightModeSensitivity'
+            v-model='config.minimumLightLevel'
             :disabled='!config.nightMode'
             discrete
             min='0'
             max='1'
             step='.1'
             :tick-labels="['Pitch black', '', '', '', '', 'Dark', '', '', '', '', 'Dim']"
-            :label='config.nightModeSensitivity * 100 + "%"'
+            :label='config.minimumLightLevel * 100 + "%"'
           )
 
     //- Reading light color temp
@@ -111,12 +111,7 @@ export default class LampSettings extends Vue {
   deleteLampDialog = false
 
   name = ''
-  config: any = {
-    nightMode: true,
-    nightModeSensitivity: .5,
-    brightnessLevel: 1,
-    readingLightColorTemperature: 6000,
-  }
+  config: any = {}
   
   async mounted() {
     const lamp = await getLamp(this.$route.params.id)
