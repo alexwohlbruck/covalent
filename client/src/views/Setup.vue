@@ -109,7 +109,7 @@ v-container
 
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { Network } from '@/store'
-import { error } from '@/services/app'
+import { showError } from '@/services/app'
 import { createLamp } from '@/services/lamp'
 import {
   emitter,
@@ -161,7 +161,7 @@ export default class Setup extends Vue {
     emitter.on(CONNECTION_FAILURE, (payload: any) => {
       this.connectingToNetwork = false
       this.connectedNetwork = null
-      error("Couldn't connect to wifi network.")
+      showError("Couldn't connect to wifi network.")
     })
   }
 

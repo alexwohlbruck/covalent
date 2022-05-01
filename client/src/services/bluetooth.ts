@@ -4,9 +4,8 @@ import {
   dataViewToText,
 } from '@capacitor-community/bluetooth-le'
 import store from '@/store'
-import { Store } from 'vuex'
 import mitt from 'mitt'
-import { error } from './app'
+import { showError } from '@/services/app'
 
 const NUS_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e' // Nordic UART Service
 const RX_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e' // Receiver characteristic
@@ -93,7 +92,7 @@ export function onMessage(payload: Payload) {
 
   switch (name) {
     case ERROR: {
-      error(data.message)
+      showError(data.message)
     }
   }
 }
