@@ -124,7 +124,7 @@ export default class LampSettings extends Vue {
     
     this.loadingConfig = true
     try {
-      const config = await getLampConfig(this.$route.params.id)
+      const config = await getLampConfig(lamp.deviceData.deviceId)
       if (config) {
         this.config = {
           ...this.config,
