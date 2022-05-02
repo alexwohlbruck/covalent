@@ -2,6 +2,7 @@ from app.config import reset_config, add_config, load_config
 from machine import reset
 from app.led import set_color, turn_off, set, get_color_gradient, rgb_to_hue, hex_to_rgb, polylinear_gradient, rgb_to_hex, kelvin_to_rgb
 from app.server import start_server
+from time import sleep
 
 BRIGHTNESS = 1
 NIGHT_MODE = True
@@ -13,6 +14,11 @@ server = None
 last_active = False
 last_colors = [(255,255,255)]
 reading_light_on = False
+
+last_room_is_lit = True
+last_motion_detected = True
+
+message_queue = []
 
 def on_message(name, data):
     # TODO: Move this switch to a dict outside
@@ -48,24 +54,41 @@ def start_commander():
     server.subscribe(on_message)
 
 
+# Send activate command to server
 def activate(color):
     if (server):
         active = True
         server.send_lamp_command(rgb_to_hex(*color), True)
 
+# Send deactivate command to server
 def deactivate(color=(0,0,0)):
     if (server):
         active = False
         server.send_lamp_command(rgb_to_hex(*color), False)
+
+# Activate LEDs from last stored colors
+def activate_local():
+    global last_colors
+    state = state_from_color_list(last_colors, brightness=BRIGHTNESS)
+    set(state)
+
+# Deactivate LEDs from last stored colors
+def deactivate_local():
+    global last_colors
+    global reading_light_on
+    if reading_light_on:
+        turn_on_reading_light(last_colors)
+    else:
+        state = state_from_color_list(last_colors, BRIGHTNESS * .05)
+        set(state)
 
 def turn_on_reading_light():
     global READING_LIGHT_COLOR_TEMPERATURE
     print('on')
     global reading_light_on
     reading_light_on = True
-    print(READING_LIGHT_COLOR_TEMPERATURE)
-    print(kelvin_to_rgb(READING_LIGHT_COLOR_TEMPERATURE))
-    set_color(kelvin_to_rgb(READING_LIGHT_COLOR_TEMPERATURE))
+    rgb = kelvin_to_rgb(READING_LIGHT_COLOR_TEMPERATURE)
+    set_color(rgb, brightness=BRIGHTNESS)
 
 def turn_off_reading_light():
     print('off')
@@ -79,6 +102,35 @@ def toggle_reading_light():
         turn_off_reading_light()
     else:
         turn_on_reading_light()
+
+# Triggered by input.py when the room becomes bright
+def room_is_lit(val):
+    print('room is lit' + str(val))
+    global last_room_is_lit
+    last_room_is_lit = val
+    dequeue()
+
+# Triggered by input.py when motion is detected
+def motion_detected(val):
+    print('motion detected' + str(val))
+    global last_motion_detected
+    last_motion_detected = val
+    dequeue()
+
+# If room is lid and motion detected, dequeue pending messages
+def dequeue():
+    global last_room_is_lit
+    global last_motion_detected
+    if last_room_is_lit and last_motion_detected:
+        # Wait 1 second between dequeuing
+        while len(message_queue) > 0:
+            message = message_queue.pop(0)
+            pulse_received(message)
+            sleep(1)
+        
+        # Deactivate after dequeuing
+        deactivate_local()
+
 
 def factory_reset():
     reset_config()
@@ -98,6 +150,15 @@ def pulse_received(data):
 
     if state == None and active == None:
         return
+
+    global last_room_is_lit
+    global last_motion_detected
+
+    # Queue if the room is not lit or no motion detected
+    if not last_room_is_lit or not last_motion_detected:
+        if active:
+            message_queue.append(data)
+        return
           
     global last_active
     global last_colors
@@ -106,18 +167,9 @@ def pulse_received(data):
     last_colors = colors
 
     if active:
-        # effect = start_effect('rotate', colors=state.get('colors'))
-        state = state_from_color_list(colors, brightness=BRIGHTNESS)
-        set(state)
-
+        activate_local()
     else:
-        # stop_effect(effect)
-        global reading_light_on
-        if reading_light_on:
-            turn_on_reading_light(colors)
-        else:
-            state = state_from_color_list(colors, BRIGHTNESS * .05)
-            set(state)
+        deactivate_local()
 
 def update_config(config):
     global BRIGHTNESS
@@ -135,15 +187,17 @@ def update_config(config):
     if brightness is not None:
         add_config('brightness', brightness)
         BRIGHTNESS = brightness
-        
-        global last_active
-        global last_colors
-        if last_active:
-            state = state_from_color_list(last_colors, brightness=BRIGHTNESS)
-            set(state)
+
+        global reading_light_on
+        if reading_light_on:
+            turn_on_reading_light()
         else:
-            state = state_from_color_list(last_colors, brightness=BRIGHTNESS * .05)
-            set(state)
+            global last_active
+            global last_colors
+            if last_active:
+                activate_local()
+            else:
+                deactivate_local()
 
     if night_mode is not None:
         add_config('nightMode', night_mode)

@@ -12,9 +12,9 @@ v-container.d-flex.flex-column.align-center
         | {{ name && name.length ? name : (lamp ? lamp.name : 'Lamp') }} settings
       v-spacer
       transition(name='bounce')
-        .d-flex(v-if='saving')
+        .d-flex.mt-2(v-hide='!saving')
           span.mr-2 Saving
-          v-progress-circular(indeterminate size='20')
+          v-progress-circular.mt-1.ml-1(indeterminate size='20')
 
     //- Lamp name
     v-text-field(
@@ -98,7 +98,9 @@ v-container.d-flex.flex-column.align-center
 
     
     v-sheet.d-flex.flex-column(style='background-color: rgba(255,0,0,.1)' rounded outlined)
-      v-subheader ⚠️ Danger zone!
+      v-subheader.white--text
+        span(style='margin: 0 8px 3px 0') ⚠️
+        | Danger zone!
       v-divider(label='asdf')
 
 

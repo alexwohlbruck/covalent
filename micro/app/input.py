@@ -4,7 +4,7 @@ from time import sleep, sleep_ms, ticks_ms
 from machine import Pin, ADC
 from app.rotary.rotary_irq_esp import RotaryIRQ
 from app.led import set_color, rgb_to_hex, hsl_to_rgb, turn_off
-from app.commander import activate, toggle_reading_light, deactivate, factory_reset
+from app.commander import activate, toggle_reading_light, deactivate, factory_reset, room_is_lit, motion_detected
 
 ROTARY_STEPS = 32
 LIGHT_SENSITIVITY = 3400
@@ -108,12 +108,13 @@ def input_watcher():
             val = int((rotary_new / ROTARY_STEPS) * 360)
             last_color = hsl_to_rgb(val, 1, 0.5)
             set_color(last_color, top=True)
-            print('result =', rotary_new)
+            # print('result =', rotary_new)
 
         # Motion sensor
         if motion_old != motion_new:
-            print('motion =', motion_new)
+            # print('motion =', motion_new)
             motion_old = motion_new
+            motion_detected(motion_new)
         
         # Light sensor
         light_values.append(light_new)
@@ -141,10 +142,7 @@ def input_watcher():
                 if now - light_time > LIGHT_WAIT:
                     if reads_dark != is_dark:
                         is_dark = reads_dark
-                        if is_dark:
-                            turn_off()
-                        else:
-                            set_color((0,0,255), brightness=.05)
+                        room_is_lit(not is_dark)
 
                     past_threshold = False
 
