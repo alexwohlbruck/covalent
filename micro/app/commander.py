@@ -12,7 +12,7 @@ READING_LIGHT_COLOR_TEMPERATURE = 6000
 
 server = None
 last_active = False
-last_colors = [(255,255,255)]
+last_colors = ['#ffffff']
 reading_light_on = False
 
 last_room_is_lit = True
@@ -79,6 +79,7 @@ def deactivate_local():
     if reading_light_on:
         turn_on_reading_light(last_colors)
     else:
+        print(last_colors)
         state = state_from_color_list(last_colors, BRIGHTNESS * .05)
         set(state)
 
@@ -108,6 +109,12 @@ def room_is_lit(val):
     print('room is lit' + str(val))
     global last_room_is_lit
     last_room_is_lit = val
+
+    # If dark, turn off the light completely
+    if not val:
+        turn_off()
+        return
+
     dequeue()
 
 # Triggered by input.py when motion is detected
@@ -121,6 +128,7 @@ def motion_detected(val):
 def dequeue():
     global last_room_is_lit
     global last_motion_detected
+    print(last_room_is_lit, last_motion_detected)
     if last_room_is_lit and last_motion_detected:
         # Wait 1 second between dequeuing
         while len(message_queue) > 0:
@@ -194,6 +202,7 @@ def update_config(config):
         else:
             global last_active
             global last_colors
+
             if last_active:
                 activate_local()
             else:

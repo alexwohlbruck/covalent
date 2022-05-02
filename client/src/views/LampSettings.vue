@@ -2,7 +2,7 @@
 v-container.d-flex.flex-column.align-center
   v-card.pa-6.d-flex.flex-column.small-container(flat outlined style='gap: 2rem')
     v-fade-transition
-      v-overlay(absolute v-if='loadingConfigf')
+      v-overlay(absolute v-if='loadingConfig')
         v-progress-circular(indeterminate)
 
     .d-flex
@@ -12,7 +12,7 @@ v-container.d-flex.flex-column.align-center
         | {{ name && name.length ? name : (lamp ? lamp.name : 'Lamp') }} settings
       v-spacer
       transition(name='bounce')
-        .d-flex.mt-2(v-hide='!saving')
+        .d-flex.mt-2(v-if='saving')
           span.mr-2 Saving
           v-progress-circular.mt-1.ml-1(indeterminate size='20')
 

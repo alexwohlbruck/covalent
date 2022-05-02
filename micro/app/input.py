@@ -114,7 +114,7 @@ def input_watcher():
         if motion_old != motion_new:
             # print('motion =', motion_new)
             motion_old = motion_new
-            motion_detected(motion_new)
+            motion_detected(motion_new == 1)
         
         # Light sensor
         light_values.append(light_new)
