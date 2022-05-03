@@ -136,11 +136,8 @@ def dequeue():
     global last_room_is_lit
     global last_motion_detected
     print(last_room_is_lit, last_motion_detected)
-    
-    # Check if user has interacted with device in the last 30 seconds
-    user_has_interacted = ticks_ms() - time_since_interactive < 30000
 
-    if user_has_interacted or (last_room_is_lit and last_motion_detected):
+    if last_room_is_lit and last_motion_detected:
         # Wait 1 second between dequeuing
         while len(message_queue) > 0:
             message = message_queue.pop(0)
@@ -172,12 +169,16 @@ def pulse_received(data):
 
     global last_room_is_lit
     global last_motion_detected
+    global time_since_interactive
 
-    # Queue if the room is not lit or no motion detected
-    if not last_room_is_lit or not last_motion_detected:
+    # Check if user has interacted with device in the last 10 seconds
+    user_has_interacted = ticks_ms() - time_since_interactive < 10000
+
+    # Don't light if user has not interacted recently, the room is dark, or motion is not detected
+    if not user_has_interacted and (not last_room_is_lit or not last_motion_detected):
         if active:
             message_queue.append(data)
-        return
+            return
           
     global last_active
     global last_colors

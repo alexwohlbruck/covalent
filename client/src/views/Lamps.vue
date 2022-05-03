@@ -6,7 +6,7 @@ v-container
     v-img.mt-5.mb-10(src='@/assets/undraw_signal_searching.svg' width='300')
 
 
-  .d-flex.flex-column.align-center(v-else style='gap: 1em;')
+  .d-flex.flex-column.align-center(v-else)
     v-card.lamp-card.mb-4.pa-6.small-container(
       v-for='(group, groupId) in groups'
       :key='groupId'
@@ -18,7 +18,8 @@ v-container
           | {{ group.lamps.length }} {{ group.lamps.length === 1 ? 'lamp' : 'lamps' }}
           | - {{ group.group.accessCode }}
 
-      lamp(v-for='lamp in group.lamps' :key='lamp._id' :lamp='lamp')
+      .d-flex.flex-column(style='gap: 1.5em;')
+        lamp(v-for='lamp in group.lamps' :key='lamp._id' :lamp='lamp')
     
   .d-flex.justify-center
     v-btn.ml-4(
