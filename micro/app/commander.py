@@ -1,9 +1,10 @@
 from app.config import reset_config, add_config, load_config
 from machine import reset
-from app.led import set_color, turn_off, set, get_color_gradient, rgb_to_hue, hex_to_rgb, polylinear_gradient, rgb_to_hex, kelvin_to_rgb
+from app.led import set_color, turn_off, transition_to, get_color_gradient, rgb_to_hue, hex_to_rgb, polylinear_gradient, rgb_to_hex, kelvin_to_rgb
 from app.server import start_server
-from time import sleep
+from time import sleep, ticks_ms
 
+# User defined config variables
 BRIGHTNESS = 1
 NIGHT_MODE = True
 MOTION_DETECTION = True
@@ -17,6 +18,7 @@ reading_light_on = False
 
 last_room_is_lit = True
 last_motion_detected = True
+time_since_interactive = ticks_ms()
 
 message_queue = []
 
@@ -70,18 +72,20 @@ def deactivate(color=(0,0,0)):
 def activate_local():
     global last_colors
     state = state_from_color_list(last_colors, brightness=BRIGHTNESS)
-    set(state)
+    # set(state)
+    transition_to(state, 50)
 
 # Deactivate LEDs from last stored colors
 def deactivate_local():
     global last_colors
     global reading_light_on
     if reading_light_on:
-        turn_on_reading_light(last_colors)
+        turn_on_reading_light()
     else:
         print(last_colors)
         state = state_from_color_list(last_colors, BRIGHTNESS * .05)
-        set(state)
+        # set(state)
+        transition_to(state, 10)
 
 def turn_on_reading_light():
     global READING_LIGHT_COLOR_TEMPERATURE
@@ -95,7 +99,7 @@ def turn_off_reading_light():
     print('off')
     global reading_light_on
     reading_light_on = False
-    turn_off()
+    deactivate_local()
 
 def toggle_reading_light():
     global reading_light_on
@@ -106,7 +110,6 @@ def toggle_reading_light():
 
 # Triggered by input.py when the room becomes bright
 def room_is_lit(val):
-    print('room is lit' + str(val))
     global last_room_is_lit
     last_room_is_lit = val
 
@@ -119,17 +122,25 @@ def room_is_lit(val):
 
 # Triggered by input.py when motion is detected
 def motion_detected(val):
-    print('motion detected' + str(val))
     global last_motion_detected
     last_motion_detected = val
     dequeue()
+
+# Triggered by input.py when user is interacting with device
+def user_is_interacting():
+    global time_since_interactive
+    time_since_interactive = ticks_ms()
 
 # If room is lid and motion detected, dequeue pending messages
 def dequeue():
     global last_room_is_lit
     global last_motion_detected
     print(last_room_is_lit, last_motion_detected)
-    if last_room_is_lit and last_motion_detected:
+    
+    # Check if user has interacted with device in the last 30 seconds
+    user_has_interacted = ticks_ms() - time_since_interactive < 30000
+
+    if user_has_interacted or (last_room_is_lit and last_motion_detected):
         # Wait 1 second between dequeuing
         while len(message_queue) > 0:
             message = message_queue.pop(0)

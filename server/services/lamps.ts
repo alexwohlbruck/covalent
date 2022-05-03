@@ -236,7 +236,7 @@ export const sendCommand = async (lampId: string, state: LampState) => {
     data: response
   })
 
-  await lamp.save() // Save in background
+  await lamp.save()
 
   return response
 }

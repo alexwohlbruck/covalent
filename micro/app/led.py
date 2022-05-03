@@ -376,17 +376,22 @@ def set(state):
     np.write()
 
 # TODO: Fade new color
-def set_color(color, brightness=None, top=False):
+def set_color(color, brightness=None, top=False, duration=100):
     global effect
     effect = None
     brightness = brightness or DEFAULT_BRIGHTNESS
 
     # If top is set, get top eighth of leds
     leds = range((led_count // 8) * 7, led_count) if top else range(led_count)
-
+    state = copy()
     for i in leds:
-        np[i] = tuple(int(p * brightness) for p in color)
-    np.write()
+        state[i] = tuple(int(p * brightness) for p in color)
+
+    if duration == 0 or top:
+        set(state)
+    else:
+        transition_to(state, duration)
+        # start_new_thread(transition_to, (state, duration))
 
 def turn_off():
     set([(0,0,0)] * led_count)
@@ -413,25 +418,28 @@ def set_gradient(colors, fade=True):
 
 ## Effects
 
-# # TODO: Transition from state1 to state 2 with a smooth fade
+# # TODO: Transition from state1 to state 2 with a smooth fade for X milliseconds
 # # state: list of rgb tuples [(R, G, B)]
-# def transition(state1, state2, duration):
-#     step_duration = 1 # duration of each step in ms
-#     global effect
-#     effect = EFFECT_TRANSITION
-#     state1 = state1 or copy()
-#     state2 = state2 or copy()
+def transition(state1, state2, duration):
+    step_duration = 1 # duration of each step in ms
+    global effect
+    effect = EFFECT_TRANSITION
+    state1 = state1 or copy()
+    state2 = state2 or copy()
 
-#     steps = int(duration * 1000 / step_duration)
+    steps = int(duration / step_duration)
 
-#     for i in range(steps):
-#         progress = i / steps
-#         for j in range(led_count):
-#             state1[j] = tuple(int(s1 + (s2 - s1) * progress) for s1, s2 in zip(state1[j], state2[j]))
-#         set(state1)
-#         sleep_ms(step_duration)
-#     set(state2)
-#     effect = None
+    for i in range(steps):
+        progress = i / steps
+        for j in range(led_count):
+            state1[j] = tuple(int(s1 + (s2 - s1) * progress) for s1, s2 in zip(state1[j], state2[j]))
+        set(state1)
+        sleep_ms(step_duration)
+    set(state2)
+    effect = None
+
+def transition_to(state, duration):
+    transition(copy(), state, duration)
 
 
 # Turn off all LEDs and then fade them in

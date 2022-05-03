@@ -115,6 +115,15 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
     }
   }
 
+  // TODO: Send current group state when lamp connects for the first time
+  // ws.send(JSON.stringify({
+  //   name: 'GROUP_STATE_CHANGED',
+  //   data: {
+  //     groupId,
+  //     state: newState,
+  //   }
+  // }))
+
   // Handle incoming messages with event handlers
   ws.on('message', (message: any) => {
     try {

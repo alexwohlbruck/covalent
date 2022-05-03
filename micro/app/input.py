@@ -4,10 +4,12 @@ from time import sleep, sleep_ms, ticks_ms
 from machine import Pin, ADC
 from app.rotary.rotary_irq_esp import RotaryIRQ
 from app.led import set_color, rgb_to_hex, hsl_to_rgb, turn_off
-from app.commander import activate, toggle_reading_light, deactivate, factory_reset, room_is_lit, motion_detected
+from app.commander import activate, toggle_reading_light, deactivate, factory_reset, room_is_lit, motion_detected, user_is_interacting, MINIMUM_LIGHT_LEVEL
 
 ROTARY_STEPS = 32
-LIGHT_SENSITIVITY = 3400
+# LIGHT_SENSITIVITY = 3400
+LIGHT_SENSITIVITY_MAX = 4095
+LIGHT_SENSITIVITY_MIN = 100
 SENSITIVITY_RANGE = 100
 OUTLIER_RANGE = 35
 DOUBLE_PRESS_WAIT = 350 # Usually 500, I like it a little quicker
@@ -67,6 +69,7 @@ def input_watcher():
 
         # Pushbutton
         if pushbutton_new != pushbutton_old:
+            user_is_interacting()
             if pushbutton_new == 0:
                 # Pressed
                 pressed_time = ticks_ms()
@@ -104,6 +107,7 @@ def input_watcher():
 
         # Rotary input
         if rotary_old != rotary_new:
+            user_is_interacting()
             rotary_old = rotary_new
             val = int((rotary_new / ROTARY_STEPS) * 360)
             last_color = hsl_to_rgb(val, 1, 0.5)
@@ -118,6 +122,7 @@ def input_watcher():
         
         # Light sensor
         light_values.append(light_new)
+        # print(light_new)
         if len(light_values) > light_avg_max:
             light_values.pop(0)
         
@@ -127,11 +132,13 @@ def input_watcher():
         if light_new <= light_avg + OUTLIER_RANGE and light_new >= light_avg - OUTLIER_RANGE:
 
             # # If light level passes sensitivity threshold, update reads_dark
-            if reads_dark and light_new > (LIGHT_SENSITIVITY + SENSITIVITY_RANGE):
+            threshold = ((LIGHT_SENSITIVITY_MAX - LIGHT_SENSITIVITY_MIN) * MINIMUM_LIGHT_LEVEL) + LIGHT_SENSITIVITY_MIN
+
+            if reads_dark and light_new > (threshold + SENSITIVITY_RANGE):
                 reads_dark = False
                 past_threshold = True
 
-            elif not reads_dark and light_new < (LIGHT_SENSITIVITY - SENSITIVITY_RANGE):
+            elif not reads_dark and light_new < (threshold - SENSITIVITY_RANGE):
                 reads_dark = True
                 light_time = ticks_ms()
                 past_threshold = True

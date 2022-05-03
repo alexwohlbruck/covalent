@@ -4,16 +4,21 @@ from time import sleep_ms
 import app.uwebsockets.client as wsclient
 from app.config import get_device_id, get_config_item, load_config
 from app.wifi import disconnect_wifi
+from app.led import set_color, pulse
 
 MAX_RECONNECT_ATTEMPTS = 5
+color = (0, 255, 0)
 
 class WebSocket():
     def __init__(self, uri, callback):
+        set_color(color)
+        pulse()
         print('Connecting to server')
         self.uri = uri
         self.callback = callback
         self.reconnect_attempts = 0
         self.connect()
+        set_color(color)
 
     def connect(self):
         self.websocket = wsclient.connect(self. uri)
