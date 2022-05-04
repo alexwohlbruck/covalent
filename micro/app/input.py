@@ -119,6 +119,8 @@ def input_watcher():
             # print('motion =', motion_new)
             motion_old = motion_new
             motion_detected(motion_new == 1)
+            if motion_new == 1:
+                user_is_interacting()
         
         # Light sensor
         light_values.append(light_new)

@@ -465,10 +465,13 @@ def flash(color=None):
 
 # Slowly pulse all LEDs
 def pulse(color=None, state=None):
+    global effect
+    effect = None
+    sleep_ms(1)
+
     if color:
         set_gradient(set_color_gradient(color))
 
-    global effect
     effect = EFFECT_PULSE
     state = state or copy()
     start_new_thread(pulse_thread, (state,))
