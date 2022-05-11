@@ -379,7 +379,7 @@ def set(state):
 def set_effect(name):
     global effect
     effect = None
-    if effect:
+    if name:
         sleep_ms(1)
         effect = name
 
@@ -472,14 +472,15 @@ def flash(color=None):
 def pulse(color=None, state=None):
     if color:
         set_gradient(set_color_gradient(color))
-        
     set_effect(EFFECT_PULSE)
 
     state = state or copy()
     start_new_thread(pulse_thread, (state,))
 
 def pulse_thread(state):
+    global effect
     while (effect == EFFECT_PULSE):
+        print('pulsing')
         # Fade out from 100% to 50%
         for i in range(20):
             for j in range(led_count):
