@@ -1,6 +1,6 @@
 import os, gc
 from .httpclient import HttpClient
-from app.led import pulse, set_gradient, get_color_gradient, rgb_to_hue
+from app.led import pulse, set_color
 
 class OTAUpdater:
     """
@@ -78,8 +78,7 @@ class OTAUpdater:
         (current_version, latest_version) = self._check_for_new_version()
         if latest_version > current_version:
             print('Updating to version {}...'.format(latest_version))
-            hue = rgb_to_hue(255, 255, 255)
-            set_gradient(get_color_gradient(223))
+            set_color((255, 255, 255))
             pulse()
         
             self._create_new_version_file(latest_version)

@@ -24,7 +24,7 @@ def counter(callback_id, current_time, callback_memory):
     
 def start_updater_chron():
     mcron.init_timer()
-    mcron.insert(15, {0}, '15s', counter)
+    mcron.insert(15 * 1000, {0}, '15m', counter) # Check update every 15 minutes
     
 def my_exception_processor(e):
     print(e)

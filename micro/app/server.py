@@ -121,4 +121,4 @@ def start_server():
         run_setup()
         # run_startup()
 
-    return Server('project-covalent.herokuapp.com', lamp_id)
+    return Server('www.projectcovalent.app', lamp_id)

@@ -30,7 +30,7 @@
 
 
 ## Signing in
-Visit https://project-covalent.herokuapp.com and sign in with your Google account. You will be redirected to the home page where you see your lamp or pair a new one.
+Visit https://www.projectcovalent.app and sign in with your Google account. You will be redirected to the home page where you see your lamp or pair a new one.
 
 ## Pairing a lamp
 The app uses Bluetooth to pair to your lamp and configure it. This is not supported on iOS devices, or in the Safari browser. Compatible browsers are Chrome, Opera, Edge, and Samsung Internet. For more info about compatibility, visit <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility" target="_blank">this page</a>.
