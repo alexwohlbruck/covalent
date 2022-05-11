@@ -79,7 +79,7 @@ class OTAUpdater:
         if latest_version > current_version:
             print('Updating to version {}...'.format(latest_version))
             set_color((255, 255, 255))
-            pulse()
+            # pulse()
         
             self._create_new_version_file(latest_version)
             self._download_new_version(latest_version)

@@ -480,7 +480,6 @@ def pulse(color=None, state=None):
 def pulse_thread(state):
     global effect
     while (effect == EFFECT_PULSE):
-        print('pulsing')
         # Fade out from 100% to 50%
         for i in range(20):
             for j in range(led_count):

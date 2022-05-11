@@ -25,12 +25,12 @@
 | <img src="indicators/dot-green-pulse.svg" width='12'>  | Green pulsing          | Connecting to server                             |
 | <img src="indicators/dot-green.svg" width='12'>        | Green solid            | Successfully set up                              |
 | <img src="indicators/dot-red.svg" width='12'>          | Red solid              | Error                                            |
-| <img src="indicators/dot-white-pulse.svg" width='12'>  | White pulsing          | Factory resetting or installing firmware update  |
+| <img src="indicators/dot-white.svg" width='12'>  | White                  | Factory resetting or installing firmware update  |
 
 
 
 ## Signing in
-Visit https://www.projectcovalent.app and sign in with your Google account. You will be redirected to the home page where you see your lamp or pair a new one.
+Visit **https://www.projectcovalent.app** and sign in with your Google account. You will be redirected to the home page where you see your lamp or pair a new one.
 
 ## Pairing a lamp
 The app uses Bluetooth to pair to your lamp and configure it. This is not supported on iOS devices, or in the Safari browser. Compatible browsers are Chrome, Opera, Edge, and Samsung Internet. For more info about compatibility, visit <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API#browser_compatibility" target="_blank">this page</a>.

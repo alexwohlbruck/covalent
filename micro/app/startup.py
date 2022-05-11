@@ -11,13 +11,17 @@ import app.mcron as mcron
 import app.mcron.decorators
 
 def check_update_and_install():
-    otaUpdater = OTAUpdater('https://github.com/alexwohlbruck/covalent', github_src_dir='micro', main_dir='app')
-    hasUpdated = otaUpdater.install_update_if_available()
-    if hasUpdated:
+    try:
+        otaUpdater = OTAUpdater('https://github.com/alexwohlbruck/covalent', github_src_dir='micro', main_dir='app')
+        hasUpdated = otaUpdater.install_update_if_available()
+        if hasUpdated:
+            machine.reset()
+        else:
+            del(otaUpdater)
+            gc.collect()
+    except Exception as e:
+        # Somtimes there are network errors. Restart the device in case
         machine.reset()
-    else:
-        del(otaUpdater)
-        gc.collect()
 
 def counter(callback_id, current_time, callback_memory):
     check_update_and_install()
