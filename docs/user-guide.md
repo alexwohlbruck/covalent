@@ -16,16 +16,16 @@
   - [Signing out](#signing-out)
 
 ## LED indicator colors
-|                                                        | Color                  | Lamp mode              |
-|--------------------------------------------------------|------------------------|------------------------|
-| <img src="indicators/dot-blue-pulse.svg" width='12'>   | Blue pulsing           | Bluetooth pairing mode |
-| <img src="indicators/dot-blue.svg" width='12'>         | Blue solid             | Bluetooth connected    |
-| <img src="indicators/dot-amber-pulse.svg" width='12'>  | Amber pulsing          | Connecting to wifi     |
-| <img src="indicators/dot-amber.svg" width='12'>        | Amber solid            | Connected to wifi      |
-| <img src="indicators/dot-green-pulse.svg" width='12'>  | Green pulsing          | Connecting to server   |
-| <img src="indicators/dot-green.svg" width='12'>        | Green solid            | Successfully set up    |
-| <img src="indicators/dot-red.svg" width='12'>          | Red solid              | Error                  |
-| <img src="indicators/dot-white-pulse.svg" width='12'>  | White pulsing          | Factory resetting      |
+|                                                        | Color                  | Lamp mode                             |
+|--------------------------------------------------------|------------------------|---------------------------------------|
+| <img src="indicators/dot-blue-pulse.svg" width='12'>   | Blue pulsing           | Bluetooth pairing mode                |
+| <img src="indicators/dot-blue.svg" width='12'>         | Blue solid             | Bluetooth connected                   |
+| <img src="indicators/dot-amber-pulse.svg" width='12'>  | Amber pulsing          | Connecting to wifi                    |
+| <img src="indicators/dot-amber.svg" width='12'>        | Amber solid            | Connected to wifi                     |
+| <img src="indicators/dot-green-pulse.svg" width='12'>  | Green pulsing          | Connecting to server                  |
+| <img src="indicators/dot-green.svg" width='12'>        | Green solid            | Successfully set up                   |
+| <img src="indicators/dot-red.svg" width='12'>          | Red solid              | Error                                 |
+| <img src="indicators/dot-white-pulse.svg" width='12'>  | White pulsing          | Factory resetting or firmware update  |
 
 
 

@@ -175,8 +175,8 @@ def pulse_received(data):
     # Check if user has interacted with device in the last 30 seconds
     user_has_interacted = ticks_ms() - time_since_interactive < 30000
 
-    # Don't light if user has not interacted recently, the room is dark, or motion is not detected
-    if active and not user_has_interacted and (not last_room_is_lit or not last_motion_detected):
+    # Don't light if user has not interacted recently or the room is dark
+    if active and not user_has_interacted and (not last_room_is_lit):
         message_queue.append(data)
         return
           

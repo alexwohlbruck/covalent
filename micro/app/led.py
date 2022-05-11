@@ -374,11 +374,18 @@ def set(state):
     for i in range(led_count):
         np[i] = state[i]
     np.write()
+        
+# Update the current effect
+def set_effect(name):
+    global effect
+    effect = None
+    if effect:
+        sleep_ms(1)
+        effect = name
 
 # TODO: Fade new color
 def set_color(color, brightness=None, top=False, duration=100):
-    global effect
-    effect = None
+    set_effect(None)
     brightness = brightness or DEFAULT_BRIGHTNESS
 
     # If top is set, get top eighth of leds
@@ -422,8 +429,7 @@ def set_gradient(colors, fade=True):
 # # state: list of rgb tuples [(R, G, B)]
 def transition(state1, state2, duration):
     step_duration = 1 # duration of each step in ms
-    global effect
-    effect = EFFECT_TRANSITION
+    set_effect(EFFECT_TRANSITION)
     state1 = state1 or copy()
     state2 = state2 or copy()
 
@@ -446,9 +452,8 @@ def transition_to(state, duration):
 def flash(color=None):
     if color:
         set_color(color)
-
-    global effect
-    effect = None
+        
+    set_effect(None)
     state = copy()
 
     # Turn off all LEDs
@@ -465,14 +470,11 @@ def flash(color=None):
 
 # Slowly pulse all LEDs
 def pulse(color=None, state=None):
-    global effect
-    effect = None
-    sleep_ms(1)
-
     if color:
         set_gradient(set_color_gradient(color))
+        
+    set_effect(EFFECT_PULSE)
 
-    effect = EFFECT_PULSE
     state = state or copy()
     start_new_thread(pulse_thread, (state,))
 
