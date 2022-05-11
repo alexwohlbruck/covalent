@@ -7,6 +7,8 @@ from app.ota.ota_updater import OTAUpdater
 import app.input as inputio
 from app.led import animate
 from app.commander import start_commander
+import app.mcron as mcron
+import app.mcron.decorators
 
 def check_update_and_install():
     otaUpdater = OTAUpdater('https://github.com/alexwohlbruck/covalent', github_src_dir='micro', main_dir='app')
@@ -17,6 +19,17 @@ def check_update_and_install():
         del(otaUpdater)
         gc.collect()
 
+def counter(callback_id, current_time, callback_memory):
+    check_update_and_install()
+    
+def start_updater_chron():
+    mcron.init_timer()
+    mcron.insert(15, {0}, '15s', counter)
+    
+def my_exception_processor(e):
+    print(e)
+
+mcron.callback_exception_processors.append(my_exception_processor)
 
 def run_startup():
     wifi_success = connect_wifi_from_config()
@@ -29,6 +42,7 @@ def run_startup():
 
     # Start commander service
     start_commander()
+    start_updater_chron()
 
     # Run LED animation loop
     # animate()
