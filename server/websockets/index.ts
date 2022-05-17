@@ -145,6 +145,9 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
 
   ws.on('error', (e: any) => {
     console.error(e)
+    if (deviceId) {
+      setLampOnline(deviceId, false)
+    }
   })
 
   ws.on('close', () => {

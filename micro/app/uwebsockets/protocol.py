@@ -39,7 +39,11 @@ class ConnectionClosed(Exception):
 
 def urlparse(uri):
     """Parse ws:// URLs"""
-    match = URL_RE.match(uri)
+    try:
+        match = URL_RE.match(uri)
+    except:
+        print('Failed to parse URL')
+        return
 
     if match:
         protocol = match.group(1)
