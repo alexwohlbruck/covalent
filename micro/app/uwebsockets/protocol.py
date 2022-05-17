@@ -8,6 +8,7 @@ import urandom as random
 import usocket as socket
 from ucollections import namedtuple
 import machine
+from app.led import set_color
 
 
 # Opcodes
@@ -245,6 +246,7 @@ class Websocket:
 
     def _close(self):
         if __debug__: print("Connection closed")
+        set_color((255, 0, 0))
         self.open = False
         self.sock.close()
         machine.reset()

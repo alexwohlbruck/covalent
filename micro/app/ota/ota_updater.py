@@ -1,6 +1,6 @@
 import os, gc
 from .httpclient import HttpClient
-from app.led import pulse, set_color
+from app.led import set_color
 
 class OTAUpdater:
     """
@@ -79,7 +79,6 @@ class OTAUpdater:
         if latest_version > current_version:
             print('Updating to version {}...'.format(latest_version))
             set_color((255, 255, 255))
-            # pulse()
         
             self._create_new_version_file(latest_version)
             self._download_new_version(latest_version)
