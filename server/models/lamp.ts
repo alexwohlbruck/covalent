@@ -17,6 +17,7 @@ export interface Lamp {
   user: User
   deviceData: {
     deviceId: string
+    online: boolean
   }
 }
 
@@ -52,6 +53,11 @@ const LampSchema = new Schema<Lamp>({
       type: String,
       required: true,
     },
+    online: {
+      type: Boolean,
+      required: true,
+      default: false,
+    }
   },
 }, {
   timestamps: true,

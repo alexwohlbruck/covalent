@@ -8,6 +8,21 @@ v-card.lamp-card(light)
         .text-body-2.font-weight-bold {{ lamp.user.name }}
 
       v-spacer
+
+      //- Online/offline status indicator
+      v-chip(
+        style='margin-top: 6px; margin-right: 8px'
+        :color='lamp.deviceData.online ? "success lighten-1" : "error"'
+        small
+      )
+        v-icon(
+          style='margin-top: 1px; margin-left: -5px;'
+          left
+          :color='lamp.deviceData.online ? "white" : "white"'
+          size='12'
+        ) {{ lamp.deviceData.online ? "mdi-check" : "mdi-close" }}
+        | {{ lamp.deviceData.online ? "Online" : "Offline" }}
+
       v-btn(
         v-if='isMyLamp'
         icon

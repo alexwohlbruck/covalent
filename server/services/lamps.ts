@@ -277,3 +277,25 @@ export const deleteLamp = async (id: string) => {
 
   return await LampModel.findByIdAndRemove(id)
 }
+
+export const setLampOnline = async (id: string, online: boolean) => {
+  const lamp = await LampModel.findOne({
+    'deviceData.deviceId': id,
+  })
+
+  if (!lamp) {
+    console.log('Lamp not found')
+    return
+  }
+
+  lamp.deviceData.online = online
+
+  await lamp.save()
+
+  broadcastToGroup(lamp.group._id, {
+    name: 'ADD_LAMP',
+    data: lamp,
+  })
+
+  return lamp
+}

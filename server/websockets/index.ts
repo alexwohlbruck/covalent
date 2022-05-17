@@ -1,7 +1,7 @@
 import express from 'express'
 import { User } from '../models/user'
 import WebSocket from 'ws'
-import { sendCommand } from '../services/lamps'
+import { sendCommand, setLampOnline } from '../services/lamps'
 import { LampModel } from '../models/lamp'
 import mitt from 'mitt'
 
@@ -103,6 +103,7 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
   else {
     if (deviceClients.has(deviceId)) {
       deviceClients.get(deviceId).push(ws)
+      setLampOnline(deviceId, true)
     }
     else {
       // Check that lamp exists in database
@@ -112,6 +113,7 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
       if (!lamp) return ws.close()
 
       deviceClients.set(deviceId, [ws])
+      setLampOnline(deviceId, true)
     }
   }
 
@@ -159,6 +161,7 @@ router.ws('/', async (ws: WebSocket, req: express.Request) => {
         const index = clients.indexOf(ws)
         if (index > -1) clients.splice(index, 1)
       }
+      setLampOnline(deviceId, false)
     }
   })
 })
