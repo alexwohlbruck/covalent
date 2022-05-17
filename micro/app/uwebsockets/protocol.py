@@ -7,6 +7,7 @@ import ustruct as struct
 import urandom as random
 import usocket as socket
 from ucollections import namedtuple
+import machine
 
 
 # Opcodes
@@ -41,10 +42,9 @@ def urlparse(uri):
     """Parse ws:// URLs"""
     try:
         match = URL_RE.match(uri)
-    except:
-        print('Failed to parse URL')
-        return
-
+    except: 
+        machine.reset()
+    
     if match:
         protocol = match.group(1)
         host = match.group(2)
@@ -247,3 +247,4 @@ class Websocket:
         if __debug__: print("Connection closed")
         self.open = False
         self.sock.close()
+        machine.reset()

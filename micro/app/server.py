@@ -122,3 +122,4 @@ def start_server():
         # run_startup()
 
     return Server('www.projectcovalent.app', lamp_id)
+    # return Server('192.168.1.17:3000', lamp_id)

@@ -105,7 +105,7 @@ export const createLamp = async (
       color: '#ff0000',
       touching: false,
     },
-    deviceData: deviceData,
+    deviceData,
     group: new Types.ObjectId(group._id),
     user: new Types.ObjectId(userId),
   })
