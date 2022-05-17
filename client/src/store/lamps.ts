@@ -23,11 +23,6 @@ const lampsGetters = {
     const lamp = {...state.byId[id]}
 
     // Denormalize data
-    if (lamp.groupId) {
-      lamp.group = getters.group(lamp.groupId)
-      delete lamp.groupId
-    }
-
     if (lamp.userId) {
       lamp.user = getters.user(lamp.userId)
       delete lamp.userId
@@ -36,6 +31,7 @@ const lampsGetters = {
     if (lamp?.user?._id) {
       lamp.user = getters.user(lamp.user._id)
     }
+    console.log(lamp)
 
     return lamp
   },
@@ -73,10 +69,10 @@ const mutations = {
   },
 
   ADD_LAMP_CONFIG(state: LampsState, config: any) {
-    Vue.set(state.byId, config.lampId, {
-     ...state.byId[config.lampId],
-      config,
-    })
+    // Vue.set(state.byId, config.lampId, {
+    //  ...state.byId[config.lampId],
+    //   config,
+    // })
   },
 
   REMOVE_LAMP(state: LampsState, lamp: Lamp | { _id: string }) {

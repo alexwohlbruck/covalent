@@ -47,12 +47,17 @@ const mutations = {
 const getters = {
   group: (state: GroupsState, getters: any, _rootState: RootState, rootGetters: any) => (id: string, populateGroups = false) => {
     const g = state.byId[id]
+    console.log(populateGroups, g)
     if (populateGroups) {
       g.lamps = rootGetters.lampsByGroup(id)
     }
     return g
   },
-  groups: (state: GroupsState, getters: any) => (ids: string[], populateGroups: boolean) => ids.map(id => getters.group(id, populateGroups)),
+  
+  groups: (state: GroupsState, getters: any) => (ids: string[], populateGroups: boolean) => {
+    return ids.map(id => getters.group(id, populateGroups))
+  },
+  
   myGroups: (state: GroupsState, getters: any, _rootState: RootState, _rootGetters: any) => {
     return getters
       .groups(state.all, true)

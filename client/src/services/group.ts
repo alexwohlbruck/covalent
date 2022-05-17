@@ -11,15 +11,9 @@ export const getGroup = async (id: string) => {
 export const getMyGroups = async () => {
   const { data } = await axios.get<Group[]>('/groups/me')
 
-  console.log(JSON.stringify(data))
-  console.log(data)
-
   data.forEach(group => {
-    console.log(group)
-
     // Destructure lamps
     group.lamps?.forEach(lamp => {
-      console.log(lamp)
       Store.commit('ADD_LAMP', lamp)
     })
     delete group.lamps

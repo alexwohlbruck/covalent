@@ -50,12 +50,6 @@ export default class Lamps extends Vue {
     await getMyGroups()
   }
 
-  // When navigating reload data
-  beforeRouteUpdate(_to: any, _from: any, next: any) {
-    getMyGroups()
-    next()
-  }
-
   get myGroups() {
     return this.$store.getters.myGroups
   }
