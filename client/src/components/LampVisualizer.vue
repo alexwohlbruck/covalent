@@ -2,7 +2,7 @@
 .lamp-visualizer
   //- div(:style='`width: 100px; height: 100px; background: ${state.colors[0]}`')
 
-  .lamp
+  .lamp(:class='{small}')
     .section.lid(style='z-index: 3;')
       .bottom
       .middle
@@ -22,12 +22,12 @@
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import { GroupState } from '@/types/Group'
 
-
 type State = GroupState
 
 @Component
 export default class LampVisualizer extends Vue {
   @Prop(Object) state!: State
+  @Prop({ default: false }) small!: boolean
 }
 </script>
 
@@ -46,7 +46,7 @@ $base-height: .2 * $lamp-height;
   width: $lamp-width;
   height: $lamp-height;
   margin-bottom: $lamp-height * .25;
-  
+
   .section {
     position: relative;
     width: $lamp-width;
@@ -115,6 +115,10 @@ $base-height: .2 * $lamp-height;
       background-color: rgb(207, 109, 43);
     }
   }
+}
 
+.lamp.small {
+  transform: scale(.5);
+  margin: -2.6em;
 }
 </style>

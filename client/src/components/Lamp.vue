@@ -1,20 +1,31 @@
 <template lang="pug">
 v-card.lamp-card(light)
-  v-card-text.d-flex.flex-column
+  v-card-text.d-flex.flex-column.flex-row
     .d-flex
-      .text-h5.font-weight-bold(:style='`color: ${lamp.group.state.colors[0]}`')
-        | {{ lamp.name }}
+      div
+        .text-h5.font-weight-bold(:style='`color: ${state.colors[0]}`')
+          | {{ lamp.name }}
+        .text-body-2.font-weight-bold {{ lamp.user.name }}
 
       v-spacer
-      v-btn(icon color='black' :to="{name: 'lamp-settings', params: {id: lamp._id}}")
+      v-btn(
+        v-if='isMyLamp'
+        icon
+        color='black'
+        :to="{name: 'lamp-settings', params: {id: lamp._id}}"
+      )
         v-icon mdi-cog
 
     .d-flex.align-sm-end.justify-space-between.flex-column.flex-sm-row
+      v-spacer(v-if='!isMyLamp')
+
       lamp-visualizer.mb-4(
-        :state='lamp.group.state'
+        :state='state'
         :lampId='lamp._id'
+        :small='!isMyLamp'
       )
       v-btn.px-8.py-7(
+        v-if='isMyLamp'
         @mousedown='activate'
         @touchstart='activate'
         @mouseup='deactivate'
@@ -27,6 +38,7 @@ v-card.lamp-card(light)
         | Send pulse
   
   v-color-picker(
+    v-if='isMyLamp'
     v-model='selectedColor'
     hide-canvas
     hide-inputs
@@ -53,12 +65,17 @@ type Hsl = {
 })
 export default class Lamp extends Vue {
   @Prop({ default: null }) lamp: any
+  @Prop({ default: null }) state: any
 
   touching = false
   selectedColor: Hsl = {
     h: 0,
     s: 1,
     l: 0.5,
+  }
+
+  get isMyLamp() {
+    return this.lamp?.user._id === this.$store.getters.me?._id
   }
 
   gradientFromHue(hue: number) {

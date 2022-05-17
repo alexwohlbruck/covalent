@@ -6,11 +6,24 @@ import { GroupModel } from '../models/group'
 import { convertToDotNotation } from '../helpers'
 
 // List a user's groups
-export const listGroups = async (userId: string) => {
+export const listGroups = async (userId: string, includeLamps = false) => {
   const lamps = await LampModel.find({
     user: new Types.ObjectId(userId)
   })
-  const groups = lamps.map((lamp: Lamp) => lamp.group)
+
+  // Convert to plain JSON in order to append lamps results
+  const groups = JSON.parse(JSON.stringify(
+    lamps.map((lamp: Lamp) => lamp.group)
+  ))
+
+  if (includeLamps) {
+    for (const group of groups) {
+      group.lamps = await getLamps({
+        groupId: group._id.toString(),
+        autopopulate: false,
+      })
+    }
+  }
 
   return groups
 }

@@ -1,5 +1,6 @@
-import { Group } from '@/types/Group'
 import Vue from 'vue'
+import { Group } from '@/types/Group'
+import { RootState } from '.'
 
 export interface GroupsState {
   all: string[]
@@ -44,8 +45,17 @@ const mutations = {
 }
 
 const getters = {
-  group: (state: GroupsState) => (id: string) => state.byId[id],
-  groups: (state: GroupsState) => (ids: string[]) => ids.map(id => state.byId[id]),
+  group: (state: GroupsState, getters: any, _rootState: RootState, rootGetters: any) => (id: string) => {
+    const g = state.byId[id]
+    g.lamps = rootGetters.lampsByGroup(id)
+    return g
+  },
+  groups: (state: GroupsState, getters: any) => (ids: string[]) => ids.map(id => getters.group(id)),
+  myGroups: (state: GroupsState, getters: any, _rootState: RootState, _rootGetters: any) => {
+    return getters
+      .groups(state.all)
+      // .filter((lamp: Lamp) => lamp.user?._id === rootGetters.me?._id)
+  }
 }
 
 export default {

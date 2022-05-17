@@ -16,15 +16,21 @@ const broadcastToGroup = async (groupId: string, payload: WSPayload) => {
 export const getLamps = async (options: {
   userId?: string;
   groupId?: string;
+  autopopulate?: boolean;
 }) => {
   const query: any = {}
 
   if (options) {
     if (options.userId) query.user = new Types.ObjectId(options.userId)
     if (options.groupId) query.group = new Types.ObjectId(options.groupId)
+    if (options.autopopulate === undefined) options.autopopulate = true
   }
 
-  return await LampModel.find(query).sort({ createdAt: -1 })
+  return await LampModel.find(query, {}, {
+    autopopulate: options.autopopulate,
+  })
+  .populate('user')
+  .sort({ createdAt: -1 })
 }
 
 export const getLamp = async (id: string) => {

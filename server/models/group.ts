@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose'
+import { Lamp } from './lamp'
 
 export interface GroupState {
   colors: string[]
@@ -10,6 +11,7 @@ export interface Group {
   groupId: string
   accessCode: string
   state: GroupState
+  lamps?: Lamp[]
 }
 
 const GroupSchema = new Schema<Group>({

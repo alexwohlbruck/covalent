@@ -1,10 +1,10 @@
-import { Lamp } from '@/types/Lamp'
 import Vue from 'vue'
+import { Lamp } from '@/types/Lamp'
 import { RootState } from '.'
 import UsersStore from './users'
 import GroupsStore from './groups'
-const { mutations: usersMutations, state: usersState } = UsersStore
-const { mutations: groupsMutations, state: groupsState } = GroupsStore
+// const { mutations: usersMutations, state: usersState } = UsersStore
+// const { mutations: groupsMutations, state: groupsState } = GroupsStore
 
 export interface LampsState {
   all: string[]
@@ -33,6 +33,10 @@ const lampsGetters = {
       delete lamp.userId
     }
 
+    if (lamp?.user?._id) {
+      lamp.user = getters.user(lamp.user._id)
+    }
+
     return lamp
   },
 
@@ -40,21 +44,22 @@ const lampsGetters = {
     return ids.map((id: string) => getters.lamp(id))
   },
 
-  myLamps: (state: LampsState, getters: any, _rootState: RootState, rootGetters: any) => {
-    return getters
-      .lamps(state.all)
-      // .filter((lamp: Lamp) => lamp.user?._id === rootGetters.me?._id)
-  }
+  lampsByGroup: (state: LampsState, getters: any) => (groupId: string) => {
+    const lamps = getters.lamps(state.all.filter((id: string) => {
+      return getters.lamp(id).group === groupId
+    }))
+    return lamps
+  },
 }
 
 const mutations = {
   ADD_LAMP(state: LampsState, lamp: Lamp) {
-    if (lamp.user) {
+    if (lamp.user?._id) {
       UsersStore.mutations.ADD_USER(UsersStore.state, lamp.user)
       lamp.userId = lamp.user._id
       delete lamp.user
     }
-    if (lamp.group) {
+    if (lamp?.group?._id) {
       GroupsStore.mutations.ADD_GROUP(GroupsStore.state, lamp.group)
       lamp.groupId = lamp.group._id
       delete lamp.group
